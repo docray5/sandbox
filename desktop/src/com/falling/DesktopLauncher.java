@@ -2,8 +2,7 @@ package com.falling;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.falling.Application;
-import com.falling.Core.*;
+import static com.falling.Core.*;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
@@ -13,8 +12,8 @@ public class DesktopLauncher {
 		config.setForegroundFPS(60);
 		config.setIdleFPS(10);
 		// config.setWindowIcon("icon.png");
-		//config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
-		config.setWindowedMode(Core.screenWidth, Core.screenHeight);
+		// config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
+		config.setWindowedMode(screenWidth, screenHeight);
 
 		new Lwjgl3Application(new Application(), config);
 	}

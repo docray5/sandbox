@@ -14,6 +14,7 @@ public class Mappers {
     public static ComponentMapper<ResizeComponent> resizeMapper;
     public static ComponentMapper<TypeComponent> typeMapper;
     public static ComponentMapper<PauseComponent> pauseMapper;
+    public static ComponentMapper<ElementComponent> elementMapper;
 
     public static void init() {
         transformMapper = ComponentMapper.getFor(TransformComponent.class);
@@ -26,5 +27,6 @@ public class Mappers {
         resizeMapper = ComponentMapper.getFor(ResizeComponent.class);
         typeMapper = ComponentMapper.getFor(TypeComponent.class);
         pauseMapper = ComponentMapper.getFor(PauseComponent.class);
+        elementMapper = ComponentMapper.getFor(ElementComponent.class);
     }
 }

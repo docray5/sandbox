@@ -12,6 +12,7 @@ public class Families {
     public static Family cursorFamily;
     public static Family resizeFamily;
     public static Family pauseFamily;
+    public static Family worldFamily;
 
     public static Array<Family> families;
 
@@ -23,12 +24,13 @@ public class Families {
         cursorFamily = Family.all(CursorComponent.class).get();
         resizeFamily = Family.all(ResizeComponent.class).get();
         pauseFamily = Family.all(PauseComponent.class).get();
+        worldFamily = Family.all().get();
 
         families = new Array<>();
         families.addAll(
                 renderableFamily, animationFamily,
                 textFamily, cursorFamily, pauseFamily,
-                resizeFamily
+                resizeFamily, worldFamily
         );
     }
 }

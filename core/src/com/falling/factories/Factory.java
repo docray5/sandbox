@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
 import com.falling.components.*;
+import com.falling.components.ElementComponent.ElementType;
+import com.falling.components.ElementComponent.MatterType;
 import com.falling.events.Event;
 import com.falling.factories.builders.AnimationBuilder;
 import com.falling.factories.builders.RenderableBuilder;
@@ -26,6 +28,7 @@ public class Factory {
     private TransformComponent transformComponent;
     private TypeComponent typeComponent;
     private PixmapComponent pixmapComponent;
+    private ElementComponent elementComponent;
 
     private boolean creating;
 
@@ -205,6 +208,17 @@ public class Factory {
         pixmapComponent = engine.createComponent(PixmapComponent.class);
 
         entity.add(pixmapComponent);
+        return this;
+    }
+
+    public Factory addElement(int colorBits, ElementType elementType, MatterType matterType) {
+        if (!creating) return null;
+        elementComponent = engine.createComponent(ElementComponent.class);
+        elementComponent.colorBits = colorBits;
+        elementComponent.elementType = elementType;
+        elementComponent.matterType = matterType;
+
+        entity.add(elementComponent);
         return this;
     }
 }

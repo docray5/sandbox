@@ -8,6 +8,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
 import com.falling.components.*;
+import com.falling.components.ElementComponent.ElementType;
+import com.falling.components.ElementComponent.MatterType;
 import com.falling.events.Event;
 
 import static com.falling.Core.*;
@@ -64,5 +66,11 @@ public class Director {
                 .addTextureRegion()
                 .addPixmap()
                 .endEntity();
+    }
+
+    public Entity createSand() {
+        return factory.createEntity()
+            .addElement(Color.rgba8888(0.96f, 0.84f, 0.69f, 1), ElementType.SAND, MatterType.SOLID)
+            .endEntity();
     }
 }

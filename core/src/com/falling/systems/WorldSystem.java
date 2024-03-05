@@ -5,24 +5,40 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
+import com.falling.components.ElementComponent;
 import com.falling.components.PixmapComponent;
 import com.falling.components.TextureRegionComponent;
+import com.falling.components.ElementComponent.MatterType;
 import com.falling.factories.Director;
 
 import static com.falling.utils.Mappers.*;
 import static com.falling.Core.*;
 
 public class WorldSystem extends EntitySystem {
+    private Entity[][] world;
+    private int worldSW;
+    private int worldSH;
+
     private final TextureRegionComponent textureRegionComponent;
     private final PixmapComponent pixmapComponent;
-    private int posX;
-    private int posY;
-    private Color colorTmp;
-    private Vector2 posTmp;
+    private Entity entityTmp;
+    private ElementComponent elementComponent;
+    private int xTmp;
+    private int yTmp;
+    private int xTargetTmp;
+    private int yTargetTmp;
 
     public WorldSystem(int priority) {
 		super(priority);
+
+        worldSW = (int) worldWidth;
+        worldSH = (int) worldHeight;
+
+        world = new Entity[worldSH][worldSW];
+
+        world[worldSH/2][worldSW/2] = Director.instance.createSand();
+        world[worldSH/2-1][worldSW/2] = Director.instance.createSand();
+
         Entity entity = Director.instance.createPixmap();
         pixmapComponent = pixmapMapper.get(entity);
         textureRegionComponent = texRegionMapper.get(entity);
@@ -30,15 +46,58 @@ public class WorldSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
+        // === Update ===
+        for (int iy = 0; iy < worldSH; iy++) {
+            for (int ix = worldSW-1; ix >= 0; ix--) {
+                if (world[iy][ix] == null) continue;
+                entityTmp = world[iy][ix];
+                elementComponent = elementMapper.get(entityTmp);
+                xTmp = ix;
+                yTmp = iy;
+
+                switch (elementComponent.elementType) {
+                    case SAND:
+                        processSand();
+                        break;
+                }
+            }
+        }
+
+        // === Draw ===
         pixmapComponent.pixmap.setColor(Color.CLEAR);
         pixmapComponent.pixmap.fill();
         
-        // go through all the elements.
-        pixmapComponent.pixmap.drawPixel((int) worldWidth/2, (int) worldHeight/2, Color.rgba8888(Color.WHITE));
+        for (int iy = 0; iy < world.length; iy++) {
+            for (int ix = 0; ix < world.length; ix++) {
+                if (world[iy][ix] == null) continue;
+                pixmapComponent.pixmap.drawPixel(ix, iy, elementMapper.get(world[iy][ix]).colorBits);
+            }
+        }
 
         pixmapComponent.texture.draw(pixmapComponent.pixmap, 0, 0);
         textureRegionComponent.textureRegion.setRegion(pixmapComponent.texture);
         textureRegionComponent.textureRegion.flip(false, true);
+    }
+
+    public void processSand() {
+        if (tryMove(0, -1)) return;
+        if (tryMove(-1, -1)) return;
+        if (tryMove(1, -1)) return;
+    }
+
+    public boolean tryMove(int dx, int dy) {
+        xTargetTmp = xTmp + dx;
+        yTargetTmp = yTmp + dy;
+
+        if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW ||
+                world[yTargetTmp][xTargetTmp] != null &&
+                elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == MatterType.SOLID)
+            return false;
+
+        world[yTmp][xTmp] = world[yTargetTmp][xTargetTmp];
+        world[yTargetTmp][xTargetTmp] = entityTmp;
+
+        return true;
     }
 
     public void resize() {

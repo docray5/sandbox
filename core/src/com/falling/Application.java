@@ -57,7 +57,7 @@ public class Application implements ApplicationListener  {
     public void startGame() {
         renderSystem.init(assets);
 
-        engine.addSystem(new TempCursorSystem(5));
+        engine.addSystem(new TempCursorSystem(4));
         engine.addSystem(new WorldSystem(5));
     }
 
