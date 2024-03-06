@@ -19,6 +19,7 @@ public class WorldSystem extends EntitySystem {
     private Entity[][] world;
     private int worldSW;
     private int worldSH;
+    private boolean updatedLastTime;
 
     private final TextureRegionComponent textureRegionComponent;
     private final PixmapComponent pixmapComponent;
@@ -28,6 +29,7 @@ public class WorldSystem extends EntitySystem {
     private int yTmp;
     private int xTargetTmp;
     private int yTargetTmp;
+    private boolean columnDir;
 
     public WorldSystem(int priority) {
 		super(priority);
@@ -47,27 +49,34 @@ public class WorldSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
+        updatedLastTime = false;
+
         // Move to spawner system
         if (touchHeld) drawCircleAtMouse(11);
 
         // === Update ===
         for (int iy = 0; iy < worldSH; iy++) {
+            columnDir = MathUtils.randomBoolean();
             for (int ix = worldSW-1; ix >= 0; ix--) {
-                if (world[iy][ix] == null) continue;
-                entityTmp = world[iy][ix];
-                elementComponent = elementMapper.get(entityTmp);
                 xTmp = ix;
+                if (columnDir) xTmp = -ix + worldSW-1;
+                if (world[iy][xTmp] == null) continue;
                 yTmp = iy;
+                entityTmp = world[yTmp][xTmp];
+                elementComponent = elementMapper.get(entityTmp);
 
                 switch (elementComponent.elementType) {
                     case SAND:
-                        processSand();
+                        updateSand();
                         break;
                 }
             }
         }
 
         // === Draw ===
+
+        if (!updatedLastTime) return;
+        
         pixmapComponent.pixmap.setColor(Color.CLEAR);
         pixmapComponent.pixmap.fill();
         
@@ -83,7 +92,7 @@ public class WorldSystem extends EntitySystem {
         textureRegionComponent.textureRegion.flip(false, true);
     }
 
-    public void processSand() {
+    public void updateSand() {
         if (tryMove(0, -1)) return;
         if (tryMove(-1, -1)) return;
         if (tryMove(1, -1)) return;
@@ -100,7 +109,9 @@ public class WorldSystem extends EntitySystem {
 
         world[yTmp][xTmp] = world[yTargetTmp][xTargetTmp];
         world[yTargetTmp][xTargetTmp] = entityTmp;
-        
+
+        updatedLastTime = true;
+
         return true;
     }
 
@@ -148,8 +159,9 @@ public class WorldSystem extends EntitySystem {
                 x = posX+i;
                 y = posY+j;
 
-                if (y < 0 || y > worldSH-1 || x < 0 || x > worldSW-1) continue;
                 if ((x-a) * (x-a) + (y-b) * (y-b) > r*r) continue; 
+                if (y-r < 0 || y-r > worldSH-1 || x-r < 0 || x-r > worldSW-1) continue;
+                if (world[y-r][x-r] != null) continue;
                 world[y-r][x-r] = Director.instance.createSand();
             }
         }
