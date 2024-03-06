@@ -19,7 +19,7 @@ public class WorldSystem extends EntitySystem {
     private Entity[][] world;
     private int worldSW;
     private int worldSH;
-    private boolean updatedLastTime;
+    private boolean update;
 
     private final TextureRegionComponent textureRegionComponent;
     private final PixmapComponent pixmapComponent;
@@ -45,14 +45,20 @@ public class WorldSystem extends EntitySystem {
         Entity entity = Director.instance.createPixmap();
         pixmapComponent = pixmapMapper.get(entity);
         textureRegionComponent = texRegionMapper.get(entity);
+
+        update = true;
     }
 
     @Override
     public void update(float deltaTime) {
-        updatedLastTime = false;
-
         // Move to spawner system
-        if (touchHeld) drawCircleAtMouse(11);
+        if (touchHeld) {
+            drawCircleAtMouse(11);
+            update = true;
+        }
+
+        if (!update) return;
+        update = false;
 
         // === Update ===
         for (int iy = 0; iy < worldSH; iy++) {
@@ -74,8 +80,6 @@ public class WorldSystem extends EntitySystem {
         }
 
         // === Draw ===
-
-        if (!updatedLastTime) return;
         
         pixmapComponent.pixmap.setColor(Color.CLEAR);
         pixmapComponent.pixmap.fill();
@@ -110,7 +114,7 @@ public class WorldSystem extends EntitySystem {
         world[yTmp][xTmp] = world[yTargetTmp][xTargetTmp];
         world[yTargetTmp][xTargetTmp] = entityTmp;
 
-        updatedLastTime = true;
+        update = true;
 
         return true;
     }
