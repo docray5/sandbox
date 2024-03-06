@@ -8,11 +8,14 @@ public class Core {
     public static final float startWorldWidth = 100;
     public static final float startWorldHeight = 100;
     public static final Vector3 cameraPos = new Vector3();
+    public static boolean touchHeld = false;
 
-    public static float worldWidth = 100;
-    public static float worldHeight = 100;
-    public static int screenWidth = (int) worldWidth * 8;
-    public static int screenHeight = (int) worldHeight * 8;
+    public static float worldWidth = 200;
+    public static float worldHeight = 200;
+    public static int screenWidth = (int) worldWidth * 4;
+    public static int screenHeight = (int) worldHeight * 4;
     public static float lrGutter = 0;
     public static float tbGutter = 0;
+
+    public static final float[] sandColor = { -33, 0.285f, 0.965f };
 }

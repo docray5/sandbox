@@ -5,8 +5,11 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.falling.events.Event;
+import com.falling.events.Messages;
 
 import static com.falling.Core.mousePos;
+import static com.falling.Core.touchHeld;
 import static com.falling.utils.Families.*;
 
 public class InputSystem extends IteratingSystem implements InputProcessor {
@@ -24,11 +27,14 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
         tempMousePos.set(screenX, screenY);
         viewport.unproject(tempMousePos);
 
-       return true;
+        touchHeld = true;
+
+        return true;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        touchHeld = false;
         return true;
     }
 

@@ -3,23 +3,19 @@ package com.falling.factories;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
-import com.falling.components.*;
-import com.falling.components.ElementComponent.ElementType;
-import com.falling.components.ElementComponent.MatterType;
-import com.falling.events.Event;
+import static com.falling.components.ElementComponent.*;
 
 import static com.falling.Core.*;
-import static com.falling.utils.Families.*;
 
 public class Director {
     public static Director instance;
     public static void setInstance(Director _instance) { instance = _instance; }
 
     private final Factory factory;
+
+    private Color colorTmp = new Color();
 
     public Director(Engine engine, Assets assets) {
         this.factory = new Factory(engine, assets);
@@ -69,8 +65,28 @@ public class Director {
     }
 
     public Entity createSand() {
+        // colorTmp.set(colorTmp.fromHsv(sandColor[0], sandColor[1] + MathUtils.random(0.2f)-0.2f, sandColor[2] + MathUtils.random(0.15f)-0.15f));
+
+        switch (MathUtils.random(4)) {
+            case 0:
+                colorTmp.set(0.96f, 0.84f, 0.69f, 1);
+                break;
+            case 1:
+                colorTmp.set(0.95f, 0.82f, 0.66f, 1);
+                break;
+            case 2:
+                colorTmp.set(0.93f, 0.8f, 0.64f, 1);
+                break;
+            case 3:
+                colorTmp.set(0.91f, 0.77f, 0.59f, 1);
+                break;
+            case 4:
+                colorTmp.set(0.88f, 0.75f, 0.57f, 1);
+                break;
+        }
+
         return factory.createEntity()
-            .addElement(Color.rgba8888(0.96f, 0.84f, 0.69f, 1), ElementType.SAND, MatterType.SOLID)
+            .addElement(Color.rgba8888(colorTmp), ElementType.SAND, MatterType.SOLID)
             .endEntity();
     }
 }
