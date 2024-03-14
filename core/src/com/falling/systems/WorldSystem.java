@@ -9,9 +9,13 @@ import com.badlogic.gdx.math.MathUtils;
 import com.falling.components.ElementComponent;
 import com.falling.components.PixmapComponent;
 import com.falling.components.TextureRegionComponent;
+import com.falling.components.ElementComponent.ElementType;
 import com.falling.components.ElementComponent.MatterType;
+import com.falling.events.Event;
+import com.falling.events.MessageProcessor;
 import com.falling.factories.Director;
 
+import static com.falling.utils.Families.worldFamily;
 import static com.falling.utils.Mappers.*;
 import static com.falling.Core.*;
 
@@ -31,6 +35,9 @@ public class WorldSystem extends EntitySystem {
     private int yTargetTmp;
     private boolean columnDir;
 
+    private ElementType typeToSpawn;
+    private final MessageProcessor processor;
+
     public WorldSystem(int priority) {
 		super(priority);
 
@@ -47,15 +54,22 @@ public class WorldSystem extends EntitySystem {
         textureRegionComponent = texRegionMapper.get(entity);
 
         update = true;
+
+        // Move to spawner system
+        typeToSpawn = ElementType.SAND;
+        processor = new MessageProcessor(worldFamily) {
+            public void processMessage(com.falling.events.Message message) {
+                if (message.getEvent() == Event.SPAWN_ELEMENT) {
+                    drawCircleAtMouse(11, typeToSpawn);
+                    update = true;
+                }
+            };
+        };
     }
 
     @Override
     public void update(float deltaTime) {
-        // Move to spawner system
-        if (touchHeld) {
-            drawCircleAtMouse(11);
-            update = true;
-        }
+        processor.update();
 
         if (!update) return;
         update = false;
@@ -115,6 +129,7 @@ public class WorldSystem extends EntitySystem {
         world[yTargetTmp][xTargetTmp] = entityTmp;
 
         update = true;
+        updateBlur = true;
 
         return true;
     }
@@ -146,7 +161,7 @@ public class WorldSystem extends EntitySystem {
         }
     }
 
-    public void drawCircleAtMouse(int size) {
+    public void drawCircleAtMouse(int size, ElementType type) {
         int posX = (int) mousePos.x;
         int posY = (int) mousePos.y;
         int r = size/2;

@@ -10,5 +10,7 @@ public enum Event {
     // ========= SFX: =========
     PLAY_HIT,
     // ========= UI =========
-    OPEN_MENU, CLOSE_MENU, PREP_MENU
+    OPEN_MENU, CLOSE_MENU, PREP_MENU,
+    // ========= GAME =========
+    SPAWN_ELEMENT
 }

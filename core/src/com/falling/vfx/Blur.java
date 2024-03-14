@@ -37,6 +37,9 @@ public class Blur {
     }
 
     public void blur(SpriteBatch batch, FrameBuffer fbo, float deltaTime) {
+        if (!updateBlur) return;
+        updateBlur = false;
+
         animation(deltaTime);
 
         batch.setShader(blurShader);
@@ -73,6 +76,7 @@ public class Blur {
 
     private void animation(float deltaTime) {
         if (animating) {
+            updateBlur = true;
             if (direction) {
                 if (radius > 0) radius -= accel * deltaTime;
                 if (radius < 0.1f) active = false;
@@ -95,6 +99,7 @@ public class Blur {
         animating = true;
         direction = !direction;
         active = true;
+        updateBlur = true;
     }
 
     public boolean isActive() {
@@ -102,6 +107,7 @@ public class Blur {
     }
 
     public void resize() {
+        updateBlur = true;
         fbo1.dispose();
         fbo2.dispose();
         fbo1 = null;

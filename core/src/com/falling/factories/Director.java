@@ -5,8 +5,13 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.falling.assets.Assets;
-import static com.falling.components.ElementComponent.*;
+import com.falling.components.ResizeComponent;
+import com.falling.components.TypeComponent;
+import com.falling.events.Event;
 
+import static com.falling.components.ElementComponent.*;
+import static com.falling.utils.Families.uiTranslateFamily;
+import static com.falling.utils.Families.worldFamily;
 import static com.falling.Core.*;
 
 public class Director {
@@ -34,6 +39,16 @@ public class Director {
                 .setPos(worldWidth/2f, worldHeight/2f)
                 .setRounding(10)
                 .endComponent()
+                .endEntity();
+    }
+
+    public void createSpawnArea() {
+        factory.createEntity()
+        .addTransform(0, 0)
+                .addClickable(0, 0, worldWidth, worldHeight)
+                .addResize(ResizeComponent.STICK_TYPE.LEFT_BOTTOM)
+                .addButton(Event.SPAWN_ELEMENT, worldFamily, null, null, true)
+                .addType(TypeComponent.Type.FULLSCREEN_CLICK)
                 .endEntity();
     }
 

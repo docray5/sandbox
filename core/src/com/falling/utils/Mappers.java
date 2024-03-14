@@ -6,6 +6,8 @@ import com.falling.components.*;
 public class Mappers {
     public static ComponentMapper<TransformComponent> transformMapper;
     public static ComponentMapper<TextureRegionComponent> texRegionMapper;
+    public static ComponentMapper<ClickableComponent> clickableMapper;
+    public static ComponentMapper<ButtonComponent> buttonMapper;
     public static ComponentMapper<AnimationComponent> animationMapper;
     public static ComponentMapper<TextComponent> textMapper;
     public static ComponentMapper<RenderableComponent> renderableMapper;
@@ -15,11 +17,13 @@ public class Mappers {
     public static ComponentMapper<TypeComponent> typeMapper;
     public static ComponentMapper<PauseComponent> pauseMapper;
     public static ComponentMapper<ElementComponent> elementMapper;
+    public static ComponentMapper<UITranslateComponent> uiTranslateMapper;
 
     public static void init() {
         transformMapper = ComponentMapper.getFor(TransformComponent.class);
         texRegionMapper = ComponentMapper.getFor(TextureRegionComponent.class);
         animationMapper = ComponentMapper.getFor(AnimationComponent.class);
+        clickableMapper = ComponentMapper.getFor(ClickableComponent.class);
         textMapper = ComponentMapper.getFor(TextComponent.class);
         renderableMapper = ComponentMapper.getFor(RenderableComponent.class);
         cursorMapper = ComponentMapper.getFor(CursorComponent.class);
@@ -28,5 +32,7 @@ public class Mappers {
         typeMapper = ComponentMapper.getFor(TypeComponent.class);
         pauseMapper = ComponentMapper.getFor(PauseComponent.class);
         elementMapper = ComponentMapper.getFor(ElementComponent.class);
+        buttonMapper = ComponentMapper.getFor(ButtonComponent.class);
+        uiTranslateMapper = ComponentMapper.getFor(UITranslateComponent.class);
     }
 }

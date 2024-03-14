@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.falling.assets.Assets;
+import com.falling.events.Event;
 import com.falling.events.Messages;
 import com.falling.factories.Director;
 import com.falling.systems.*;
@@ -57,8 +58,14 @@ public class Application implements ApplicationListener  {
     public void startGame() {
         renderSystem.init(assets);
 
+        engine.addSystem(new ButtonSystem(2));
+        engine.addSystem(new UITranslateSystem(2));
         engine.addSystem(new TempCursorSystem(4));
         engine.addSystem(new WorldSystem(5));
+
+        Director.instance.createSpawnArea();
+
+        // Messages.alert(Event.SHIFT_BLUR, Families.renderableFamily);
     }
 
     @Override

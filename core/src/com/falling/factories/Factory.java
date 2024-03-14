@@ -29,6 +29,8 @@ public class Factory {
     private TypeComponent typeComponent;
     private PixmapComponent pixmapComponent;
     private ElementComponent elementComponent;
+    private ClickableComponent clickableComponent;
+    private ButtonComponent buttonComponent;
 
     private boolean creating;
 
@@ -219,6 +221,38 @@ public class Factory {
         elementComponent.matterType = matterType;
 
         entity.add(elementComponent);
+        return this;
+    }
+
+    /**This one Needs to be AFTER!! transform and region components!!!*/
+    public Factory addClickable() {
+        if (!creating) return null;
+        clickableComponent = engine.createComponent(ClickableComponent.class);
+        clickableComponent.hitBox.set(transformComponent.pos.x, transformComponent.pos.y, regionComponent.textureRegion.getRegionWidth(), regionComponent.textureRegion.getRegionHeight());
+
+        entity.add(clickableComponent);
+        return this;
+    }
+
+    public Factory addClickable(float x, float y, float width, float height) {
+        if (!creating) return null;
+        clickableComponent = engine.createComponent(ClickableComponent.class);
+        clickableComponent.hitBox.set(x, y, width, height);
+
+        entity.add(clickableComponent);
+        return this;
+    }
+
+    public Factory addButton(Event onClickEvent, Family familyToAlert, ButtonComponent.AnimationType onMouse, ButtonComponent.AnimationType onTouch, boolean holdable) {
+        if (!creating) return null;
+        buttonComponent = engine.createComponent(ButtonComponent.class);
+        buttonComponent.onClickEvent = onClickEvent;
+        buttonComponent.familyToAlert = familyToAlert;
+        buttonComponent.onMouse = onMouse;
+        buttonComponent.onTouch = onTouch;
+        buttonComponent.holdable = holdable;
+
+        entity.add(buttonComponent);
         return this;
     }
 }

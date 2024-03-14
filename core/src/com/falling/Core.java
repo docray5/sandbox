@@ -10,6 +10,9 @@ public class Core {
     public static final Vector3 cameraPos = new Vector3();
     public static boolean touchHeld = false;
 
+    /** Used to control blur, set to true if updating something thats under blur */
+    public static boolean updateBlur = false;
+
     public static float worldWidth = 200;
     public static float worldHeight = 200;
     public static int screenWidth = (int) worldWidth * 4;
