@@ -5,14 +5,10 @@ import com.badlogic.gdx.utils.Pool;
 
 public class ResizeComponent implements Component, Pool.Poolable {
     public STICK_TYPE stick = null;
-    public float lastLRGutter = 0;
-    public float lastTBGutter = 0;
 
     @Override
     public void reset() {
         stick = null;
-        lastLRGutter = 0;
-        lastTBGutter = 0;
     }
 
     public enum STICK_TYPE {

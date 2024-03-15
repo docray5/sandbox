@@ -65,6 +65,8 @@ public class Application implements ApplicationListener  {
 
         Director.instance.createSpawnArea();
 
+        Director.instance.createTitle();
+
         // Messages.alert(Event.SHIFT_BLUR, Families.renderableFamily);
     }
 

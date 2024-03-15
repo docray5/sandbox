@@ -7,9 +7,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.falling.assets.Assets;
 import com.falling.components.ResizeComponent;
 import com.falling.components.TypeComponent;
+import com.falling.components.ResizeComponent.STICK_TYPE;
 import com.falling.events.Event;
 
 import static com.falling.components.ElementComponent.*;
+import static com.falling.utils.Families.renderableFamily;
 import static com.falling.utils.Families.uiTranslateFamily;
 import static com.falling.utils.Families.worldFamily;
 import static com.falling.Core.*;
@@ -69,12 +71,12 @@ public class Director {
 
     public Entity createPixmap() {
         return factory.createEntity()
-                .addTransform(worldWidth/2, worldHeight/2)
+                .addTransform(0, 0)
                 .addRenderable()
                     .setPriority(20)
-                    .setCenter(true)
                 .endComponent()
                 .addTextureRegion()
+                .addResize(STICK_TYPE.LEFT_BOTTOM)
                 .addPixmap()
                 .endEntity();
     }

@@ -64,6 +64,9 @@ public class RenderSystem extends SortedIteratingSystem {
         renderQueue = new Array<>();
         renderAfterVFXQueue = new Array<>();
 
+        oldWorldWidth = worldWidth;
+        oldWorldHeight = worldHeight;
+
         processor = new MessageProcessor(renderableFamily) {
             @Override
             public void processMessage(Message message) {
@@ -126,11 +129,14 @@ public class RenderSystem extends SortedIteratingSystem {
         if (worldWidth == oldWorldWidth && worldHeight == oldWorldHeight)
             return;
 
-        oldWorldWidth = worldWidth;
-        oldWorldHeight = worldHeight;
-
         lrGutter = (worldWidth - startWorldWidth)/2;
         tbGutter = (worldHeight - startWorldHeight)/2;
+
+        xGutOffset = (worldWidth - oldWorldWidth)/2;
+        yGutOffset = (worldHeight - oldWorldHeight)/2;
+
+        oldWorldWidth = worldWidth;
+        oldWorldHeight = worldHeight;
 
         fboMain.dispose();
         fboMain = null;

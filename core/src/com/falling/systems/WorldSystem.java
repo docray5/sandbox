@@ -23,6 +23,8 @@ public class WorldSystem extends EntitySystem {
     private Entity[][] world;
     private int worldSW;
     private int worldSH;
+    private int xOffsetI;
+    private int yOffsetI;
     private boolean update;
 
     private final TextureRegionComponent textureRegionComponent;
@@ -43,6 +45,8 @@ public class WorldSystem extends EntitySystem {
 
         worldSW = (int) worldWidth;
         worldSH = (int) worldHeight;
+        xOffsetI = (int) xGutOffset;
+        yOffsetI = (int) yGutOffset;
 
         world = new Entity[worldSH][worldSW];
 
@@ -98,8 +102,8 @@ public class WorldSystem extends EntitySystem {
         pixmapComponent.pixmap.setColor(Color.CLEAR);
         pixmapComponent.pixmap.fill();
         
-        for (int iy = 0; iy < world.length; iy++) {
-            for (int ix = 0; ix < world.length; ix++) {
+        for (int iy = 0; iy < worldSH; iy++) {
+            for (int ix = 0; ix < worldSW; ix++) {
                 if (world[iy][ix] == null) continue;
                 pixmapComponent.pixmap.drawPixel(ix, iy, elementMapper.get(world[iy][ix]).colorBits);
             }
@@ -134,15 +138,6 @@ public class WorldSystem extends EntitySystem {
         return true;
     }
 
-    public void resize() {
-        pixmapComponent.pixmap.dispose();
-        pixmapComponent.texture.dispose();
-        pixmapComponent.pixmap = null;
-        pixmapComponent.texture = null;
-        pixmapComponent.pixmap = new Pixmap((int) worldWidth, (int) worldHeight, Pixmap.Format.RGBA8888);
-        pixmapComponent.texture = new Texture((int) worldWidth, (int) worldHeight, Pixmap.Format.RGBA8888);
-    }
-
     public void dispose() {
         pixmapComponent.pixmap.dispose();
         pixmapComponent.texture.dispose();
@@ -162,8 +157,9 @@ public class WorldSystem extends EntitySystem {
     }
 
     public void drawCircleAtMouse(int size, ElementType type) {
-        int posX = (int) mousePos.x;
-        int posY = (int) mousePos.y;
+        int posX = (int) ( mousePos.x + lrGutter );
+        int posY = (int) ( mousePos.y + tbGutter );
+
         int r = size/2;
         int a = posX+r;
         int b = posY+r;
@@ -184,5 +180,37 @@ public class WorldSystem extends EntitySystem {
                 world[y-r][x-r] = Director.instance.createSand();
             }
         }
+    }
+
+    public void resize() {
+        worldSW = (int) worldWidth;
+        worldSH = (int) worldHeight;
+        xOffsetI = (int) xGutOffset;
+        yOffsetI = (int) yGutOffset;
+
+
+        pixmapComponent.pixmap.dispose();
+        pixmapComponent.texture.dispose();
+        pixmapComponent.pixmap = null;
+        pixmapComponent.texture = null;
+        pixmapComponent.pixmap = new Pixmap(worldSW, worldSH, Pixmap.Format.RGBA8888);
+        pixmapComponent.texture = new Texture(worldSW, worldSH, Pixmap.Format.RGBA8888);
+
+        resizeWorld();
+
+        update = true;
+    }
+
+    public void resizeWorld() {
+        Entity[][] newWorld = new Entity[worldSH][worldSW];
+
+        for (int iy = 0; iy < world.length; iy++) {
+            for (int ix = 0; ix < world[0].length; ix++) {
+                if (world[iy][ix] == null || iy+yOffsetI < 0 || iy+yOffsetI > worldSH-1 || ix+xOffsetI < 0 || ix + xOffsetI > worldSW-1) continue;
+                newWorld[iy+yOffsetI][ix+xOffsetI] = world[iy][ix];
+            }
+        }
+
+        world = newWorld;
     }
 }

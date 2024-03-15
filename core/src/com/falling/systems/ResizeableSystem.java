@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.falling.components.ResizeComponent;
 
 import static com.falling.Core.*;
-import static com.falling.Core.tbGutter;
 import static com.falling.utils.Families.resizeFamily;
 import static com.falling.utils.Mappers.*;
 
@@ -29,62 +28,50 @@ public class ResizeableSystem extends EntitySystem {
 
             if (transformMapper.has(entity)) {
                 posTmp = transformMapper.get(entity).pos;
-                posTmp.x += resizeTmp.lastLRGutter;
-                posTmp.y += resizeTmp.lastTBGutter;
-
-                resizeTmp.lastLRGutter = 0;
-                resizeTmp.lastTBGutter = 0;
 
                 switch (resizeTmp.stick) {
                     case LEFT_TOP:
-                        posTmp.x -= lrGutter;
-                        posTmp.y += tbGutter;
-                        resizeTmp.lastLRGutter += lrGutter;
-                        resizeTmp.lastTBGutter -= tbGutter;
+                        posTmp.x -= xGutOffset;
+                        posTmp.y += yGutOffset;
                         break;
                     case RIGHT_TOP:
-                        posTmp.x += lrGutter;
-                        posTmp.y += tbGutter;
-                        resizeTmp.lastLRGutter -= lrGutter;
-                        resizeTmp.lastTBGutter -= tbGutter;
+                        posTmp.x += xGutOffset;
+                        posTmp.y += yGutOffset;
                         break;
                     case LEFT_BOTTOM:
-                        posTmp.x -= lrGutter;
-                        posTmp.y -= tbGutter;
-                        resizeTmp.lastLRGutter += lrGutter;
-                        resizeTmp.lastTBGutter += tbGutter;
+                        posTmp.x -= xGutOffset;
+                        posTmp.y -= yGutOffset;
                         break;
                     case RIGHT_BOTTOM:
-                        posTmp.x += lrGutter;
-                        posTmp.y -= tbGutter;
-                        resizeTmp.lastLRGutter -= lrGutter;
-                        resizeTmp.lastTBGutter += tbGutter;
+                        posTmp.x += xGutOffset;
+                        posTmp.y -= yGutOffset;
                         break;
                     case LEFT:
-                        posTmp.x -= lrGutter;
-                        resizeTmp.lastLRGutter += lrGutter;
+                        posTmp.x -= xGutOffset;
                         break;
                     case RIGHT:
-                        posTmp.x += lrGutter;
-                        resizeTmp.lastLRGutter -= lrGutter;
+                        posTmp.x += xGutOffset;
                         break;
                     case TOP:
-                        posTmp.y += tbGutter;
-                        resizeTmp.lastTBGutter -= tbGutter;
+                        posTmp.y += yGutOffset;
                         break;
                     case BOTTOM:
-                        posTmp.y -= tbGutter;
-                        resizeTmp.lastTBGutter += tbGutter;
+                        posTmp.y -= yGutOffset;
                         break;
                 }
+            }
+
+            if (clickableMapper.has(entity)) {
+                clickableMapper.get(entity).hitBox.setPosition(posTmp);
             }
 
             if (typeMapper.has(entity)) {
                 switch (typeMapper.get(entity).type) {
                     case FULLSCREEN_CLICK:
+                        clickableMapper.get(entity).hitBox.setSize(worldWidth, worldHeight);
                         break;
                 }
-            }
+            }        
         }
     }
 
