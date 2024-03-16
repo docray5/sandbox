@@ -2,6 +2,7 @@ package com.falling.systems;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -96,7 +97,16 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        return false;
+
+
+        if (keycode == Input.Keys.S) {
+            Messages.alert(Event.SEL_SAND, worldFamily);
+            System.out.println("clicked");
+        } else if (keycode == Input.Keys.W) {
+            Messages.alert(Event.SEL_WATER, worldFamily);
+        }
+
+        return true;
     }
 
     @Override

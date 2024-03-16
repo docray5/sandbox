@@ -106,4 +106,10 @@ public class Director {
             .addElement(Color.rgba8888(colorTmp), ElementType.SAND, MatterType.SOLID)
             .endEntity();
     }
+
+    public Entity createWater() {
+            return factory.createEntity()
+                .addElement(Color.rgba8888(Color.SKY), ElementType.WATER, MatterType.FLUID)
+                .endEntity();
+    }
 }

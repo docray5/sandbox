@@ -12,5 +12,5 @@ public enum Event {
     // ========= UI =========
     OPEN_MENU, CLOSE_MENU, PREP_MENU,
     // ========= GAME =========
-    SPAWN_ELEMENT
+    SPAWN_ELEMENT, SEL_SAND, SEL_WATER
 }

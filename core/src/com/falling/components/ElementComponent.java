@@ -13,7 +13,7 @@ public class ElementComponent implements Component, Poolable {
 	}
 
     public enum ElementType {
-        SAND
+        SAND, WATER
     }
 
     public enum MatterType {

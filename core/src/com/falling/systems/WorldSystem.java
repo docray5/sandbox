@@ -63,9 +63,19 @@ public class WorldSystem extends EntitySystem {
         typeToSpawn = ElementType.SAND;
         processor = new MessageProcessor(worldFamily) {
             public void processMessage(com.falling.events.Message message) {
-                if (message.getEvent() == Event.SPAWN_ELEMENT) {
-                    drawCircleAtMouse(11, typeToSpawn);
-                    update = true;
+                switch (message.getEvent()) {
+                    case SPAWN_ELEMENT:
+                        drawCircleAtMouse(11);
+                        update = true;
+                        break;
+                    case SEL_SAND:
+                        typeToSpawn = ElementType.SAND;
+                        break;
+                    case SEL_WATER:
+                        typeToSpawn = ElementType.WATER;
+                        break;
+					default:
+						break;
                 }
             };
         };
@@ -93,6 +103,9 @@ public class WorldSystem extends EntitySystem {
                     case SAND:
                         updateSand();
                         break;
+                    case WATER:
+                        updateWater();
+                        break;
                 }
             }
         }
@@ -114,6 +127,14 @@ public class WorldSystem extends EntitySystem {
         textureRegionComponent.textureRegion.flip(false, true);
     }
 
+    public void updateWater() {
+        if (tryMove(0, -1)) return;
+        if (tryMove(-1, -1)) return;
+        if (tryMove(1, -1)) return;
+        if (tryMove(1, 0)) return;
+        if (tryMove(-1, 0)) return;
+    }
+
     public void updateSand() {
         if (tryMove(0, -1)) return;
         if (tryMove(-1, -1)) return;
@@ -124,10 +145,17 @@ public class WorldSystem extends EntitySystem {
         xTargetTmp = xTmp + dx;
         yTargetTmp = yTmp + dy;
 
-        if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
-                world[yTargetTmp][xTargetTmp] != null &&
-                elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == MatterType.SOLID)
-            return false;
+        if (elementComponent.matterType == MatterType.SOLID) {
+            if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
+                    world[yTargetTmp][xTargetTmp] != null &&
+                    elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == MatterType.SOLID)
+                return false;
+        } else if (elementComponent.matterType == MatterType.FLUID) {
+            if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
+                    world[yTargetTmp][xTargetTmp] != null)
+                return false;
+
+        }
 
         world[yTmp][xTmp] = world[yTargetTmp][xTargetTmp];
         world[yTargetTmp][xTargetTmp] = entityTmp;
@@ -151,12 +179,12 @@ public class WorldSystem extends EntitySystem {
             for (int j = 0; j < size; j++) {
                 if (MathUtils.random() < 0.8f) continue;
                 if (posY+i < 0 || posY+i > worldSH-1 || posX+j < 0 || posX+j > worldSW-1) continue;
-                world[posY + i][posX + j] = Director.instance.createSand();
+                world[posY + i][posX + j] = spawn();
             }
         }
     }
 
-    public void drawCircleAtMouse(int size, ElementType type) {
+    public void drawCircleAtMouse(int size) {
         int posX = (int) ( mousePos.x + lrGutter );
         int posY = (int) ( mousePos.y + tbGutter );
 
@@ -177,9 +205,16 @@ public class WorldSystem extends EntitySystem {
                 if ((x-a) * (x-a) + (y-b) * (y-b) > r*r) continue; 
                 if (y-r < 0 || y-r > worldSH-1 || x-r < 0 || x-r > worldSW-1) continue;
                 if (world[y-r][x-r] != null) continue;
-                world[y-r][x-r] = Director.instance.createSand();
+                world[y-r][x-r] = spawn();
             }
         }
+    }
+
+    public Entity spawn() {
+        if (typeToSpawn == ElementType.SAND) return Director.instance.createSand();
+        if (typeToSpawn == ElementType.WATER) return Director.instance.createWater();
+
+        return Director.instance.createSand();
     }
 
     public void resize() {
