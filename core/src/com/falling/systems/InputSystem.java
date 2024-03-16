@@ -97,13 +97,12 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-
-
         if (keycode == Input.Keys.S) {
             Messages.alert(Event.SEL_SAND, worldFamily);
-            System.out.println("clicked");
         } else if (keycode == Input.Keys.W) {
             Messages.alert(Event.SEL_WATER, worldFamily);
+        } else if (keycode == Input.Keys.SPACE) {
+            Messages.alert(Event.SHIFT_BLUR, renderableFamily);
         }
 
         return true;

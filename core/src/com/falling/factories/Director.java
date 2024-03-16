@@ -10,9 +10,7 @@ import com.falling.components.TypeComponent;
 import com.falling.components.ResizeComponent.STICK_TYPE;
 import com.falling.events.Event;
 
-import static com.falling.components.ElementComponent.*;
-import static com.falling.utils.Families.renderableFamily;
-import static com.falling.utils.Families.uiTranslateFamily;
+import static com.falling.components.ParticleComponent.*;
 import static com.falling.utils.Families.worldFamily;
 import static com.falling.Core.*;
 
@@ -49,7 +47,7 @@ public class Director {
         .addTransform(0, 0)
                 .addClickable(0, 0, worldWidth, worldHeight)
                 .addResize(ResizeComponent.STICK_TYPE.LEFT_BOTTOM)
-                .addButton(Event.SPAWN_ELEMENT, worldFamily, null, null, true)
+                .addButton(Event.SPAWN_PARTICLE, worldFamily, null, null, true)
                 .addType(TypeComponent.Type.FULLSCREEN_CLICK)
                 .endEntity();
     }
@@ -103,13 +101,13 @@ public class Director {
         }
 
         return factory.createEntity()
-            .addElement(Color.rgba8888(colorTmp), ElementType.SAND, MatterType.SOLID)
+            .addParticle(Color.rgba8888(colorTmp), ParticleType.SAND, MatterType.SOLID)
             .endEntity();
     }
 
     public Entity createWater() {
             return factory.createEntity()
-                .addElement(Color.rgba8888(Color.SKY), ElementType.WATER, MatterType.FLUID)
+                .addParticle(Color.rgba8888(Color.SKY), ParticleType.WATER, MatterType.FLUID)
                 .endEntity();
     }
 }

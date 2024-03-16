@@ -1,20 +1,22 @@
 package com.falling.components;
 
 import com.badlogic.ashley.core.Component;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.Pool.Poolable;
 
-public class ParticleComponent implements Component, Pool.Poolable {
-    public float lifeTime = 1;
-    public float passed = 0;
-    public float colorAccel = 1;
-    public Color targetColor = new Color(1, 1, 1, 1);
+public class ParticleComponent implements Component, Poolable {
+    public int colorBits = 0;
+    public ParticleType particleType = null;
+    public MatterType matterType = null;
 
-    @Override
-    public void reset() {
-        lifeTime = 1;
-        passed = 0;
-        targetColor.set(1, 1,1 ,1);
-        colorAccel = 1;
+	@Override
+	public void reset() {
+	}
+
+    public enum ParticleType {
+        SAND, WATER
+    }
+
+    public enum MatterType {
+        SOLID, GAS, FLUID
     }
 }

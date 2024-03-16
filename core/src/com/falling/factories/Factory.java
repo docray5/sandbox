@@ -1,14 +1,11 @@
 package com.falling.factories;
 
 import com.badlogic.ashley.core.*;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
 import com.falling.components.*;
-import com.falling.components.ElementComponent.ElementType;
-import com.falling.components.ElementComponent.MatterType;
+import com.falling.components.ParticleComponent.ParticleType;
+import com.falling.components.ParticleComponent.MatterType;
 import com.falling.events.Event;
 import com.falling.factories.builders.AnimationBuilder;
 import com.falling.factories.builders.RenderableBuilder;
@@ -28,7 +25,7 @@ public class Factory {
     private TransformComponent transformComponent;
     private TypeComponent typeComponent;
     private PixmapComponent pixmapComponent;
-    private ElementComponent elementComponent;
+    private ParticleComponent particleComponent;
     private ClickableComponent clickableComponent;
     private ButtonComponent buttonComponent;
 
@@ -213,14 +210,14 @@ public class Factory {
         return this;
     }
 
-    public Factory addElement(int colorBits, ElementType elementType, MatterType matterType) {
+    public Factory addParticle(int colorBits, ParticleType particleType, MatterType matterType) {
         if (!creating) return null;
-        elementComponent = engine.createComponent(ElementComponent.class);
-        elementComponent.colorBits = colorBits;
-        elementComponent.elementType = elementType;
-        elementComponent.matterType = matterType;
+        particleComponent = engine.createComponent(ParticleComponent.class);
+        particleComponent.colorBits = colorBits;
+        particleComponent.particleType = particleType;
+        particleComponent.matterType = matterType;
 
-        entity.add(elementComponent);
+        entity.add(particleComponent);
         return this;
     }
 

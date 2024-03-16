@@ -6,12 +6,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
-import com.falling.components.ElementComponent;
+import com.falling.components.ParticleComponent;
 import com.falling.components.PixmapComponent;
 import com.falling.components.TextureRegionComponent;
-import com.falling.components.ElementComponent.ElementType;
-import com.falling.components.ElementComponent.MatterType;
-import com.falling.events.Event;
+import com.falling.components.ParticleComponent.ParticleType;
+import com.falling.components.ParticleComponent.MatterType;
 import com.falling.events.MessageProcessor;
 import com.falling.factories.Director;
 
@@ -30,14 +29,14 @@ public class WorldSystem extends EntitySystem {
     private final TextureRegionComponent textureRegionComponent;
     private final PixmapComponent pixmapComponent;
     private Entity entityTmp;
-    private ElementComponent elementComponent;
+    private ParticleComponent particleComponent;
     private int xTmp;
     private int yTmp;
     private int xTargetTmp;
     private int yTargetTmp;
     private boolean columnDir;
 
-    private ElementType typeToSpawn;
+    private ParticleType typeToSpawn;
     private final MessageProcessor processor;
 
     public WorldSystem(int priority) {
@@ -60,19 +59,19 @@ public class WorldSystem extends EntitySystem {
         update = true;
 
         // Move to spawner system
-        typeToSpawn = ElementType.SAND;
+        typeToSpawn = ParticleType.SAND;
         processor = new MessageProcessor(worldFamily) {
             public void processMessage(com.falling.events.Message message) {
                 switch (message.getEvent()) {
-                    case SPAWN_ELEMENT:
+                    case SPAWN_PARTICLE:
                         drawCircleAtMouse(11);
                         update = true;
                         break;
                     case SEL_SAND:
-                        typeToSpawn = ElementType.SAND;
+                        typeToSpawn = ParticleType.SAND;
                         break;
                     case SEL_WATER:
-                        typeToSpawn = ElementType.WATER;
+                        typeToSpawn = ParticleType.WATER;
                         break;
 					default:
 						break;
@@ -97,9 +96,9 @@ public class WorldSystem extends EntitySystem {
                 if (world[iy][xTmp] == null) continue;
                 yTmp = iy;
                 entityTmp = world[yTmp][xTmp];
-                elementComponent = elementMapper.get(entityTmp);
+                particleComponent = particleMapper.get(entityTmp);
 
-                switch (elementComponent.elementType) {
+                switch (particleComponent.particleType) {
                     case SAND:
                         updateSand();
                         break;
@@ -118,7 +117,7 @@ public class WorldSystem extends EntitySystem {
         for (int iy = 0; iy < worldSH; iy++) {
             for (int ix = 0; ix < worldSW; ix++) {
                 if (world[iy][ix] == null) continue;
-                pixmapComponent.pixmap.drawPixel(ix, iy, elementMapper.get(world[iy][ix]).colorBits);
+                pixmapComponent.pixmap.drawPixel(ix, iy, particleMapper.get(world[iy][ix]).colorBits);
             }
         }
 
@@ -145,12 +144,12 @@ public class WorldSystem extends EntitySystem {
         xTargetTmp = xTmp + dx;
         yTargetTmp = yTmp + dy;
 
-        if (elementComponent.matterType == MatterType.SOLID) {
+        if (particleComponent.matterType == MatterType.SOLID) {
             if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
                     world[yTargetTmp][xTargetTmp] != null &&
-                    elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == MatterType.SOLID)
+                    particleMapper.get(world[yTargetTmp][xTargetTmp]).matterType == MatterType.SOLID)
                 return false;
-        } else if (elementComponent.matterType == MatterType.FLUID) {
+        } else if (particleComponent.matterType == MatterType.FLUID) {
             if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
                     world[yTargetTmp][xTargetTmp] != null)
                 return false;
@@ -211,8 +210,8 @@ public class WorldSystem extends EntitySystem {
     }
 
     public Entity spawn() {
-        if (typeToSpawn == ElementType.SAND) return Director.instance.createSand();
-        if (typeToSpawn == ElementType.WATER) return Director.instance.createWater();
+        if (typeToSpawn == ParticleType.SAND) return Director.instance.createSand();
+        if (typeToSpawn == ParticleType.WATER) return Director.instance.createWater();
 
         return Director.instance.createSand();
     }
