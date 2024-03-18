@@ -20,6 +20,7 @@ import com.falling.vfx.Blur;
 
 import static com.badlogic.gdx.Gdx.gl;
 import static com.falling.Core.*;
+import static com.falling.events.Event.*;
 import static com.falling.utils.Families.renderableFamily;
 import static com.falling.utils.Mappers.*;
 
@@ -67,10 +68,13 @@ public class RenderSystem extends SortedIteratingSystem {
         oldWorldWidth = worldWidth;
         oldWorldHeight = worldHeight;
 
-        processor = new MessageProcessor(renderableFamily) {
+        processor = new MessageProcessor() {
             @Override
             public void processMessage(Message message) {
-                if (message.getEvent() == Event.SHIFT_BLUR) {
+                if (message.getEvent() == KEY_DOWN) {
+                    if (shiftBlurPressed) Messages.alert(SHIFT_BLUR);
+                }
+                if (message.getEvent() == SHIFT_BLUR) {
                     blur.shift();
                 }
             }

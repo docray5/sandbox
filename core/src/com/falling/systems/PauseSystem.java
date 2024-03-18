@@ -5,7 +5,6 @@ import com.falling.events.Event;
 import com.falling.events.Message;
 import com.falling.events.MessageProcessor;
 
-import static com.falling.utils.Families.pauseFamily;
 import static com.falling.utils.Mappers.pauseMapper;
 
 public class PauseSystem extends EntitySystem {
@@ -13,7 +12,7 @@ public class PauseSystem extends EntitySystem {
 
     public PauseSystem(int priority) {
         super(priority);
-        processor = new MessageProcessor(pauseFamily) {
+        processor = new MessageProcessor() {
             @Override
             public void processMessage(Message message) {
                 if (message.getEvent() == Event.PAUSE_SYSTEM) {

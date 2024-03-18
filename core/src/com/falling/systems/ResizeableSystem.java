@@ -11,6 +11,8 @@ import static com.falling.utils.Families.resizeFamily;
 import static com.falling.utils.Mappers.*;
 
 public class ResizeableSystem extends EntitySystem {
+    // TODO Make it a fucking Iterating system bruv, will improve performance of resize.
+
     private Entity entity;
     private ImmutableArray<Entity> entitiesTmp;
     private ResizeComponent resizeTmp;

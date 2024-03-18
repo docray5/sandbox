@@ -13,7 +13,7 @@ public class ParticleComponent implements Component, Poolable {
 	}
 
     public enum ParticleType {
-        SAND, WATER
+        SAND, WATER, WOOD
     }
 
     public enum MatterType {

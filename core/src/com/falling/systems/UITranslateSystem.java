@@ -3,9 +3,12 @@ package com.falling.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
+import com.falling.events.Event;
 import com.falling.events.Message;
 import com.falling.events.MessageProcessor;
 
+import static com.falling.events.Event.CLOSE_MENU;
+import static com.falling.events.Event.OPEN_MENU;
 import static com.falling.utils.Families.uiTranslateFamily;
 import static com.falling.utils.Mappers.animationMapper;
 import static com.falling.utils.Mappers.uiTranslateMapper;
@@ -20,9 +23,10 @@ public class UITranslateSystem extends IteratingSystem {
     public UITranslateSystem(int priority) {
         super(uiTranslateFamily, priority);
 
-        processor = new MessageProcessor(uiTranslateFamily) {
+        processor = new MessageProcessor() {
             @Override
             public void processMessage(Message message) {
+                if (message.getEvent() != OPEN_MENU || message.getEvent() != CLOSE_MENU || message.getEvent() != Event.PREP_MENU) return;
                 for (int i = 0; i < UITranslateSystem.super.getEntities().size(); i++) {
                     entity = UITranslateSystem.super.getEntities().get(i);
                     switch (message.getEvent()) {
@@ -37,6 +41,8 @@ public class UITranslateSystem extends IteratingSystem {
                         case PREP_MENU:
                             animationMapper.get(entity).target.set(new Vector2(uiTranslateMapper.get(entity).openPos).sub(0, 4));
                             animationMapper.get(entity).isAnimating = true;
+						default:
+							break;
                     }
                 }
             }

@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.falling.assets.Assets;
-import com.falling.events.Event;
 import com.falling.events.Messages;
 import com.falling.factories.Director;
 import com.falling.systems.*;
@@ -66,8 +65,6 @@ public class Application implements ApplicationListener  {
         Director.instance.createSpawnArea();
 
         Director.instance.createTitle();
-
-        // Messages.alert(Event.SHIFT_BLUR, Families.renderableFamily);
     }
 
     @Override
@@ -79,6 +76,7 @@ public class Application implements ApplicationListener  {
 	public void dispose () {
         assets.dispose();
         renderSystem.dispose();
+        engine.getSystem(WorldSystem.class).dispose();
 	}
 
     @Override

@@ -17,7 +17,6 @@ public class AnimationComponent implements Component, Pool.Poolable {
     public boolean isAnimating = false;
     public float rounding = 100.0f;
     public Event eventOnFinish = null;
-    public Family familyToAlert = null;
     public Entity entityToAlert = null;
     public AnimationMode mode = AnimationMode.NORMAL;
     /**when using pingPong initially set it to values from pos;*/
@@ -35,7 +34,6 @@ public class AnimationComponent implements Component, Pool.Poolable {
         isAnimating = false;
         rounding = 100.0f;
         eventOnFinish = null;
-        familyToAlert = null;
         entityToAlert = null;
         mode = AnimationMode.NORMAL;
         pingPongPos.set(0, 0);

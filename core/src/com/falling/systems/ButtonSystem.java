@@ -22,14 +22,15 @@ public class ButtonSystem extends IteratingSystem {
 
     public ButtonSystem(int priority) {
         super(buttonFamily, priority);
-        processor = new MessageProcessor(buttonFamily) {
+        processor = new MessageProcessor() {
             @Override
             public void processMessage(Message message) {
+                if (message.getEntityToAlert() == null || !buttonMapper.has(message.getEntityToAlert())) return;
                 buttonComponentTmp = buttonMapper.get(message.getEntityToAlert());
                 switch (message.getEvent()) {
                     case CLICKED:
                         if (buttonComponentTmp.holdable) break;
-                        Messages.alert(buttonComponentTmp.onClickEvent, buttonComponentTmp.familyToAlert);
+                        Messages.alert(buttonComponentTmp.onClickEvent);
                         break;
                     case TOUCH_DOWN:
                         clickableMapper.get(message.getEntityToAlert()).clicked = true;
@@ -37,7 +38,7 @@ public class ButtonSystem extends IteratingSystem {
                         // =========== Animation ===========
                         if (typeMapper.has(message.getEntityToAlert()) &&
                                 typeMapper.get(message.getEntityToAlert()).type == TypeComponent.Type.FULLSCREEN_CLICK)
-                            Messages.alert(Event.PREP_MENU, uiTranslateFamily);
+                            Messages.alert(Event.PREP_MENU);
                         if (buttonComponentTmp.onTouch == null) break;
                         switch (buttonComponentTmp.onTouch) {
                             case TEXTURE:
@@ -47,7 +48,6 @@ public class ButtonSystem extends IteratingSystem {
                                 transformMapper.get(message.getEntityToAlert()).scale.set(0.5f, 0.5f);
                                 break;
                         }
-
 
                         Gdx.input.vibrate(10);
                         break;
@@ -98,6 +98,8 @@ public class ButtonSystem extends IteratingSystem {
                                 break;
                         }
                         break;
+					default:
+						break;
                 }
             }
         };
@@ -114,7 +116,7 @@ public class ButtonSystem extends IteratingSystem {
         buttonComponentTmp = buttonMapper.get(entity);
 
         if (clickableMapper.get(entity).clicked && buttonComponentTmp.holdable)
-            Messages.alert(buttonComponentTmp.onClickEvent, buttonComponentTmp.familyToAlert);
+            Messages.alert(buttonComponentTmp.onClickEvent);
 
         if (renderableMapper.has(entity) && texRegionMapper.has(entity) && renderableMapper.get(entity).center) {
             posTmp.set(transformMapper.get(entity).pos);

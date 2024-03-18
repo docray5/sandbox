@@ -117,11 +117,10 @@ public class AnimationBuilder {
         return this;
     }
 
-    public AnimationBuilder setEventAlertsOnFinish(Entity entityToAlert, Event eventOnFinish, Family familyToAlert) {
+    public AnimationBuilder setEventAlertsOnFinish(Entity entityToAlert, Event eventOnFinish) {
         if (!creating) return null;
         animationComponent.entityToAlert = entityToAlert;
         animationComponent.eventOnFinish = eventOnFinish;
-        animationComponent.familyToAlert = familyToAlert;
         return this;
     }
 }

@@ -23,4 +23,11 @@ public class Core {
     public static float yGutOffset = 0;
 
     public static final float[] sandColor = { -33, 0.285f, 0.965f };
+
+    // =================== KEYS ===================
+    public static boolean selErasePressed = false;
+    public static boolean selSandPressed = false;
+    public static boolean selWaterPressed = false;
+    public static boolean selWoodPressed = false;
+    public static boolean shiftBlurPressed = false;
 }

@@ -73,7 +73,7 @@ public class AnimationSystem extends IteratingSystem {
                         break;
                 }
                 // Animation finished
-                Messages.alert(tmpAnimation.entityToAlert, tmpAnimation.eventOnFinish, tmpAnimation.familyToAlert, entity);
+                Messages.alert(tmpAnimation.entityToAlert, tmpAnimation.eventOnFinish, entity);
             }
         }
 

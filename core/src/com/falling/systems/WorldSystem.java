@@ -10,13 +10,14 @@ import com.falling.components.ParticleComponent;
 import com.falling.components.PixmapComponent;
 import com.falling.components.TextureRegionComponent;
 import com.falling.components.ParticleComponent.ParticleType;
-import com.falling.components.ParticleComponent.MatterType;
+import com.falling.events.Message;
 import com.falling.events.MessageProcessor;
 import com.falling.factories.Director;
 
-import static com.falling.utils.Families.worldFamily;
 import static com.falling.utils.Mappers.*;
 import static com.falling.Core.*;
+import static com.falling.components.ParticleComponent.ParticleType.*;
+import static com.falling.components.ParticleComponent.MatterType.*;
 
 public class WorldSystem extends EntitySystem {
     private Entity[][] world;
@@ -59,19 +60,20 @@ public class WorldSystem extends EntitySystem {
         update = true;
 
         // Move to spawner system
-        typeToSpawn = ParticleType.SAND;
-        processor = new MessageProcessor(worldFamily) {
-            public void processMessage(com.falling.events.Message message) {
+        typeToSpawn = SAND;
+        processor = new MessageProcessor() {
+            @Override
+            public void processMessage(Message message) {
                 switch (message.getEvent()) {
                     case SPAWN_PARTICLE:
                         drawCircleAtMouse(11);
                         update = true;
                         break;
-                    case SEL_SAND:
-                        typeToSpawn = ParticleType.SAND;
-                        break;
-                    case SEL_WATER:
-                        typeToSpawn = ParticleType.WATER;
+                    case KEY_DOWN:
+                        if (selSandPressed) typeToSpawn = SAND;
+                        else if (selWaterPressed) typeToSpawn = WATER;
+                        else if (selWoodPressed) typeToSpawn = WOOD;
+                        else if (selErasePressed) typeToSpawn = null;
                         break;
 					default:
 						break;
@@ -144,12 +146,12 @@ public class WorldSystem extends EntitySystem {
         xTargetTmp = xTmp + dx;
         yTargetTmp = yTmp + dy;
 
-        if (particleComponent.matterType == MatterType.SOLID) {
+        if (particleComponent.matterType == SOLID) {
             if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
                     world[yTargetTmp][xTargetTmp] != null &&
-                    particleMapper.get(world[yTargetTmp][xTargetTmp]).matterType == MatterType.SOLID)
+                    particleMapper.get(world[yTargetTmp][xTargetTmp]).matterType == SOLID)
                 return false;
-        } else if (particleComponent.matterType == MatterType.FLUID) {
+        } else if (particleComponent.matterType == FLUID) {
             if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
                     world[yTargetTmp][xTargetTmp] != null)
                 return false;
@@ -178,7 +180,7 @@ public class WorldSystem extends EntitySystem {
             for (int j = 0; j < size; j++) {
                 if (MathUtils.random() < 0.8f) continue;
                 if (posY+i < 0 || posY+i > worldSH-1 || posX+j < 0 || posX+j > worldSW-1) continue;
-                world[posY + i][posX + j] = spawn();
+                world[posY + i][posX + j] = spawn(posX-i, posY-j);
             }
         }
     }
@@ -203,15 +205,20 @@ public class WorldSystem extends EntitySystem {
 
                 if ((x-a) * (x-a) + (y-b) * (y-b) > r*r) continue; 
                 if (y-r < 0 || y-r > worldSH-1 || x-r < 0 || x-r > worldSW-1) continue;
-                if (world[y-r][x-r] != null) continue;
-                world[y-r][x-r] = spawn();
+                if (world[y-r][x-r] != null && typeToSpawn != null) continue;
+                world[y-r][x-r] = spawn(x-r, y-r);
             }
         }
     }
 
-    public Entity spawn() {
-        if (typeToSpawn == ParticleType.SAND) return Director.instance.createSand();
-        if (typeToSpawn == ParticleType.WATER) return Director.instance.createWater();
+    public Entity spawn(int px, int py) {
+        if (typeToSpawn == SAND) return Director.instance.createSand();
+        else if (typeToSpawn == WATER) return Director.instance.createWater();
+        else if (typeToSpawn == WOOD) return Director.instance.createWood();
+        else if (typeToSpawn == null) {
+            if (world[py][px] != null) getEngine().removeEntity(world[py][px]);
+            return null;
+        }
 
         return Director.instance.createSand();
     }

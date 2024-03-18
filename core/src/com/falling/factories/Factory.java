@@ -240,11 +240,10 @@ public class Factory {
         return this;
     }
 
-    public Factory addButton(Event onClickEvent, Family familyToAlert, ButtonComponent.AnimationType onMouse, ButtonComponent.AnimationType onTouch, boolean holdable) {
+    public Factory addButton(Event onClickEvent, ButtonComponent.AnimationType onMouse, ButtonComponent.AnimationType onTouch, boolean holdable) {
         if (!creating) return null;
         buttonComponent = engine.createComponent(ButtonComponent.class);
         buttonComponent.onClickEvent = onClickEvent;
-        buttonComponent.familyToAlert = familyToAlert;
         buttonComponent.onMouse = onMouse;
         buttonComponent.onTouch = onTouch;
         buttonComponent.holdable = holdable;

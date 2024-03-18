@@ -47,7 +47,7 @@ public class Director {
         .addTransform(0, 0)
                 .addClickable(0, 0, worldWidth, worldHeight)
                 .addResize(ResizeComponent.STICK_TYPE.LEFT_BOTTOM)
-                .addButton(Event.SPAWN_PARTICLE, worldFamily, null, null, true)
+                .addButton(Event.SPAWN_PARTICLE, null, null, true)
                 .addType(TypeComponent.Type.FULLSCREEN_CLICK)
                 .endEntity();
     }
@@ -108,6 +108,12 @@ public class Director {
     public Entity createWater() {
             return factory.createEntity()
                 .addParticle(Color.rgba8888(Color.SKY), ParticleType.WATER, MatterType.FLUID)
+                .endEntity();
+    }
+
+    public Entity createWood() {
+            return factory.createEntity()
+                .addParticle(Color.rgba8888(Color.BROWN), ParticleType.WOOD, MatterType.SOLID)
                 .endEntity();
     }
 }

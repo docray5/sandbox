@@ -7,12 +7,12 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.falling.components.ClickableComponent;
-import com.falling.events.Event;
 import com.falling.events.Messages;
 
 import static com.falling.Core.*;
 import static com.falling.utils.Families.*;
 import static com.falling.utils.Mappers.*;
+import static com.falling.events.Event.*;
 
 public class InputSystem extends IteratingSystem implements InputProcessor {
     private final Vector2 tempMousePos;
@@ -34,7 +34,7 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
         for (int i = 0; i < getEntities().size(); i++) {
             tempClickableComponent = clickableMapper.get(getEntities().get(i));
             if (tempClickableComponent.clickable && tempClickableComponent.hitBox.contains(tempMousePos)) {
-                Messages.alert(getEntities().get(i),Event.TOUCH_DOWN, buttonFamily, null);
+                Messages.alert(getEntities().get(i), TOUCH_DOWN, null);
             }
         }
 
@@ -45,9 +45,9 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         for (int i = 0; i < getEntities().size(); i++) {
             if (clickableMapper.get(getEntities().get(i)).clicked) {
-                Messages.alert(getEntities().get(i), Event.TOUCH_UP, buttonFamily, null);
+                Messages.alert(getEntities().get(i), TOUCH_UP, null);
                 if (tempClickableComponent.hitBox.contains(tempMousePos)) {
-                    Messages.alert(getEntities().get(i), Event.CLICKED, buttonFamily, null);
+                    Messages.alert(getEntities().get(i), CLICKED, null);
                 }
             }
         }
@@ -64,10 +64,10 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
         for (int i = 0; i < getEntities().size(); i++) {
             tempClickableComponent = clickableMapper.get(getEntities().get(i));
             if (tempClickableComponent.clickable && tempClickableComponent.hitBox.contains(tempMousePos)) {
-                Messages.alert(getEntities().get(i), Event.MOUSE_EXIT, buttonFamily, null);
+                Messages.alert(getEntities().get(i), MOUSE_EXIT, null);
                 tempClickableComponent.hovered = true;
             } else if (tempClickableComponent.hovered) {
-                Messages.alert(getEntities().get(i), Event.MOUSE_EXIT, buttonFamily, null);
+                Messages.alert(getEntities().get(i), MOUSE_EXIT, null);
                 tempClickableComponent.hovered = false;
             }
         }
@@ -97,12 +97,18 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.S) {
-            Messages.alert(Event.SEL_SAND, worldFamily);
-        } else if (keycode == Input.Keys.W) {
-            Messages.alert(Event.SEL_WATER, worldFamily);
+        Messages.alert(KEY_DOWN);
+
+        if (keycode == Input.Keys.NUM_0) {
+            selErasePressed = true;
+        } else if (keycode == Input.Keys.NUM_1) {
+            selSandPressed = true;
+        } else if (keycode == Input.Keys.NUM_2) {
+            selWaterPressed = true;
+        } else if (keycode == Input.Keys.NUM_3) {
+            selWoodPressed = true;
         } else if (keycode == Input.Keys.SPACE) {
-            Messages.alert(Event.SHIFT_BLUR, renderableFamily);
+            shiftBlurPressed = true;
         }
 
         return true;
@@ -110,7 +116,21 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
-        return false;
+        Messages.alert(KEY_UP);
+
+        if (keycode == Input.Keys.NUM_0) {
+            selErasePressed = false;
+        } else if (keycode == Input.Keys.NUM_1) {
+            selSandPressed = false;
+        } else if (keycode == Input.Keys.NUM_2) {
+            selWaterPressed = false;
+        } else if (keycode == Input.Keys.NUM_3) {
+            selWoodPressed = false;
+        } else if (keycode == Input.Keys.SPACE) {
+            shiftBlurPressed = false;
+        }
+
+        return true;
     }
 
     @Override

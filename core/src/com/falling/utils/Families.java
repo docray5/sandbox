@@ -1,7 +1,6 @@
 package com.falling.utils;
 
 import com.badlogic.ashley.core.Family;
-import com.badlogic.gdx.utils.Array;
 import com.falling.components.*;
 
 public class Families {
@@ -16,8 +15,6 @@ public class Families {
     public static Family uiTranslateFamily;
     public static Family worldFamily;
 
-    public static Array<Family> families;
-
     public static void init() {
         renderableFamily = Family.all(TransformComponent.class, RenderableComponent.class).one(TextureRegionComponent.class, TextComponent.class).get();
         inputFamily = Family.all(ClickableComponent.class).get();
@@ -29,12 +26,5 @@ public class Families {
         pauseFamily = Family.all(PauseComponent.class).get();
         uiTranslateFamily = Family.all(UITranslateComponent.class).get();
         worldFamily = Family.all().get();
-
-        families = new Array<>();
-        families.addAll(
-                renderableFamily, animationFamily, buttonFamily,
-                textFamily, cursorFamily, pauseFamily,
-                resizeFamily, inputFamily, uiTranslateFamily, worldFamily
-        );
     }
 }
