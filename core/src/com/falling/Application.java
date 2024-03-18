@@ -40,6 +40,8 @@ public class Application implements ApplicationListener  {
         engine.addSystem(new ResizeableSystem(7));
         engine.addSystem(renderSystem);
         engine.addSystem(new PauseSystem(10));
+
+        Director.instance.createTitle();
 	}
 
 	@Override
@@ -64,7 +66,7 @@ public class Application implements ApplicationListener  {
 
         Director.instance.createSpawnArea();
 
-        Director.instance.createTitle();
+        Director.instance.createStartText();
     }
 
     @Override

@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.falling.components.ParticleComponent;
 import com.falling.components.PixmapComponent;
 import com.falling.components.TextureRegionComponent;
@@ -148,6 +147,8 @@ public class WorldSystem extends EntitySystem {
 
     public void updateWater() {
         if (tryMove(0, -1)) return;
+        if (tryMove(-1, -1)) return;
+        if (tryMove(1, -1)) return;
         if (tryMove(1, 0)) return;
         if (tryMove(-1, 0)) return;
     }

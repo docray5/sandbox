@@ -54,16 +54,13 @@ public class Director {
 
     public void createStartText() {
         factory.createEntity()
-                .addTransform(worldWidth/2f, 60)
+                .addTransform(worldWidth/2f, 100)
                 .addRenderable()
                     .setPriority(4)
                     .setCenter(true)
+                    .setColor(new Color(1, 1, 1, 0.2f))
                 .endComponent()
-                .addTextureRegion("start")
-                .addAnimation()
-                .setPos(worldWidth/2f, 60)
-                .setRounding(10)
-                .endComponent()
+                .addText("1-3 - sand, water, wood\ne - eraser\nz,x,c - brushes")
                 .endEntity();
     }
 
