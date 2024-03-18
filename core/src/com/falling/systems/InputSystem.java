@@ -99,7 +99,7 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
     public boolean keyDown(int keycode) {
         Messages.alert(KEY_DOWN);
 
-        if (keycode == Input.Keys.NUM_0) {
+        if (keycode == Input.Keys.E) {
             selErasePressed = true;
         } else if (keycode == Input.Keys.NUM_1) {
             selSandPressed = true;
@@ -109,6 +109,12 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
             selWoodPressed = true;
         } else if (keycode == Input.Keys.SPACE) {
             shiftBlurPressed = true;
+        } else if (keycode == Input.Keys.C) {
+            circleBrushPressed = true;
+        } else if (keycode == Input.Keys.X) {
+            squareBrushPressed = true;
+        } else if (keycode == Input.Keys.Z) {
+            pixelBrushPressed = true;
         }
 
         return true;
@@ -128,6 +134,12 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
             selWoodPressed = false;
         } else if (keycode == Input.Keys.SPACE) {
             shiftBlurPressed = false;
+        } else if (keycode == Input.Keys.C) {
+            circleBrushPressed = false;
+        } else if (keycode == Input.Keys.X) {
+            squareBrushPressed = false;
+        } else if (keycode == Input.Keys.Z) {
+            pixelBrushPressed = false;
         }
 
         return true;

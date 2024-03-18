@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.falling.components.ParticleComponent;
 import com.falling.components.PixmapComponent;
 import com.falling.components.TextureRegionComponent;
@@ -26,6 +27,8 @@ public class WorldSystem extends EntitySystem {
     private int xOffsetI;
     private int yOffsetI;
     private boolean update;
+    private int lastMX;
+    private int lastMY;
 
     private final TextureRegionComponent textureRegionComponent;
     private final PixmapComponent pixmapComponent;
@@ -38,6 +41,8 @@ public class WorldSystem extends EntitySystem {
     private boolean columnDir;
 
     private ParticleType typeToSpawn;
+    private BrushType brushType;
+    private boolean spawnParticle;
     private final MessageProcessor processor;
 
     public WorldSystem(int priority) {
@@ -61,19 +66,27 @@ public class WorldSystem extends EntitySystem {
 
         // Move to spawner system
         typeToSpawn = SAND;
+        brushType = BrushType.CIRCLE;
         processor = new MessageProcessor() {
             @Override
             public void processMessage(Message message) {
                 switch (message.getEvent()) {
-                    case SPAWN_PARTICLE:
-                        drawCircleAtMouse(11);
-                        update = true;
+                    case SPAWN_PARTICLE_DOWN:
+                        lastMX = (int) (mousePos.x + lrGutter);
+                        lastMY = (int) (mousePos.y + tbGutter);
+                        spawnParticle = true;
+                        break;
+                    case SPAWN_PARTICLE_UP:
+                        spawnParticle = false;
                         break;
                     case KEY_DOWN:
                         if (selSandPressed) typeToSpawn = SAND;
                         else if (selWaterPressed) typeToSpawn = WATER;
                         else if (selWoodPressed) typeToSpawn = WOOD;
                         else if (selErasePressed) typeToSpawn = null;
+                        else if (circleBrushPressed) brushType = BrushType.CIRCLE;
+                        else if (squareBrushPressed) brushType = BrushType.SQUARE;
+                        else if (pixelBrushPressed) brushType = BrushType.PIXEL;
                         break;
 					default:
 						break;
@@ -85,6 +98,11 @@ public class WorldSystem extends EntitySystem {
     @Override
     public void update(float deltaTime) {
         processor.update();
+
+        if (spawnParticle) {
+            draw();
+            update = true;
+        }
 
         if (!update) return;
         update = false;
@@ -130,8 +148,6 @@ public class WorldSystem extends EntitySystem {
 
     public void updateWater() {
         if (tryMove(0, -1)) return;
-        if (tryMove(-1, -1)) return;
-        if (tryMove(1, -1)) return;
         if (tryMove(1, 0)) return;
         if (tryMove(-1, 0)) return;
     }
@@ -172,23 +188,79 @@ public class WorldSystem extends EntitySystem {
         pixmapComponent.texture.dispose();
     }
 
-    public void drawSquareAtMouse(int size) {
-        int posX = (int) mousePos.x - size/2;
-        int posY = (int) mousePos.y - size/2;
+    public void draw() {
+        int posX = (int) (mousePos.x + lrGutter);
+        int posY = (int) (mousePos.y + tbGutter);
+    
+        if (posX == lastMX && posY == lastMY) {
+            brush(posX, posY);
+            return;
+        }
+
+        int xDiff = posX - lastMX;
+        int yDiff = posY - lastMY;
+        boolean xDiffIsLarger = Math.abs(xDiff) > Math.abs(yDiff);
+
+        int xModifier = xDiff < 0 ? 1 : -1;
+        int yModifier = yDiff < 0 ? 1 : -1;
+
+        int longerSideLength = Math.max(Math.abs(xDiff), Math.abs(yDiff));
+        int shorterSideLength = Math.min(Math.abs(xDiff), Math.abs(yDiff));
+        float slope = (shorterSideLength == 0 || longerSideLength == 0) ? 0 : ((float) (shorterSideLength) / (longerSideLength));
+
+        int shorterSideIncrease, currentY, currentX, yIncrease, xIncrease;
+        for (int i = 1; i <= longerSideLength; i++) {
+            shorterSideIncrease = Math.round(i * slope);
+            if (xDiffIsLarger) {
+                xIncrease = i;
+                yIncrease = shorterSideIncrease;
+            } else {
+                yIncrease = i;
+                xIncrease = shorterSideIncrease;
+            }
+            currentY = posY + (yIncrease * yModifier);
+            currentX = posX + (xIncrease * xModifier);
+
+            brush(currentX, currentY);
+        }
+
+        lastMX = posX;
+        lastMY = posY;
+    }
+
+    public void brush(int posX, int posY) {
+        boolean randomize = true;
+        
+        if (typeToSpawn == null || typeToSpawn == WOOD) randomize = false;
+
+        switch (brushType) {
+            case CIRCLE:
+                drawCircleAtPos(posX, posY, 11, randomize);
+                break;
+            case PIXEL:
+                drawPixel(posX, posY);
+                break;
+            case SQUARE:
+                drawSquareAtPos(posX, posY, 11, randomize);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void drawSquareAtPos(int posX, int posY, int size, boolean randomize) {
+        posX -= size/2;
+        posY -= size/2;
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if (MathUtils.random() < 0.8f) continue;
-                if (posY+i < 0 || posY+i > worldSH-1 || posX+j < 0 || posX+j > worldSW-1) continue;
-                world[posY + i][posX + j] = spawn(posX-i, posY-j);
+                if (randomize && MathUtils.random() < 0.8f) continue;
+                drawPixel(posX+j, posY+i);
             }
         }
     }
 
-    public void drawCircleAtMouse(int size) {
-        int posX = (int) ( mousePos.x + lrGutter );
-        int posY = (int) ( mousePos.y + tbGutter );
-
+    public void drawCircleAtPos(int posX, int posY, int size, boolean randomize) {
         int r = size/2;
         int a = posX+r;
         int b = posY+r;
@@ -198,29 +270,32 @@ public class WorldSystem extends EntitySystem {
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if (MathUtils.random() < 0.8f) continue;
+                if (randomize && MathUtils.random() < 0.8f) continue;
 
                 x = posX+i;
                 y = posY+j;
 
-                if ((x-a) * (x-a) + (y-b) * (y-b) > r*r) continue; 
-                if (y-r < 0 || y-r > worldSH-1 || x-r < 0 || x-r > worldSW-1) continue;
-                if (world[y-r][x-r] != null && typeToSpawn != null) continue;
-                world[y-r][x-r] = spawn(x-r, y-r);
+                if ((x-a) * (x-a) + (y-b) * (y-b) > r*r) continue;
+                x-=r;
+                y-=r;
+                drawPixel(x, y);
             }
         }
     }
 
-    public Entity spawn(int px, int py) {
-        if (typeToSpawn == SAND) return Director.instance.createSand();
-        else if (typeToSpawn == WATER) return Director.instance.createWater();
-        else if (typeToSpawn == WOOD) return Director.instance.createWood();
-        else if (typeToSpawn == null) {
-            if (world[py][px] != null) getEngine().removeEntity(world[py][px]);
-            return null;
+    public void drawPixel(int x, int y) {
+        if (isOutsideBounds(x, y)) return;
+        if (typeToSpawn == null) {
+            if (world[y][x] != null) getEngine().removeEntity(world[y][x]);
+            world[y][x] = null;
+            return;
         }
+        if (world[y][x] != null) return;
+        world[y][x] = Director.instance.createElement(typeToSpawn);
+    }
 
-        return Director.instance.createSand();
+    public boolean isOutsideBounds(int x, int y) {
+        return y < 0 || y > worldSH-1 || x < 0 || x > worldSW-1;
     }
 
     public void resize() {
@@ -253,5 +328,9 @@ public class WorldSystem extends EntitySystem {
         }
 
         world = newWorld;
+    }
+
+    private enum BrushType {
+        CIRCLE, SQUARE, PIXEL
     }
 }

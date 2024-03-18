@@ -30,4 +30,7 @@ public class Core {
     public static boolean selWaterPressed = false;
     public static boolean selWoodPressed = false;
     public static boolean shiftBlurPressed = false;
+    public static boolean circleBrushPressed = false;
+    public static boolean squareBrushPressed = false;
+    public static boolean pixelBrushPressed = false;
 }

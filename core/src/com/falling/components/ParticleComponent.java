@@ -10,6 +10,9 @@ public class ParticleComponent implements Component, Poolable {
 
 	@Override
 	public void reset() {
+        colorBits = 0;
+        particleType = null;
+        matterType = null;
 	}
 
     public enum ParticleType {

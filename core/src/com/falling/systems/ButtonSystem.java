@@ -5,7 +5,6 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.falling.components.ButtonComponent;
-import com.falling.components.ClickableComponent;
 import com.falling.components.TypeComponent;
 import com.falling.events.Event;
 import com.falling.events.Message;
@@ -29,11 +28,12 @@ public class ButtonSystem extends IteratingSystem {
                 buttonComponentTmp = buttonMapper.get(message.getEntityToAlert());
                 switch (message.getEvent()) {
                     case CLICKED:
-                        if (buttonComponentTmp.holdable) break;
                         Messages.alert(buttonComponentTmp.onClickEvent);
                         break;
                     case TOUCH_DOWN:
                         clickableMapper.get(message.getEntityToAlert()).clicked = true;
+
+                        Messages.alert(buttonComponentTmp.onTouchDownEvent);
 
                         // =========== Animation ===========
                         if (typeMapper.has(message.getEntityToAlert()) &&
@@ -53,6 +53,8 @@ public class ButtonSystem extends IteratingSystem {
                         break;
                     case TOUCH_UP:
                         clickableMapper.get(message.getEntityToAlert()).clicked = false;
+                        
+                        Messages.alert(buttonComponentTmp.onTouchUpEvent);
 
                         // =========== Animation ===========
                         if (buttonComponentTmp.onTouch == null) break;
@@ -113,11 +115,6 @@ public class ButtonSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        buttonComponentTmp = buttonMapper.get(entity);
-
-        if (clickableMapper.get(entity).clicked && buttonComponentTmp.holdable)
-            Messages.alert(buttonComponentTmp.onClickEvent);
-
         if (renderableMapper.has(entity) && texRegionMapper.has(entity) && renderableMapper.get(entity).center) {
             posTmp.set(transformMapper.get(entity).pos);
             posTmp.x -= texRegionMapper.get(entity).textureRegion.getRegionWidth()/2f;

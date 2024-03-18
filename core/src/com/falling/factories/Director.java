@@ -11,8 +11,8 @@ import com.falling.components.ResizeComponent.STICK_TYPE;
 import com.falling.events.Event;
 
 import static com.falling.components.ParticleComponent.*;
-import static com.falling.utils.Families.worldFamily;
 import static com.falling.Core.*;
+import static com.falling.components.ParticleComponent.ParticleType.*;
 
 public class Director {
     public static Director instance;
@@ -47,7 +47,7 @@ public class Director {
         .addTransform(0, 0)
                 .addClickable(0, 0, worldWidth, worldHeight)
                 .addResize(ResizeComponent.STICK_TYPE.LEFT_BOTTOM)
-                .addButton(Event.SPAWN_PARTICLE, null, null, true)
+                .addButton(null, Event.SPAWN_PARTICLE_DOWN, Event.SPAWN_PARTICLE_UP, null, null)
                 .addType(TypeComponent.Type.FULLSCREEN_CLICK)
                 .endEntity();
     }
@@ -77,6 +77,14 @@ public class Director {
                 .addResize(STICK_TYPE.LEFT_BOTTOM)
                 .addPixmap()
                 .endEntity();
+    }
+
+    public Entity createElement(ParticleType type) {
+         if (type == SAND) return createSand();
+        else if (type == WATER) return createWater();
+        else if (type == WOOD) return createWood();
+
+        return createSand();
     }
 
     public Entity createSand() {
