@@ -10,9 +10,9 @@ import com.falling.components.TypeComponent;
 import com.falling.components.ResizeComponent.STICK_TYPE;
 import com.falling.events.Event;
 
-import static com.falling.components.ParticleComponent.*;
+import static com.falling.components.ElementComponent.*;
 import static com.falling.Core.*;
-import static com.falling.components.ParticleComponent.ParticleType.*;
+import static com.falling.components.ElementComponent.ElementType.*;
 
 public class Director {
     public static Director instance;
@@ -47,7 +47,7 @@ public class Director {
         .addTransform(0, 0)
                 .addClickable(0, 0, worldWidth, worldHeight)
                 .addResize(ResizeComponent.STICK_TYPE.LEFT_BOTTOM)
-                .addButton(null, Event.SPAWN_PARTICLE_DOWN, Event.SPAWN_PARTICLE_UP, null, null)
+                .addButton(null, Event.SPAWN_ELEMENT_DOWN, Event.SPAWN_ELEMENT_UP, null, null)
                 .addType(TypeComponent.Type.FULLSCREEN_CLICK)
                 .endEntity();
     }
@@ -76,7 +76,7 @@ public class Director {
                 .endEntity();
     }
 
-    public Entity createElement(ParticleType type) {
+    public Entity createElement(ElementType type) {
          if (type == SAND) return createSand();
         else if (type == WATER) return createWater();
         else if (type == WOOD) return createWood();
@@ -106,19 +106,19 @@ public class Director {
         }
 
         return factory.createEntity()
-            .addParticle(Color.rgba8888(colorTmp), ParticleType.SAND, MatterType.SOLID)
+            .addElement(Color.rgba8888(colorTmp), ElementType.SAND, MatterType.SOLID)
             .endEntity();
     }
 
     public Entity createWater() {
             return factory.createEntity()
-                .addParticle(Color.rgba8888(Color.SKY), ParticleType.WATER, MatterType.FLUID)
+                .addElement(Color.rgba8888(Color.SKY), ElementType.WATER, MatterType.FLUID)
                 .endEntity();
     }
 
     public Entity createWood() {
             return factory.createEntity()
-                .addParticle(Color.rgba8888(Color.BROWN), ParticleType.WOOD, MatterType.SOLID)
+                .addElement(Color.rgba8888(Color.BROWN), ElementType.WOOD, MatterType.SOLID)
                 .endEntity();
     }
 }

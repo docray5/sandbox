@@ -6,18 +6,18 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
-import com.falling.components.ParticleComponent;
+import com.falling.components.ElementComponent;
 import com.falling.components.PixmapComponent;
 import com.falling.components.TextureRegionComponent;
-import com.falling.components.ParticleComponent.ParticleType;
+import com.falling.components.ElementComponent.ElementType;
 import com.falling.events.Message;
 import com.falling.events.MessageProcessor;
 import com.falling.factories.Director;
 
 import static com.falling.utils.Mappers.*;
 import static com.falling.Core.*;
-import static com.falling.components.ParticleComponent.ParticleType.*;
-import static com.falling.components.ParticleComponent.MatterType.*;
+import static com.falling.components.ElementComponent.ElementType.*;
+import static com.falling.components.ElementComponent.MatterType.*;
 
 public class WorldSystem extends EntitySystem {
     private Entity[][] world;
@@ -32,16 +32,16 @@ public class WorldSystem extends EntitySystem {
     private final TextureRegionComponent textureRegionComponent;
     private final PixmapComponent pixmapComponent;
     private Entity entityTmp;
-    private ParticleComponent particleComponent;
+    private ElementComponent elementComponent;
     private int xTmp;
     private int yTmp;
     private int xTargetTmp;
     private int yTargetTmp;
     private boolean columnDir;
 
-    private ParticleType typeToSpawn;
+    private ElementType typeToSpawn;
     private BrushType brushType;
-    private boolean spawnParticle;
+    private boolean spawnElement;
     private final MessageProcessor processor;
 
     public WorldSystem(int priority) {
@@ -70,13 +70,13 @@ public class WorldSystem extends EntitySystem {
             @Override
             public void processMessage(Message message) {
                 switch (message.getEvent()) {
-                    case SPAWN_PARTICLE_DOWN:
+                    case SPAWN_ELEMENT_DOWN:
                         lastMX = (int) (mousePos.x + lrGutter);
                         lastMY = (int) (mousePos.y + tbGutter);
-                        spawnParticle = true;
+                        spawnElement = true;
                         break;
-                    case SPAWN_PARTICLE_UP:
-                        spawnParticle = false;
+                    case SPAWN_ELEMENT_UP:
+                        spawnElement = false;
                         break;
                     case KEY_DOWN:
                         if (selSandPressed) typeToSpawn = SAND;
@@ -98,7 +98,7 @@ public class WorldSystem extends EntitySystem {
     public void update(float deltaTime) {
         processor.update();
 
-        if (spawnParticle) {
+        if (spawnElement) {
             draw();
             update = true;
         }
@@ -115,9 +115,9 @@ public class WorldSystem extends EntitySystem {
                 if (world[iy][xTmp] == null) continue;
                 yTmp = iy;
                 entityTmp = world[yTmp][xTmp];
-                particleComponent = particleMapper.get(entityTmp);
+                elementComponent = elementMapper.get(entityTmp);
 
-                switch (particleComponent.particleType) {
+                switch (elementComponent.elementType) {
                     case SAND:
                         updateSand();
                         break;
@@ -136,7 +136,7 @@ public class WorldSystem extends EntitySystem {
         for (int iy = 0; iy < worldSH; iy++) {
             for (int ix = 0; ix < worldSW; ix++) {
                 if (world[iy][ix] == null) continue;
-                pixmapComponent.pixmap.drawPixel(ix, iy, particleMapper.get(world[iy][ix]).colorBits);
+                pixmapComponent.pixmap.drawPixel(ix, iy, elementMapper.get(world[iy][ix]).colorBits);
             }
         }
 
@@ -163,12 +163,12 @@ public class WorldSystem extends EntitySystem {
         xTargetTmp = xTmp + dx;
         yTargetTmp = yTmp + dy;
 
-        if (particleComponent.matterType == SOLID) {
+        if (elementComponent.matterType == SOLID) {
             if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
                     world[yTargetTmp][xTargetTmp] != null &&
-                    particleMapper.get(world[yTargetTmp][xTargetTmp]).matterType == SOLID)
+                    elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == SOLID)
                 return false;
-        } else if (particleComponent.matterType == FLUID) {
+        } else if (elementComponent.matterType == FLUID) {
             if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
                     world[yTargetTmp][xTargetTmp] != null)
                 return false;

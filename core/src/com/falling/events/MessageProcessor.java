@@ -18,5 +18,5 @@ public class MessageProcessor {
      * return true when processed the messange, it is going to be removed for performance
      */
     public void processMessage(Message message) { }
-    // TODO make it return boolean so when message is processed it is going to get removed.
+    // TODO make it return boolean so when message is processed it is going to get removed. Nah we cant really do it
 }

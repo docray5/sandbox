@@ -16,7 +16,7 @@ public class Mappers {
     public static ComponentMapper<ResizeComponent> resizeMapper;
     public static ComponentMapper<TypeComponent> typeMapper;
     public static ComponentMapper<PauseComponent> pauseMapper;
-    public static ComponentMapper<ParticleComponent> particleMapper;
+    public static ComponentMapper<ElementComponent> elementMapper;
     public static ComponentMapper<UITranslateComponent> uiTranslateMapper;
 
     public static void init() {
@@ -31,7 +31,7 @@ public class Mappers {
         resizeMapper = ComponentMapper.getFor(ResizeComponent.class);
         typeMapper = ComponentMapper.getFor(TypeComponent.class);
         pauseMapper = ComponentMapper.getFor(PauseComponent.class);
-        particleMapper = ComponentMapper.getFor(ParticleComponent.class);
+        elementMapper = ComponentMapper.getFor(ElementComponent.class);
         buttonMapper = ComponentMapper.getFor(ButtonComponent.class);
         uiTranslateMapper = ComponentMapper.getFor(UITranslateComponent.class);
     }

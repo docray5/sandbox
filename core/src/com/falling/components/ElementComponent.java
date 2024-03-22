@@ -3,19 +3,19 @@ package com.falling.components;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Pool.Poolable;
 
-public class ParticleComponent implements Component, Poolable {
+public class ElementComponent implements Component, Poolable {
     public int colorBits = 0;
-    public ParticleType particleType = null;
+    public ElementType elementType = null;
     public MatterType matterType = null;
 
 	@Override
 	public void reset() {
         colorBits = 0;
-        particleType = null;
+        elementType = null;
         matterType = null;
 	}
 
-    public enum ParticleType {
+    public enum ElementType {
         SAND, WATER, WOOD
     }
 
