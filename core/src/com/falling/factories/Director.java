@@ -5,10 +5,10 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.falling.assets.Assets;
+import com.falling.commands.Commands;
 import com.falling.components.ResizeComponent;
 import com.falling.components.TypeComponent;
 import com.falling.components.ResizeComponent.STICK_TYPE;
-import com.falling.events.Event;
 
 import static com.falling.components.ElementComponent.*;
 import static com.falling.Core.*;
@@ -47,7 +47,7 @@ public class Director {
         .addTransform(0, 0)
                 .addClickable(0, 0, worldWidth, worldHeight)
                 .addResize(ResizeComponent.STICK_TYPE.LEFT_BOTTOM)
-                .addButton(null, Event.SPAWN_ELEMENT_DOWN, Event.SPAWN_ELEMENT_UP, null, null)
+                .addButton(null, Commands.instance.spawnElementDown, Commands.instance.spawnElementUp, null, null)
                 .addType(TypeComponent.Type.FULLSCREEN_CLICK)
                 .endEntity();
     }

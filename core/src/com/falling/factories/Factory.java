@@ -1,14 +1,12 @@
 package com.falling.factories;
 
-import static com.falling.utils.Mappers.buttonMapper;
-
 import com.badlogic.ashley.core.*;
 import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
+import com.falling.commands.Command;
 import com.falling.components.*;
 import com.falling.components.ElementComponent.ElementType;
 import com.falling.components.ElementComponent.MatterType;
-import com.falling.events.Event;
 import com.falling.factories.builders.AnimationBuilder;
 import com.falling.factories.builders.RenderableBuilder;
 
@@ -242,14 +240,14 @@ public class Factory {
         return this;
     }
 
-    public Factory addButton(Event onClickEvent, Event onTouchDownEvent, Event onTouchUpEvent, ButtonComponent.AnimationType onMouse, ButtonComponent.AnimationType onTouch) {
+    public Factory addButton(Command onClickCommand, Command onTouchDownCommand, Command onTouchUpCommand, ButtonComponent.AnimationType onMouse, ButtonComponent.AnimationType onTouch) {
         if (!creating) return null;
         buttonComponent = engine.createComponent(ButtonComponent.class);
-        buttonComponent.onClickEvent = onClickEvent;
-        buttonComponent.onTouchDownEvent = onTouchDownEvent;
-        buttonComponent.onTouchUpEvent = onTouchUpEvent;
-        buttonComponent.onMouse = onMouse;
-        buttonComponent.onTouch = onTouch;
+        buttonComponent.onClickCommand = onClickCommand;
+        buttonComponent.onTouchDownCommand = onTouchDownCommand;
+        buttonComponent.onTouchUpCommand = onTouchUpCommand;
+        buttonComponent.onMouseAnim = onMouse;
+        buttonComponent.onTouchAnim = onTouch;
 
         entity.add(buttonComponent);
         return this;

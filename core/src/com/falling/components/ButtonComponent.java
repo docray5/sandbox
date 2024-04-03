@@ -3,23 +3,23 @@ package com.falling.components;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Pool;
-import com.falling.events.Event;
+import com.falling.commands.Command;
 
 public class ButtonComponent implements Component, Pool.Poolable {
-    public Event onTouchUpEvent = null;
-    public Event onTouchDownEvent = null;
-    public Event onClickEvent = null;
-    public AnimationType onMouse = null;
-    public AnimationType onTouch = null;
+    public Command onTouchUpCommand = null;
+    public Command onTouchDownCommand = null;
+    public Command onClickCommand = null;
+    public AnimationType onMouseAnim = null;
+    public AnimationType onTouchAnim = null;
     public Texture normalTexture = null;
     public Texture clickedTexture = null;
 
     @Override
     public void reset() {
-        onTouchUpEvent = null;
-        onTouchDownEvent = null;
-        onClickEvent = null;
-        onMouse = null;
+        onTouchUpCommand = null;
+        onTouchDownCommand = null;
+        onClickCommand = null;
+        onMouseAnim = null;
         normalTexture = null;
         clickedTexture = null;
     }

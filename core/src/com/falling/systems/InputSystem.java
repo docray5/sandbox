@@ -1,56 +1,46 @@
 package com.falling.systems;
 
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.falling.components.ClickableComponent;
-import com.falling.events.Messages;
+import com.falling.commands.*;
 
 import static com.falling.Core.*;
-import static com.falling.utils.Families.*;
-import static com.falling.utils.Mappers.*;
-import static com.falling.events.Event.*;
+import static com.falling.components.ElementComponent.ElementType.*;
+import static com.falling.systems.WorldSystem.BrushType.*;
 
-public class InputSystem extends IteratingSystem implements InputProcessor {
+public class InputSystem implements InputProcessor {
     private final Vector2 tempMousePos;
     private final Viewport viewport;
+    private final Commands commands;
 
-    private ClickableComponent tempClickableComponent;
-
-    public InputSystem(Viewport viewport, int priority) {
-        super(inputFamily, priority);
+    public InputSystem(Viewport viewport, Engine engine) {
         tempMousePos = new Vector2();
         this.viewport = viewport;
+
+        commands = Commands.instance;
     }
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         tempMousePos.set(screenX, screenY);
         viewport.unproject(tempMousePos);
+        mousePos.set(tempMousePos);
 
-        for (int i = 0; i < getEntities().size(); i++) {
-            tempClickableComponent = clickableMapper.get(getEntities().get(i));
-            if (tempClickableComponent.clickable && tempClickableComponent.hitBox.contains(tempMousePos)) {
-                Messages.alert(getEntities().get(i), TOUCH_DOWN, null);
-            }
-        }
+        commands.touchDown.execute();
 
         return true;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        for (int i = 0; i < getEntities().size(); i++) {
-            if (clickableMapper.get(getEntities().get(i)).clicked) {
-                Messages.alert(getEntities().get(i), TOUCH_UP, null);
-                if (tempClickableComponent.hitBox.contains(tempMousePos)) {
-                    Messages.alert(getEntities().get(i), CLICKED, null);
-                }
-            }
-        }
+        tempMousePos.set(screenX, screenY);
+        viewport.unproject(tempMousePos);
+        mousePos.set(tempMousePos);
+
+        commands.touchUp.execute();
 
         return true;
     }
@@ -61,16 +51,7 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
         viewport.unproject(tempMousePos);
         mousePos.set(tempMousePos);
 
-        for (int i = 0; i < getEntities().size(); i++) {
-            tempClickableComponent = clickableMapper.get(getEntities().get(i));
-            if (tempClickableComponent.clickable && tempClickableComponent.hitBox.contains(tempMousePos)) {
-                Messages.alert(getEntities().get(i), MOUSE_EXIT, null);
-                tempClickableComponent.hovered = true;
-            } else if (tempClickableComponent.hovered) {
-                Messages.alert(getEntities().get(i), MOUSE_EXIT, null);
-                tempClickableComponent.hovered = false;
-            }
-        }
+        commands.mouseMoved.execute();
 
         return true;
     }
@@ -97,49 +78,38 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        Messages.alert(KEY_DOWN);
-
-        if (keycode == Input.Keys.E) {
-            selErasePressed = true;
-        } else if (keycode == Input.Keys.NUM_1) {
-            selSandPressed = true;
-        } else if (keycode == Input.Keys.NUM_2) {
-            selWaterPressed = true;
-        } else if (keycode == Input.Keys.NUM_3) {
-            selWoodPressed = true;
-        } else if (keycode == Input.Keys.SPACE) {
-            shiftBlurPressed = true;
-        } else if (keycode == Input.Keys.C) {
-            circleBrushPressed = true;
-        } else if (keycode == Input.Keys.X) {
-            squareBrushPressed = true;
-        } else if (keycode == Input.Keys.Z) {
-            pixelBrushPressed = true;
-        }
-
         return true;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        Messages.alert(KEY_UP);
-
-        if (keycode == Input.Keys.NUM_0) {
-            selErasePressed = false;
-        } else if (keycode == Input.Keys.NUM_1) {
-            selSandPressed = false;
-        } else if (keycode == Input.Keys.NUM_2) {
-            selWaterPressed = false;
-        } else if (keycode == Input.Keys.NUM_3) {
-            selWoodPressed = false;
-        } else if (keycode == Input.Keys.SPACE) {
-            shiftBlurPressed = false;
-        } else if (keycode == Input.Keys.C) {
-            circleBrushPressed = false;
-        } else if (keycode == Input.Keys.X) {
-            squareBrushPressed = false;
-        } else if (keycode == Input.Keys.Z) {
-            pixelBrushPressed = false;
+        switch (keycode) {
+            case Input.Keys.E:
+                commands.selectElement.setElementType(null).execute();
+                break;
+            case Input.Keys.NUM_1:
+                commands.selectElement.setElementType(SAND).execute();
+                break;
+            case Input.Keys.NUM_2:
+                commands.selectElement.setElementType(WATER).execute();
+                break;
+            case Input.Keys.NUM_3:
+                commands.selectElement.setElementType(WOOD).execute();
+                break;
+            case Input.Keys.C:
+                commands.selectBrush.setBrushType(CIRCLE).execute();
+                break;
+            case Input.Keys.X:
+                commands.selectBrush.setBrushType(SQUARE).execute();
+                break;
+            case Input.Keys.Z:
+                commands.selectBrush.setBrushType(PIXEL).execute();
+                break;
+            case Input.Keys.SPACE:
+                commands.shiftBlur.execute();
+                break;
+            default:
+                break;
         }
 
         return true;
@@ -148,10 +118,5 @@ public class InputSystem extends IteratingSystem implements InputProcessor {
     @Override
     public boolean keyTyped(char character) {
         return false;
-    }
-
-    @Override
-    protected void processEntity(Entity entity, float deltaTime) {
-
     }
 }

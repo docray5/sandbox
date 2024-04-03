@@ -9,16 +9,14 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
-import com.falling.Application;
+import com.falling.commands.Commands;
 
 public class Assets {
     private final AssetManager manager;
     private final Array<MyAssetDescriptor> assets;
     private boolean finished = false;
-    private final Application application;
 
-    public Assets(Application a) {
-        application = a;
+    public Assets() {
         manager = new AssetManager();
         manager.setLoader(TextureRegion[].class, new RegionArrLoader(new InternalFileHandleResolver()));
         manager.setLoader(ShaderLoader.Shader.class, new ShaderLoader(new InternalFileHandleResolver()));
@@ -65,7 +63,7 @@ public class Assets {
     public void update() {
         if (manager.update()) {
             loadPrefabs();
-            application.startGame();
+            Commands.instance.startGame.execute();
             finished = true;
         }
     }

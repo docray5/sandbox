@@ -1,13 +1,11 @@
 package com.falling.factories.builders;
 
 import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.falling.commands.Command;
 import com.falling.components.AnimationComponent;
-import com.falling.events.Event;
 import com.falling.factories.Factory;
 
 public class AnimationBuilder {
@@ -117,10 +115,9 @@ public class AnimationBuilder {
         return this;
     }
 
-    public AnimationBuilder setEventAlertsOnFinish(Entity entityToAlert, Event eventOnFinish) {
+    public AnimationBuilder setCommandOnFinish(Command command) {
         if (!creating) return null;
-        animationComponent.entityToAlert = entityToAlert;
-        animationComponent.eventOnFinish = eventOnFinish;
+        animationComponent.commandOnFinish = command;
         return this;
     }
 }

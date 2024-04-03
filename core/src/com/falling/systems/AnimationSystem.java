@@ -3,7 +3,6 @@ package com.falling.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.falling.components.AnimationComponent;
-import com.falling.events.Messages;
 
 import static com.falling.utils.Families.animationFamily;
 import static com.falling.utils.Mappers.*;
@@ -73,7 +72,8 @@ public class AnimationSystem extends IteratingSystem {
                         break;
                 }
                 // Animation finished
-                Messages.alert(tmpAnimation.entityToAlert, tmpAnimation.eventOnFinish, entity);
+                if (tmpAnimation.commandOnFinish != null)
+                    tmpAnimation.commandOnFinish.execute();
             }
         }
 

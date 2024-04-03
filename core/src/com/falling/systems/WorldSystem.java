@@ -10,8 +10,6 @@ import com.falling.components.ElementComponent;
 import com.falling.components.PixmapComponent;
 import com.falling.components.TextureRegionComponent;
 import com.falling.components.ElementComponent.ElementType;
-import com.falling.events.Message;
-import com.falling.events.MessageProcessor;
 import com.falling.factories.Director;
 
 import static com.falling.utils.Mappers.*;
@@ -42,7 +40,6 @@ public class WorldSystem extends EntitySystem {
     private ElementType typeToSpawn;
     private BrushType brushType;
     private boolean spawnElement;
-    private final MessageProcessor processor;
 
     public WorldSystem(int priority) {
 		super(priority);
@@ -66,38 +63,10 @@ public class WorldSystem extends EntitySystem {
         // Move to spawner system
         typeToSpawn = SAND;
         brushType = BrushType.CIRCLE;
-        processor = new MessageProcessor() {
-            @Override
-            public void processMessage(Message message) {
-                switch (message.getEvent()) {
-                    case SPAWN_ELEMENT_DOWN:
-                        lastMX = (int) (mousePos.x + lrGutter);
-                        lastMY = (int) (mousePos.y + tbGutter);
-                        spawnElement = true;
-                        break;
-                    case SPAWN_ELEMENT_UP:
-                        spawnElement = false;
-                        break;
-                    case KEY_DOWN:
-                        if (selSandPressed) typeToSpawn = SAND;
-                        else if (selWaterPressed) typeToSpawn = WATER;
-                        else if (selWoodPressed) typeToSpawn = WOOD;
-                        else if (selErasePressed) typeToSpawn = null;
-                        else if (circleBrushPressed) brushType = BrushType.CIRCLE;
-                        else if (squareBrushPressed) brushType = BrushType.SQUARE;
-                        else if (pixelBrushPressed) brushType = BrushType.PIXEL;
-                        break;
-					default:
-						break;
-                }
-            };
-        };
     }
 
     @Override
     public void update(float deltaTime) {
-        processor.update();
-
         if (spawnElement) {
             draw();
             update = true;
@@ -331,7 +300,25 @@ public class WorldSystem extends EntitySystem {
         world = newWorld;
     }
 
-    private enum BrushType {
+    public void spawnElementDown() {
+        lastMX = (int) (mousePos.x + lrGutter);
+        lastMY = (int) (mousePos.y + tbGutter);
+        spawnElement = true;
+    }
+
+    public void spawnElementUp() {
+        spawnElement = false;
+    }
+
+    public void selectElement(ElementType type) {
+        typeToSpawn = type;
+    }
+
+    public void selectBrush(BrushType type) {
+        brushType = type;
+    }
+
+    public enum BrushType {
         CIRCLE, SQUARE, PIXEL
     }
 }

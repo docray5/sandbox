@@ -3,18 +3,12 @@ package com.falling.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
-import com.falling.events.Event;
-import com.falling.events.Message;
-import com.falling.events.MessageProcessor;
 
-import static com.falling.events.Event.CLOSE_MENU;
-import static com.falling.events.Event.OPEN_MENU;
 import static com.falling.utils.Families.uiTranslateFamily;
 import static com.falling.utils.Mappers.animationMapper;
 import static com.falling.utils.Mappers.uiTranslateMapper;
 
 public class UITranslateSystem extends IteratingSystem {
-    private final MessageProcessor processor;
     private Entity entity;
 
     /**
@@ -22,40 +16,39 @@ public class UITranslateSystem extends IteratingSystem {
      */
     public UITranslateSystem(int priority) {
         super(uiTranslateFamily, priority);
-
-        processor = new MessageProcessor() {
-            @Override
-            public void processMessage(Message message) {
-                if (message.getEvent() != OPEN_MENU || message.getEvent() != CLOSE_MENU || message.getEvent() != Event.PREP_MENU) return;
-                for (int i = 0; i < UITranslateSystem.super.getEntities().size(); i++) {
-                    entity = UITranslateSystem.super.getEntities().get(i);
-                    switch (message.getEvent()) {
-                        case OPEN_MENU:
-                            animationMapper.get(entity).target.set(uiTranslateMapper.get(entity).openPos);
-                            animationMapper.get(entity).isAnimating = true;
-                            break;
-                        case CLOSE_MENU:
-                            animationMapper.get(entity).target.set(uiTranslateMapper.get(entity).closePos);
-                            animationMapper.get(entity).isAnimating = true;
-                            break;
-                        case PREP_MENU:
-                            animationMapper.get(entity).target.set(new Vector2(uiTranslateMapper.get(entity).openPos).sub(0, 4));
-                            animationMapper.get(entity).isAnimating = true;
-						default:
-							break;
-                    }
-                }
-            }
-        };
     }
 
     @Override
     public void update(float deltaTime) {
-        processor.update();
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
 
+    }
+
+    public void openMenu() {
+        for (int i = 0; i < super.getEntities().size(); i++) {
+            entity = super.getEntities().get(i);
+            animationMapper.get(entity).target.set(uiTranslateMapper.get(entity).openPos);
+            animationMapper.get(entity).isAnimating = true;
+        }
+    }
+
+    public void closeMenu() {
+        for (int i = 0; i < super.getEntities().size(); i++) {
+            entity = super.getEntities().get(i);
+            animationMapper.get(entity).target.set(uiTranslateMapper.get(entity).closePos);
+            animationMapper.get(entity).isAnimating = true;
+
+        }
+    }
+
+    public void prepMenu() {
+        for (int i = 0; i < super.getEntities().size(); i++) {
+            entity = super.getEntities().get(i);
+            animationMapper.get(entity).target.set(new Vector2(uiTranslateMapper.get(entity).openPos).sub(0, 4));
+            animationMapper.get(entity).isAnimating = true;
+        }
     }
 }

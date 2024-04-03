@@ -14,13 +14,11 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.falling.assets.Assets;
 import com.falling.components.*;
-import com.falling.events.*;
 import com.falling.utils.PriorityComparator;
 import com.falling.vfx.Blur;
 
 import static com.badlogic.gdx.Gdx.gl;
 import static com.falling.Core.*;
-import static com.falling.events.Event.*;
 import static com.falling.utils.Families.renderableFamily;
 import static com.falling.utils.Mappers.*;
 
@@ -43,7 +41,6 @@ public class RenderSystem extends SortedIteratingSystem {
     private RenderableComponent renderableTmp;
     private float widthTmp;
     private float heightTmp;
-    private final MessageProcessor processor;
     private float drawX;
     private float drawY;
 
@@ -67,23 +64,10 @@ public class RenderSystem extends SortedIteratingSystem {
 
         oldWorldWidth = worldWidth;
         oldWorldHeight = worldHeight;
-
-        processor = new MessageProcessor() {
-            @Override
-            public void processMessage(Message message) {
-                if (message.getEvent() == KEY_DOWN) {
-                    if (shiftBlurPressed) Messages.alert(SHIFT_BLUR);
-                }
-                if (message.getEvent() == SHIFT_BLUR) {
-                    blur.shift();
-                }
-            }
-        };
     }
 
     @Override
     public void update(float deltaTime) {
-        processor.update();
         super.update(deltaTime);
 
         camera.position.set(cameraPos);
@@ -210,5 +194,9 @@ public class RenderSystem extends SortedIteratingSystem {
     /**USED ONLY ONCE*/
     public Viewport getViewport() {
         return viewport;
+    }
+
+    public void shiftBlur() {
+        blur.shift();
     }
 }
