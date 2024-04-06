@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.falling.assets.Assets;
+import com.falling.commands.Commands;
 import com.falling.components.*;
 import com.falling.utils.PriorityComparator;
 import com.falling.vfx.Blur;
@@ -137,8 +138,7 @@ public class RenderSystem extends SortedIteratingSystem {
 
         if (blur != null) blur.resize();
 
-        if (getEngine().getSystem(WorldSystem.class) != null) getEngine().getSystem(WorldSystem.class).resize();
-        if (getEngine().getSystem(ResizeableSystem.class) != null) getEngine().getSystem(ResizeableSystem.class).resize();
+        Commands.instance.resize.execute();
     }
 
     private void renderQueue(Array<Entity> queue) {

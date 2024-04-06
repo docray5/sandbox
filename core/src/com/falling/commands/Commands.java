@@ -22,6 +22,7 @@ public class Commands {
     public SpawnElementUp spawnElementUp;
     public SelectElement selectElement;
     public SelectBrush selectBrush;
+    public Resize resize;
 
     /** inits core commands for loading screen */
     public Commands(Engine engine, Application application) {
@@ -41,5 +42,6 @@ public class Commands {
         spawnElementUp = new SpawnElementUp(engine);
         selectElement = new SelectElement(engine);
         selectBrush = new SelectBrush(engine);
+        resize = new Resize(engine);
     }
 }

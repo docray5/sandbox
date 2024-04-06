@@ -274,7 +274,6 @@ public class WorldSystem extends EntitySystem {
         xOffsetI = (int) xGutOffset;
         yOffsetI = (int) yGutOffset;
 
-
         pixmapComponent.pixmap.dispose();
         pixmapComponent.texture.dispose();
         pixmapComponent.pixmap = null;
@@ -287,7 +286,7 @@ public class WorldSystem extends EntitySystem {
         update = true;
     }
 
-    public void resizeWorld() {
+    private void resizeWorld() {
         Entity[][] newWorld = new Entity[worldSH][worldSW];
 
         for (int iy = 0; iy < world.length; iy++) {
