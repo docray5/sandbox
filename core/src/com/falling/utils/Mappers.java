@@ -15,7 +15,6 @@ public class Mappers {
     public static ComponentMapper<PixmapComponent> pixmapMapper;
     public static ComponentMapper<ResizeComponent> resizeMapper;
     public static ComponentMapper<TypeComponent> typeMapper;
-    public static ComponentMapper<PauseComponent> pauseMapper;
     public static ComponentMapper<ElementComponent> elementMapper;
     public static ComponentMapper<UITranslateComponent> uiTranslateMapper;
 
@@ -30,7 +29,6 @@ public class Mappers {
         pixmapMapper = ComponentMapper.getFor(PixmapComponent.class);
         resizeMapper = ComponentMapper.getFor(ResizeComponent.class);
         typeMapper = ComponentMapper.getFor(TypeComponent.class);
-        pauseMapper = ComponentMapper.getFor(PauseComponent.class);
         elementMapper = ComponentMapper.getFor(ElementComponent.class);
         buttonMapper = ComponentMapper.getFor(ButtonComponent.class);
         uiTranslateMapper = ComponentMapper.getFor(UITranslateComponent.class);

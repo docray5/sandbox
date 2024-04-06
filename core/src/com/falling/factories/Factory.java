@@ -17,7 +17,6 @@ public class Factory {
     private Entity entity;
     private final AnimationBuilder animationBuilder;
     private CursorComponent cursorComponent;
-    private PauseComponent pauseComponent;
     private final RenderableBuilder renderableBuilder;
     private ResizeComponent resizeComponent;
     private TextComponent textComponent;
@@ -73,15 +72,6 @@ public class Factory {
         cursorComponent = engine.createComponent(CursorComponent.class);
 
         entity.add(cursorComponent);
-        return this;
-    }
-
-    public Factory addPause(Class<?extends EntitySystem> system) {
-        if (!creating) return null;
-        pauseComponent = engine.createComponent(PauseComponent.class);
-        pauseComponent.system = system;
-
-        entity.add(pauseComponent);
         return this;
     }
 

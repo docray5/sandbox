@@ -1,7 +1,7 @@
 package com.falling.systems;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Vector2;
 import com.falling.components.ResizeComponent;
@@ -10,20 +10,19 @@ import static com.falling.Core.*;
 import static com.falling.utils.Families.resizeFamily;
 import static com.falling.utils.Mappers.*;
 
-public class ResizeableSystem extends EntitySystem {
-    // TODO Make it a fucking Iterating system bruv, will improve performance of resize.
-
+public class ResizeableSystem extends IteratingSystem {
     private Entity entity;
     private ImmutableArray<Entity> entitiesTmp;
     private ResizeComponent resizeTmp;
     private Vector2 posTmp;
 
     public ResizeableSystem(int priority) {
-        super(priority);
+        super(resizeFamily, priority);
+        setProcessing(false);
     }
 
     public void resize() {
-        entitiesTmp = getEngine().getEntitiesFor(resizeFamily);
+        entitiesTmp = getEntities();
         for (int i = 0; i < entitiesTmp.size(); i++) {
             entity = entitiesTmp.get(i);
             resizeTmp = resizeMapper.get(entity);
@@ -78,7 +77,8 @@ public class ResizeableSystem extends EntitySystem {
     }
 
     @Override
-    public void update(float deltaTime) {
+    public void update(float deltaTime) { }
 
-    }
+	@Override
+	protected void processEntity(Entity entity, float deltaTime) { }
 }
