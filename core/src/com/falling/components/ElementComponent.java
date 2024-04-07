@@ -7,12 +7,18 @@ public class ElementComponent implements Component, Poolable {
     public int colorBits = 0;
     public ElementType elementType = null;
     public MatterType matterType = null;
+    public float maxSpeed = 8;
+    public float acceleration = 0.4f; // like a gravity multiplied by mass
+    public float velocity = 0;
 
 	@Override
 	public void reset() {
         colorBits = 0;
         elementType = null;
         matterType = null;
+        maxSpeed = 8;
+        acceleration = 0.4f;
+        velocity = 0;
 	}
 
     public enum ElementType {
@@ -20,6 +26,6 @@ public class ElementComponent implements Component, Poolable {
     }
 
     public enum MatterType {
-        SOLID, GAS, FLUID
+        SOLID, GAS, FLUID, POWDER
     }
 }

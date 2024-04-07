@@ -23,6 +23,7 @@ public class Commands {
     public SelectElement selectElement;
     public SelectBrush selectBrush;
     public Resize resize;
+    public PauseWorld pauseWorld;
 
     /** inits core commands for loading screen */
     public Commands(Engine engine, Application application) {
@@ -43,5 +44,6 @@ public class Commands {
         selectElement = new SelectElement(engine);
         selectBrush = new SelectBrush(engine);
         resize = new Resize(engine);
+        pauseWorld = new PauseWorld(engine);
     }
 }

@@ -49,7 +49,7 @@ public class ButtonSystem extends IteratingSystem {
                 buttonComponentTmp.onTouchDownCommand.execute();
 
                 // =========== Animation ===========
-                if (buttonComponentTmp.onTouchAnim == null) break;
+                if (buttonComponentTmp.onTouchAnim == null) continue;
                 switch (buttonComponentTmp.onTouchAnim) {
                     case TEXTURE:
                         texRegionMapper.get(entityTmp).textureRegion.setTexture(buttonComponentTmp.clickedTexture);
@@ -99,7 +99,7 @@ public class ButtonSystem extends IteratingSystem {
             entityTmp = getEntities().get(i);
             clickableComponentTmp = clickableMapper.get(entityTmp);
 
-            if (!clickableComponentTmp.clickable) return;
+            if (!clickableComponentTmp.clickable) continue;
 
             if (clickableComponentTmp.hitBox.contains(mousePos)) {
                 // mouse enter

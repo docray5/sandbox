@@ -36,6 +36,13 @@ public class WorldSystem extends EntitySystem {
     private int xTargetTmp;
     private int yTargetTmp;
     private boolean columnDir;
+    private int updateCount;
+    private boolean moved;
+
+    private float velocityTmp;
+    private float modTmp;
+    private int flooredTmp;
+    private float absTmp;
 
     private ElementType typeToSpawn;
     private BrushType brushType;
@@ -86,6 +93,10 @@ public class WorldSystem extends EntitySystem {
                 entityTmp = world[yTmp][xTmp];
                 elementComponent = elementMapper.get(entityTmp);
 
+                if (elementComponent.matterType == SOLID) continue;
+
+                updateVelocity();
+
                 switch (elementComponent.elementType) {
                     case SAND:
                         updateSand();
@@ -115,27 +126,41 @@ public class WorldSystem extends EntitySystem {
     }
 
     public void updateWater() {
-        if (tryMove(0, -1)) return;
+        if (tryMoveDown()) return;
         if (tryMove(-1, -1)) return;
         if (tryMove(1, -1)) return;
+        elementComponent.velocity = 0;
         if (tryMove(1, 0)) return;
         if (tryMove(-1, 0)) return;
     }
 
     public void updateSand() {
-        if (tryMove(0, -1)) return;
+        if (tryMoveDown()) return;
         if (tryMove(-1, -1)) return;
         if (tryMove(1, -1)) return;
+        elementComponent.velocity = 0;
+    }
+
+    public boolean tryMoveDown() {
+        moved = false;
+        updateCount = getUpdateCount();
+        for (int i = 0; i < updateCount; i++) {
+            if (!tryMove(0, -1)) break;
+            yTmp--;
+            moved = true;
+        }
+        return moved;
     }
 
     public boolean tryMove(int dx, int dy) {
         xTargetTmp = xTmp + dx;
         yTargetTmp = yTmp + dy;
 
-        if (elementComponent.matterType == SOLID) {
+        if (elementComponent.matterType == POWDER) {
             if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
                     world[yTargetTmp][xTargetTmp] != null &&
-                    elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == SOLID)
+                    (elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == POWDER ||
+                    elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == SOLID))
                 return false;
         } else if (elementComponent.matterType == FLUID) {
             if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
@@ -151,6 +176,22 @@ public class WorldSystem extends EntitySystem {
         updateBlur = true;
 
         return true;
+    }
+
+    public int getUpdateCount() {
+        absTmp = Math.abs(elementComponent.velocity);
+        flooredTmp = MathUtils.floor(absTmp);
+        modTmp = absTmp - flooredTmp;
+        return flooredTmp + (MathUtils.random() < modTmp ? 1 : 0);
+    }
+
+    public void updateVelocity() {
+        velocityTmp = elementComponent.velocity + elementComponent.acceleration;
+
+        if (Math.abs(velocityTmp) > elementComponent.maxSpeed) 
+            velocityTmp = Math.signum(velocityTmp) * elementComponent.maxSpeed;
+
+        elementComponent.velocity = velocityTmp;
     }
 
     public void dispose() {
@@ -199,13 +240,13 @@ public class WorldSystem extends EntitySystem {
     }
 
     public void brush(int posX, int posY) {
-        boolean randomize = true;
+        boolean randomize = false;
         
         if (typeToSpawn == null || typeToSpawn == WOOD) randomize = false;
 
         switch (brushType) {
             case CIRCLE:
-                drawCircleAtPos(posX, posY, 11, randomize);
+                drawCircleAtPos(posX, posY, 3, randomize);
                 break;
             case PIXEL:
                 drawPixel(posX, posY);
@@ -315,6 +356,10 @@ public class WorldSystem extends EntitySystem {
 
     public void selectBrush(BrushType type) {
         brushType = type;
+    }
+
+    public void pause() {
+        setProcessing(!checkProcessing());
     }
 
     public enum BrushType {

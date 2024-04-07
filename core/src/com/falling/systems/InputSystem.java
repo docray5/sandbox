@@ -105,9 +105,11 @@ public class InputSystem implements InputProcessor {
             case Input.Keys.Z:
                 commands.selectBrush.setBrushType(PIXEL).execute();
                 break;
-            case Input.Keys.SPACE:
+            case Input.Keys.B:
                 commands.shiftBlur.execute();
                 break;
+            case Input.Keys.SPACE:
+                commands.pauseWorld.execute();
             default:
                 break;
         }
