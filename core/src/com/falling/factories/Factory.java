@@ -200,7 +200,7 @@ public class Factory {
         return this;
     }
 
-    public Factory addElement(int colorBits, ElementType elementType, MatterType matterType, float maxSpeed, float accel) {
+    public Factory addElement(int colorBits, ElementType elementType, MatterType matterType, float maxSpeed, float accel, int spread) {
         if (!creating) return null;
         elementComponent = engine.createComponent(ElementComponent.class);
         elementComponent.colorBits = colorBits;
@@ -208,6 +208,7 @@ public class Factory {
         elementComponent.matterType = matterType;
         elementComponent.maxSpeed = maxSpeed;
         elementComponent.acceleration = accel;
+        elementComponent.spread = spread;
 
         entity.add(elementComponent);
         return this;

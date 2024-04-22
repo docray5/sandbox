@@ -130,8 +130,8 @@ public class WorldSystem extends EntitySystem {
         if (tryMove(-1, -1)) return;
         if (tryMove(1, -1)) return;
         elementComponent.velocity = 0;
-        if (tryMove(1, 0)) return;
-        if (tryMove(-1, 0)) return;
+        if (trySpreadRight()) return;
+        if (trySpreadLeft()) return;
     }
 
     public void updateSand() {
@@ -152,6 +152,28 @@ public class WorldSystem extends EntitySystem {
         return moved;
     }
 
+    public boolean trySpreadRight() {
+        moved = false;
+        updateCount = elementComponent.spread - MathUtils.random(2);
+        for (int i = 0; i < updateCount; i++) {
+            if (!tryMove(1, 0)) break;
+            xTmp++;
+            moved = true;
+        }
+        return moved;
+    }
+
+    public boolean trySpreadLeft() {
+        moved = false;
+        updateCount = elementComponent.spread - MathUtils.random(2);
+        for (int i = 0; i < updateCount; i++) {
+            if (!tryMove(-1, 0)) break;
+            xTmp--;
+            moved = true;
+        }
+        return moved;
+    }
+
     public boolean tryMove(int dx, int dy) {
         xTargetTmp = xTmp + dx;
         yTargetTmp = yTmp + dy;
@@ -166,7 +188,6 @@ public class WorldSystem extends EntitySystem {
             if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
                     world[yTargetTmp][xTargetTmp] != null)
                 return false;
-
         }
 
         world[yTmp][xTmp] = world[yTargetTmp][xTargetTmp];

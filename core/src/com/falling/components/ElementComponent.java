@@ -10,6 +10,7 @@ public class ElementComponent implements Component, Poolable {
     public float maxSpeed = 8;
     public float acceleration = 0.4f; // like a gravity multiplied by mass
     public float velocity = 0;
+    public int spread = 0;
 
 	@Override
 	public void reset() {
@@ -19,6 +20,7 @@ public class ElementComponent implements Component, Poolable {
         maxSpeed = 8;
         acceleration = 0.4f;
         velocity = 0;
+        spread = 0;
 	}
 
     public enum ElementType {

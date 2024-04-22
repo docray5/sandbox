@@ -106,19 +106,19 @@ public class Director {
         }
 
         return factory.createEntity()
-            .addElement(Color.rgba8888(colorTmp), ElementType.SAND, MatterType.POWDER, 8, 0.2f)
+            .addElement(Color.rgba8888(colorTmp), ElementType.SAND, MatterType.POWDER, 8, 0.2f, 0)
             .endEntity();
     }
 
     public Entity createWater() {
             return factory.createEntity()
-                .addElement(Color.rgba8888(Color.SKY), ElementType.WATER, MatterType.FLUID, 8, 0.2f)
+                .addElement(Color.rgba8888(Color.SKY), ElementType.WATER, MatterType.FLUID, 8, 0.2f, 5)
                 .endEntity();
     }
 
     public Entity createWood() {
             return factory.createEntity()
-                .addElement(Color.rgba8888(Color.BROWN), ElementType.WOOD, MatterType.SOLID, 0, 0)
+                .addElement(Color.rgba8888(Color.BROWN), ElementType.WOOD, MatterType.SOLID, 0, 0, 0)
                 .endEntity();
     }
 }
