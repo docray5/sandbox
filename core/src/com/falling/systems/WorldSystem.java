@@ -126,35 +126,78 @@ public class WorldSystem extends EntitySystem {
     }
 
     public void updateWater() {
-        if (tryMoveDown()) return;
-        if (tryMove(-1, -1)) return;
-        if (tryMove(1, -1)) return;
-        elementComponent.velocity = 0;
-        if (trySpreadRight()) return;
-        if (trySpreadLeft()) return;
+        tryMoveDownWater();
     }
 
     public void updateSand() {
-        if (tryMoveDown()) return;
-        if (tryMove(-1, -1)) return;
-        if (tryMove(1, -1)) return;
-        elementComponent.velocity = 0;
+        tryMoveDown();
     }
 
     public boolean tryMoveDown() {
         moved = false;
         updateCount = getUpdateCount();
         for (int i = 0; i < updateCount; i++) {
-            if (!tryMove(0, -1)) break;
-            yTmp--;
-            moved = true;
+            if (tryMove(0, -1)) {
+                yTmp--;
+                moved = true;
+                continue;
+            }
+            if (tryMove(-1, -1)) {
+                xTmp--;
+                yTmp--;
+                moved = true;
+                continue;
+            }
+            if (tryMove(1, -1)) {
+                xTmp++;
+                yTmp--;
+                moved = true;
+                continue;
+            }
+            elementComponent.velocity = 0; // when no movement, no velocity
+            break;
+        }
+        return moved;
+    }
+
+    public boolean tryMoveDownWater() {
+        moved = false;
+        updateCount = getUpdateCount();
+        for (int i = 0; i < updateCount; i++) {
+            if (tryMove(0, -1)) {
+                yTmp--;
+                moved = true;
+                continue;
+            }
+            if (tryMove(-1, -1)) {
+                xTmp--;
+                yTmp--;
+                moved = true;
+                continue;
+            }
+            if (tryMove(1, -1)) {
+                xTmp++;
+                yTmp--;
+                moved = true;
+                continue;
+            }
+            if (trySpreadLeft()) {
+                moved = true;
+                continue;
+            }
+            if (trySpreadRight()) {
+                moved = true;
+                continue;
+            }
+            elementComponent.velocity = 0; // when no movement, no velocity
+            break;
         }
         return moved;
     }
 
     public boolean trySpreadRight() {
         moved = false;
-        updateCount = elementComponent.spread - MathUtils.random(2);
+        updateCount = elementComponent.spread - MathUtils.random(4);
         for (int i = 0; i < updateCount; i++) {
             if (!tryMove(1, 0)) break;
             xTmp++;
