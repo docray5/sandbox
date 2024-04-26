@@ -24,6 +24,7 @@ public class WorldSystem extends EntitySystem {
     private int xOffsetI;
     private int yOffsetI;
     private boolean update;
+    private boolean pause;
     private int lastMX;
     private int lastMY;
 
@@ -76,13 +77,25 @@ public class WorldSystem extends EntitySystem {
     public void update(float deltaTime) {
         if (spawnElement) {
             draw();
-            update = true;
+            if (!pause) update = true;
+            updateBlur = true;
         }
 
+        if (pause) {
+            render();
+            return;
+        }
         if (!update) return;
         update = false;
 
         // === Update ===
+        updateWorld();
+
+        // === Draw ===
+        render();
+    }
+
+    private void updateWorld() {
         for (int iy = 0; iy < worldSH; iy++) {
             columnDir = MathUtils.randomBoolean();
             for (int ix = worldSW-1; ix >= 0; ix--) {
@@ -107,9 +120,9 @@ public class WorldSystem extends EntitySystem {
                 }
             }
         }
+    }
 
-        // === Draw ===
-        
+    private void render() {
         pixmapComponent.pixmap.setColor(Color.CLEAR);
         pixmapComponent.pixmap.fill();
         
@@ -125,7 +138,7 @@ public class WorldSystem extends EntitySystem {
         textureRegionComponent.textureRegion.flip(false, true);
     }
 
-    public void updateWater() {
+    private void updateWater() {
         updateCount = getUpdateCount();
         for (int i = 0; i < updateCount; i++) {
             if (moveFluid(0, -1)) continue;
@@ -138,7 +151,7 @@ public class WorldSystem extends EntitySystem {
         }
     }
 
-    public boolean trySpread(int dx) {
+    private boolean trySpread(int dx) {
         moved = false;
         updateCount = elementComponent.spread - MathUtils.random(2);
         for (int i = 0; i < updateCount; i++) {
@@ -149,7 +162,7 @@ public class WorldSystem extends EntitySystem {
     }
 
 
-    public boolean moveFluid(int dx, int dy) {
+    private boolean moveFluid(int dx, int dy) {
         xTargetTmp = xTmp + dx;
         yTargetTmp = yTmp + dy;
 
@@ -162,7 +175,7 @@ public class WorldSystem extends EntitySystem {
         return true;
     }
 
-    public void updateSand() {
+    private void updateSand() {
         updateCount = getUpdateCount();
         for (int i = 0; i < updateCount; i++) {
             if (movePowder(0, -1)) continue;
@@ -173,7 +186,7 @@ public class WorldSystem extends EntitySystem {
         }
     }
 
-    public boolean movePowder(int dx, int dy) {
+    private boolean movePowder(int dx, int dy) {
         xTargetTmp = xTmp + dx;
         yTargetTmp = yTmp + dy;
 
@@ -188,7 +201,7 @@ public class WorldSystem extends EntitySystem {
         return true;
     }
 
-    public void swap() {
+    private void swap() {
         world[yTmp][xTmp] = world[yTargetTmp][xTargetTmp];
         world[yTargetTmp][xTargetTmp] = entityTmp;
 
@@ -200,14 +213,14 @@ public class WorldSystem extends EntitySystem {
         updateBlur = true;
     }
 
-    public int getUpdateCount() {
+    private int getUpdateCount() {
         absTmp = Math.abs(elementComponent.velocity);
         flooredTmp = MathUtils.floor(absTmp);
         modTmp = absTmp - flooredTmp;
         return flooredTmp + (MathUtils.random() < modTmp ? 1 : 0);
     }
 
-    public void updateVelocity() {
+    private void updateVelocity() {
         velocityTmp = elementComponent.velocity + elementComponent.acceleration;
 
         if (Math.abs(velocityTmp) > elementComponent.maxSpeed) 
@@ -216,7 +229,7 @@ public class WorldSystem extends EntitySystem {
         elementComponent.velocity = velocityTmp;
     }
 
-    public void draw() {
+    private void draw() {
         int posX = (int) (mousePos.x + lrGutter);
         int posY = (int) (mousePos.y + tbGutter);
     
@@ -256,7 +269,7 @@ public class WorldSystem extends EntitySystem {
         lastMY = posY;
     }
 
-    public void brush(int posX, int posY) {
+    private void brush(int posX, int posY) {
         boolean randomize = false;
         
         if (typeToSpawn == null || typeToSpawn == WOOD) randomize = false;
@@ -276,7 +289,7 @@ public class WorldSystem extends EntitySystem {
         }
     }
 
-    public void drawSquareAtPos(int posX, int posY, int size, boolean randomize) {
+    private void drawSquareAtPos(int posX, int posY, int size, boolean randomize) {
         posX -= size/2;
         posY -= size/2;
 
@@ -288,7 +301,7 @@ public class WorldSystem extends EntitySystem {
         }
     }
 
-    public void drawCircleAtPos(int posX, int posY, int size, boolean randomize) {
+    private void drawCircleAtPos(int posX, int posY, int size, boolean randomize) {
         int r = size/2;
         int a = posX+r;
         int b = posY+r;
@@ -311,7 +324,7 @@ public class WorldSystem extends EntitySystem {
         }
     }
 
-    public void drawPixel(int x, int y) {
+    private void drawPixel(int x, int y) {
         if (isOutsideBounds(x, y)) return;
         if (typeToSpawn == null) {
             if (world[y][x] != null) getEngine().removeEntity(world[y][x]);
@@ -322,7 +335,7 @@ public class WorldSystem extends EntitySystem {
         world[y][x] = Director.instance.createElement(typeToSpawn);
     }
 
-    public boolean isOutsideBounds(int x, int y) {
+    private boolean isOutsideBounds(int x, int y) {
         return y < 0 || y > worldSH-1 || x < 0 || x > worldSW-1;
     }
 
@@ -381,7 +394,9 @@ public class WorldSystem extends EntitySystem {
     }
 
     public void pause() {
-        setProcessing(!checkProcessing());
+        pause = !pause;
+        if (pause) update = false;
+        else update = true;
     }
 
     public enum BrushType {
