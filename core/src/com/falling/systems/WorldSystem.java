@@ -126,120 +126,78 @@ public class WorldSystem extends EntitySystem {
     }
 
     public void updateWater() {
-        tryMoveDownWater();
-    }
-
-    public void updateSand() {
-        tryMoveDown();
-    }
-
-    public boolean tryMoveDown() {
-        moved = false;
         updateCount = getUpdateCount();
         for (int i = 0; i < updateCount; i++) {
-            if (tryMove(0, -1)) {
-                yTmp--;
-                moved = true;
-                continue;
-            }
-            if (tryMove(-1, -1)) {
-                xTmp--;
-                yTmp--;
-                moved = true;
-                continue;
-            }
-            if (tryMove(1, -1)) {
-                xTmp++;
-                yTmp--;
-                moved = true;
-                continue;
-            }
+            if (moveFluid(0, -1)) continue;
+            if (moveFluid(-1, -1)) continue;
+            if (moveFluid(1, -1)) continue;
+            if (trySpread(1)) continue;
+            if (trySpread(-1)) continue;
             elementComponent.velocity = 0; // when no movement, no velocity
             break;
         }
-        return moved;
     }
 
-    public boolean tryMoveDownWater() {
-        moved = false;
-        updateCount = getUpdateCount();
-        for (int i = 0; i < updateCount; i++) {
-            if (tryMove(0, -1)) {
-                yTmp--;
-                moved = true;
-                continue;
-            }
-            if (tryMove(-1, -1)) {
-                xTmp--;
-                yTmp--;
-                moved = true;
-                continue;
-            }
-            if (tryMove(1, -1)) {
-                xTmp++;
-                yTmp--;
-                moved = true;
-                continue;
-            }
-            if (trySpreadLeft()) {
-                moved = true;
-                continue;
-            }
-            if (trySpreadRight()) {
-                moved = true;
-                continue;
-            }
-            elementComponent.velocity = 0; // when no movement, no velocity
-            break;
-        }
-        return moved;
-    }
-
-    public boolean trySpreadRight() {
-        moved = false;
-        updateCount = elementComponent.spread - MathUtils.random(4);
-        for (int i = 0; i < updateCount; i++) {
-            if (!tryMove(1, 0)) break;
-            xTmp++;
-            moved = true;
-        }
-        return moved;
-    }
-
-    public boolean trySpreadLeft() {
+    public boolean trySpread(int dx) {
         moved = false;
         updateCount = elementComponent.spread - MathUtils.random(2);
         for (int i = 0; i < updateCount; i++) {
-            if (!tryMove(-1, 0)) break;
-            xTmp--;
+            if (!moveFluid(dx, 0)) break;
             moved = true;
         }
         return moved;
     }
 
-    public boolean tryMove(int dx, int dy) {
+
+    public boolean moveFluid(int dx, int dy) {
         xTargetTmp = xTmp + dx;
         yTargetTmp = yTmp + dy;
 
-        if (elementComponent.matterType == POWDER) {
-            if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
-                    world[yTargetTmp][xTargetTmp] != null &&
-                    (elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == POWDER ||
-                    elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == SOLID))
-                return false;
-        } else if (elementComponent.matterType == FLUID) {
-            if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
-                    world[yTargetTmp][xTargetTmp] != null)
-                return false;
-        }
+        if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
+                world[yTargetTmp][xTargetTmp] != null)
+            return false;
 
+        swap();
+
+        return true;
+    }
+
+    public void updateSand() {
+        updateCount = getUpdateCount();
+        for (int i = 0; i < updateCount; i++) {
+            if (movePowder(0, -1)) continue;
+            if (movePowder(-1, -1)) continue;
+            if (movePowder(1, -1)) continue;
+            elementComponent.velocity = 0; // when no movement, no velocity
+            break;
+        }
+    }
+
+    public boolean movePowder(int dx, int dy) {
+        xTargetTmp = xTmp + dx;
+        yTargetTmp = yTmp + dy;
+
+        if (yTargetTmp < 0 || xTargetTmp < 0 || xTargetTmp > worldSW-1 ||
+                world[yTargetTmp][xTargetTmp] != null &&
+                (elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == POWDER ||
+                elementMapper.get(world[yTargetTmp][xTargetTmp]).matterType == SOLID))
+            return false;
+
+        swap();
+
+        return true;
+    }
+
+    public void swap() {
         world[yTmp][xTmp] = world[yTargetTmp][xTargetTmp];
         world[yTargetTmp][xTargetTmp] = entityTmp;
 
+        // update positon and screen
+        yTmp = yTargetTmp;
+        xTmp = xTargetTmp;
+
         update = true;
         updateBlur = true;
-
-        return true;
     }
 
     public int getUpdateCount() {
@@ -256,11 +214,6 @@ public class WorldSystem extends EntitySystem {
             velocityTmp = Math.signum(velocityTmp) * elementComponent.maxSpeed;
 
         elementComponent.velocity = velocityTmp;
-    }
-
-    public void dispose() {
-        pixmapComponent.pixmap.dispose();
-        pixmapComponent.texture.dispose();
     }
 
     public void draw() {
@@ -402,6 +355,11 @@ public class WorldSystem extends EntitySystem {
         }
 
         world = newWorld;
+    }
+
+    public void dispose() {
+        pixmapComponent.pixmap.dispose();
+        pixmapComponent.texture.dispose();
     }
 
     public void spawnElementDown() {
