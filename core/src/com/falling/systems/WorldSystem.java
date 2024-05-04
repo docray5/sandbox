@@ -24,6 +24,7 @@ public class WorldSystem extends EntitySystem {
     private int xOffsetI;
     private int yOffsetI;
     private boolean update;
+    private boolean render;
     private boolean pause;
     private int lastMX;
     private int lastMY;
@@ -67,6 +68,7 @@ public class WorldSystem extends EntitySystem {
         textureRegionComponent = texRegionMapper.get(entity);
 
         update = true;
+        render = true;
 
         // Move to spawner system
         typeToSpawn = SAND;
@@ -81,24 +83,21 @@ public class WorldSystem extends EntitySystem {
             updateBlur = true;
         }
 
-        if (pause) {
-            render();
-            return;
-        }
-        if (!update) return;
-        update = false;
-
-        // === Update ===
         updateWorld();
 
-        // === Draw ===
         render();
+
+        if (pause) update = false;
     }
 
     private void updateWorld() {
+        if (!update) return;
+        update = false;
+
         for (int iy = 0; iy < worldSH; iy++) {
             columnDir = MathUtils.randomBoolean();
             for (int ix = worldSW-1; ix >= 0; ix--) {
+                // setup vars
                 xTmp = ix;
                 if (columnDir) xTmp = -ix + worldSW-1;
                 if (world[iy][xTmp] == null) continue;
@@ -106,23 +105,15 @@ public class WorldSystem extends EntitySystem {
                 entityTmp = world[yTmp][xTmp];
                 elementComponent = elementMapper.get(entityTmp);
 
-                if (elementComponent.matterType == SOLID) continue;
-
-                updateVelocity();
-
-                switch (elementComponent.elementType) {
-                    case SAND:
-                        updateSand();
-                        break;
-                    case WATER:
-                        updateWater();
-                        break;
-                }
+                updateElement();
             }
         }
     }
 
     private void render() {
+        if (!render) return;
+        render = false;
+
         pixmapComponent.pixmap.setColor(Color.CLEAR);
         pixmapComponent.pixmap.fill();
         
@@ -136,6 +127,21 @@ public class WorldSystem extends EntitySystem {
         pixmapComponent.texture.draw(pixmapComponent.pixmap, 0, 0);
         textureRegionComponent.textureRegion.setRegion(pixmapComponent.texture);
         textureRegionComponent.textureRegion.flip(false, true);
+    }
+
+    private void updateElement() {
+        if (elementComponent.matterType == SOLID) return;
+
+        updateVelocity();
+
+        switch (elementComponent.elementType) {
+            case SAND:
+                updateSand();
+                break;
+            case WATER:
+                updateWater();
+                break;
+        }
     }
 
     private void updateWater() {
@@ -211,6 +217,7 @@ public class WorldSystem extends EntitySystem {
 
         update = true;
         updateBlur = true;
+        render = true;
     }
 
     private int getUpdateCount() {
@@ -333,6 +340,7 @@ public class WorldSystem extends EntitySystem {
         }
         if (world[y][x] != null) return;
         world[y][x] = Director.instance.createElement(typeToSpawn);
+        render = true;
     }
 
     private boolean isOutsideBounds(int x, int y) {
@@ -395,8 +403,10 @@ public class WorldSystem extends EntitySystem {
 
     public void pause() {
         pause = !pause;
-        if (pause) update = false;
-        else update = true;
+        if (!update) { 
+            update = true;
+            render = true;
+        }
     }
 
     public enum BrushType {
