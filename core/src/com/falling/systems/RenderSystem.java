@@ -28,7 +28,8 @@ public class RenderSystem extends SortedIteratingSystem {
     private final OrthographicCamera camera;
     private final Viewport viewport;
     private FrameBuffer fboMain;
-    private final TextureRegion fboMainTexture;
+    private final TextureRegion fboMainTextureRegion;
+    private Texture fboMainTexture;
     private final Array<Entity> renderQueue;
     private final Array<Entity> renderAfterVFXQueue;
     private Blur blur;
@@ -54,11 +55,12 @@ public class RenderSystem extends SortedIteratingSystem {
         viewport = new ExtendViewport(worldWidth, worldHeight, camera);
         cameraPos.set(camera.position);
 
-        fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth, screenHeight, false);
+        fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth, (int) worldHeight, false);
         fboMain.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear,
                 Texture.TextureFilter.Nearest);
-        fboMainTexture = new TextureRegion(fboMain.getColorBufferTexture());
-        fboMainTexture.flip(false, true);
+        fboMainTextureRegion = new TextureRegion(fboMain.getColorBufferTexture());
+        fboMainTextureRegion.flip(false, true);
+        fboMainTexture = fboMain.getColorBufferTexture();
 
         renderQueue = new Array<>();
         renderAfterVFXQueue = new Array<>();
@@ -87,12 +89,12 @@ public class RenderSystem extends SortedIteratingSystem {
         fboMain.end();
         renderQueue.clear();
 
-        if (blur != null && blur.isActive()) blur.blur(spriteBatch, fboMain, deltaTime);
+        if (blur != null && blur.isActive()) blur.blur(spriteBatch, fboMainTexture, deltaTime);
 
         // draw the whole scene
         spriteBatch.begin();
         if (blur != null && blur.isActive()) spriteBatch.draw(blur.getBlurredTexture(), cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight(), 0, 0, 1, 1);
-        else spriteBatch.draw(fboMainTexture, cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight());
+        else spriteBatch.draw(fboMainTextureRegion, cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight());
 
         // render objects after vfx
         renderQueue(renderAfterVFXQueue);
@@ -127,14 +129,19 @@ public class RenderSystem extends SortedIteratingSystem {
         oldWorldWidth = worldWidth;
         oldWorldHeight = worldHeight;
 
+        fboMainTexture.dispose();
+        fboMainTexture = null;
+
         fboMain.dispose();
         fboMain = null;
 
         fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth == 0 ? (int) worldWidth : screenWidth, screenHeight == 0 ? (int) worldHeight : screenHeight, false);
         fboMain.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
 
-        fboMainTexture.setRegion(fboMain.getColorBufferTexture());
-        fboMainTexture.flip(false, true);
+        fboMainTextureRegion.setRegion(fboMain.getColorBufferTexture());
+        fboMainTextureRegion.flip(false, true);
+
+        fboMainTexture = fboMain.getColorBufferTexture();
 
         if (blur != null) blur.resize();
 

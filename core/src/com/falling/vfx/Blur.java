@@ -17,7 +17,8 @@ public class Blur {
     private boolean direction = true;
     private boolean animating;
     private boolean active;
-    private Texture fboTexture;
+    private Texture fbo1Texture;
+    private Texture fbo2Texture;
 
     public Blur(Assets assets) {
         accel = 4f;
@@ -33,10 +34,11 @@ public class Blur {
 
         fbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
         fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
-        fboTexture = fbo2.getColorBufferTexture();
+        fbo1Texture = fbo1.getColorBufferTexture();
+        fbo2Texture = fbo2.getColorBufferTexture();
     }
 
-    public void blur(SpriteBatch batch, FrameBuffer fbo, float deltaTime) {
+    public void blur(SpriteBatch batch, Texture fboTexture, float deltaTime) {
         if (!updateBlur) return;
         updateBlur = false;
 
@@ -49,7 +51,7 @@ public class Blur {
             blurShader.setUniformf("dir", 1f, 0f);
             blurShader.setUniformf("radius", radius);
             blurShader.setUniformf("resolution", worldWidth);
-            batch.draw(i==0 ? fbo.getColorBufferTexture() : fbo2.getColorBufferTexture(), cameraPos.x - worldWidth/2f, cameraPos.y - worldHeight/2f, worldWidth, worldHeight, 0, 0, 1, 1);
+            batch.draw(i==0 ? fboTexture : fbo2Texture, cameraPos.x - worldWidth/2f, cameraPos.y - worldHeight/2f, worldWidth, worldHeight, 0, 0, 1, 1);
             batch.end();
             fbo1.end();
 
@@ -57,7 +59,7 @@ public class Blur {
             batch.begin();
             blurShader.setUniformf("dir", 0f, 1f);
             blurShader.setUniformf("resolution", worldHeight);
-            batch.draw(fbo1.getColorBufferTexture(), cameraPos.x - worldWidth/2f, cameraPos.y - worldHeight/2f, worldWidth, worldHeight, 0, 0, 1, 1);
+            batch.draw(fbo1Texture, cameraPos.x - worldWidth/2f, cameraPos.y - worldHeight/2f, worldWidth, worldHeight, 0, 0, 1, 1);
             batch.end();
             fbo2.end();
         }
@@ -66,7 +68,7 @@ public class Blur {
     }
 
     public Texture getBlurredTexture() {
-        return fboTexture;
+        return fbo2Texture;
     }
 
     public void dispose() {
@@ -108,6 +110,13 @@ public class Blur {
 
     public void resize() {
         updateBlur = true;
+
+        fbo1Texture.dispose();
+        fbo1Texture = null;
+
+        fbo2Texture.dispose();
+        fbo2Texture = null;
+
         fbo1.dispose();
         fbo2.dispose();
         fbo1 = null;
@@ -116,8 +125,7 @@ public class Blur {
         fbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
         fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
 
-        fboTexture.dispose();
-        fboTexture = null;
-        fboTexture = fbo2.getColorBufferTexture();
+        fbo1Texture = fbo2.getColorBufferTexture();
+        fbo2Texture = fbo2.getColorBufferTexture();
     }
 }
