@@ -363,6 +363,7 @@ public class WorldSystem extends EntitySystem {
         resizeWorld();
 
         update = true;
+        render = true;
     }
 
     private void resizeWorld() {

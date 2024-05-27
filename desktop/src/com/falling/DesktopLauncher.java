@@ -14,6 +14,8 @@ public class DesktopLauncher {
 		// config.setWindowIcon("icon.png");
 		// config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
 		config.setWindowedMode(screenWidth, screenHeight);
+        // config.setTransparentFramebuffer(true);
+        // config.setDecorated(false);
 
 		new Lwjgl3Application(new Application(), config);
 	}

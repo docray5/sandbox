@@ -13,6 +13,7 @@ public class Blur {
     private final ShaderProgram blurShader;
     private FrameBuffer fbo1, fbo2;
     private float radius;
+    private int iterations;
     private final float accel;
     private boolean direction = true;
     private boolean animating;
@@ -23,6 +24,7 @@ public class Blur {
     public Blur(Assets assets) {
         accel = 4f;
         radius = 0;
+        iterations = 4;
 
         ShaderProgram.pedantic = false;
         blurShader = new ShaderProgram(assets.getShader("blurVert"), assets.getShader("blurFrag"));
@@ -45,7 +47,7 @@ public class Blur {
         animation(deltaTime);
 
         batch.setShader(blurShader);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < iterations; i++) {
             fbo1.begin();
             batch.begin();
             blurShader.setUniformf("dir", 1f, 0f);
@@ -125,7 +127,7 @@ public class Blur {
         fbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
         fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
 
-        fbo1Texture = fbo2.getColorBufferTexture();
+        fbo1Texture = fbo1.getColorBufferTexture();
         fbo2Texture = fbo2.getColorBufferTexture();
     }
 }

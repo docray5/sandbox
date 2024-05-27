@@ -56,8 +56,7 @@ public class RenderSystem extends SortedIteratingSystem {
         cameraPos.set(camera.position);
 
         fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth, (int) worldHeight, false);
-        fboMain.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear,
-                Texture.TextureFilter.Nearest);
+        fboMain.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
         fboMainTextureRegion = new TextureRegion(fboMain.getColorBufferTexture());
         fboMainTextureRegion.flip(false, true);
         fboMainTexture = fboMain.getColorBufferTexture();
@@ -93,6 +92,8 @@ public class RenderSystem extends SortedIteratingSystem {
 
         // draw the whole scene
         spriteBatch.begin();
+        gl.glClearColor(0, 0, 0, 1);
+        gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         if (blur != null && blur.isActive()) spriteBatch.draw(blur.getBlurredTexture(), cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight(), 0, 0, 1, 1);
         else spriteBatch.draw(fboMainTextureRegion, cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight());
 
