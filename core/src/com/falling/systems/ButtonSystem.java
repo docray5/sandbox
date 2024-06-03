@@ -1,17 +1,19 @@
 package com.falling.systems;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.systems.SortedIteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.falling.components.ButtonComponent;
 import com.falling.components.ClickableComponent;
+import com.falling.utils.ZComparator;
 
 import static com.falling.Core.mousePos;
+import static com.falling.Core.updateBlur;
 import static com.falling.utils.Families.*;
 import static com.falling.utils.Mappers.*;
 
-public class ButtonSystem extends IteratingSystem {
+public class ButtonSystem extends SortedIteratingSystem {
     private Vector2 posTmp;
     private Entity entityTmp;
     private ButtonComponent buttonComponentTmp;
@@ -22,7 +24,8 @@ public class ButtonSystem extends IteratingSystem {
     private float scale;
 
     public ButtonSystem(int priority) {
-        super(buttonFamily, priority);
+        super(buttonFamily, new ZComparator(), priority);
+        posTmp = new Vector2();
     }
 
     @Override
@@ -46,7 +49,10 @@ public class ButtonSystem extends IteratingSystem {
                 entityTmp = getEntities().get(i);
                 buttonComponentTmp = buttonMapper.get(entityTmp);
 
-                buttonComponentTmp.onTouchDownCommand.execute();
+                updateBlur = true;
+
+                if (buttonComponentTmp.onTouchDownCommand != null)
+                    buttonComponentTmp.onTouchDownCommand.execute();
 
                 // =========== Animation ===========
                 if (buttonComponentTmp.onTouchAnim == null) continue;
@@ -60,6 +66,7 @@ public class ButtonSystem extends IteratingSystem {
                 }
 
                 Gdx.input.vibrate(10);
+                return;
             }
         }
     }
@@ -74,8 +81,11 @@ public class ButtonSystem extends IteratingSystem {
             buttonComponentTmp = buttonMapper.get(entityTmp);
 
             clickableComponentTmp.clicked = false;
+
+            updateBlur = true;
             
-            buttonComponentTmp.onTouchUpCommand.execute();
+            if (buttonComponentTmp.onTouchUpCommand != null)
+                buttonComponentTmp.onTouchUpCommand.execute();
 
             if (clickableComponentTmp.hitBox.contains(mousePos) && buttonComponentTmp.onClickCommand != null) {
                 buttonComponentTmp.onClickCommand.execute();
@@ -100,6 +110,8 @@ public class ButtonSystem extends IteratingSystem {
             clickableComponentTmp = clickableMapper.get(entityTmp);
 
             if (!clickableComponentTmp.clickable) continue;
+
+            updateBlur = true;
 
             if (clickableComponentTmp.hitBox.contains(mousePos)) {
                 // mouse enter

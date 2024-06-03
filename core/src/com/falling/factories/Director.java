@@ -5,9 +5,11 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.falling.assets.Assets;
+import com.falling.commands.Command;
 import com.falling.commands.Commands;
 import com.falling.components.ResizeComponent;
 import com.falling.components.TypeComponent;
+import com.falling.components.ButtonComponent.AnimationType;
 import com.falling.components.ResizeComponent.STICK_TYPE;
 
 import static com.falling.components.ElementComponent.*;
@@ -31,7 +33,7 @@ public class Director {
         factory.createEntity()
                 .addTransform(worldWidth/2f, worldHeight/2f)
                 .addRenderable()
-                .setPriority(4)
+                .setPriority(2)
                 .setCenter(true)
                 .endComponent()
                 .addTextureRegion("title")
@@ -47,16 +49,33 @@ public class Director {
         .addTransform(0, 0)
                 .addClickable(0, 0, worldWidth, worldHeight)
                 .addResize(ResizeComponent.STICK_TYPE.LEFT_BOTTOM)
-                .addButton(null, Commands.instance.spawnElementDown, Commands.instance.spawnElementUp, null, null)
+                .addButton(null, Commands.instance.spawnElementDown, Commands.instance.spawnElementUp, null, null, 2, 0)
                 .addType(TypeComponent.Type.FULLSCREEN_CLICK)
                 .endEntity();
+    }
+
+    public void createUIButton(float x, float y, float width, float height, String fn, STICK_TYPE stick, Command commandOnClick) {
+        factory.createEntity()
+            .addTransform(x-width/2, y-height/2)
+                .addClickable(0, 0, width, height)
+                .addResize(stick)
+                .addButton(commandOnClick, null, null, AnimationType.SCALE, AnimationType.SCALE, 0, 10)
+                .addRenderable()
+                .setPriority(10)
+                .setCenter(true).endComponent()
+                .addTextureRegion(fn)
+                .endEntity();
+    }
+
+    public void createBlurBtn() {
+        createUIButton(worldWidth-4, worldHeight-4, 27, 33, "btn", STICK_TYPE.RIGHT_TOP, Commands.instance.shiftBlur);
     }
 
     public void createStartText() {
         factory.createEntity()
                 .addTransform(worldWidth/2f, 100)
                 .addRenderable()
-                    .setPriority(4)
+                    .setPriority(2)
                     .setCenter(true)
                     .setColor(new Color(1, 1, 1, 0.2f))
                 .endComponent()
@@ -68,7 +87,7 @@ public class Director {
         return factory.createEntity()
                 .addTransform(0, 0)
                 .addRenderable()
-                    .setPriority(20)
+                    .setPriority(5)
                 .endComponent()
                 .addTextureRegion()
                 .addResize(STICK_TYPE.LEFT_BOTTOM)

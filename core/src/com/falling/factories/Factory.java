@@ -233,7 +233,7 @@ public class Factory {
         return this;
     }
 
-    public Factory addButton(Command onClickCommand, Command onTouchDownCommand, Command onTouchUpCommand, ButtonComponent.AnimationType onMouse, ButtonComponent.AnimationType onTouch) {
+    public Factory addButton(Command onClickCommand, Command onTouchDownCommand, Command onTouchUpCommand, ButtonComponent.AnimationType onMouse, ButtonComponent.AnimationType onTouch, int priority, int vibrationMs) {
         if (!creating) return null;
         buttonComponent = engine.createComponent(ButtonComponent.class);
         buttonComponent.onClickCommand = onClickCommand;
@@ -241,6 +241,8 @@ public class Factory {
         buttonComponent.onTouchUpCommand = onTouchUpCommand;
         buttonComponent.onMouseAnim = onMouse;
         buttonComponent.onTouchAnim = onTouch;
+        buttonComponent.priority = priority;
+        buttonComponent.vibrationMs = vibrationMs;
 
         entity.add(buttonComponent);
         return this;

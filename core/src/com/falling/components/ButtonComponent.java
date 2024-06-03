@@ -13,6 +13,9 @@ public class ButtonComponent implements Component, Pool.Poolable {
     public AnimationType onTouchAnim = null;
     public Texture normalTexture = null;
     public Texture clickedTexture = null;
+    // * Lower gets clicked *//
+    public int priority = 0;
+    public int vibrationMs = 0;
 
     @Override
     public void reset() {
@@ -22,6 +25,8 @@ public class ButtonComponent implements Component, Pool.Poolable {
         onMouseAnim = null;
         normalTexture = null;
         clickedTexture = null;
+        priority = 0;
+        vibrationMs = 0;
     }
 
     public enum AnimationType {

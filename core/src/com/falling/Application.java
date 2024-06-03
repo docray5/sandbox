@@ -64,6 +64,7 @@ public class Application implements ApplicationListener  {
         // Scene related:
         Director.instance.createSpawnArea();
         Director.instance.createStartText();
+        Director.instance.createBlurBtn();
     }
 
     @Override

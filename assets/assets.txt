@@ -3,4 +3,5 @@ fonts/alagard.png
 shaders/blurFrag.glsl
 shaders/blurVert.glsl
 textures/boot.png
+textures/btn.png
 textures/title.png
