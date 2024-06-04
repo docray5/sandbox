@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -115,8 +116,14 @@ public class RenderSystem extends SortedIteratingSystem {
         viewport.update(width, height);
         worldWidth = viewport.getWorldWidth();
         worldHeight = viewport.getWorldHeight();
-        screenWidth = (int) viewport.getWorldWidth();
-        screenHeight = (int) viewport.getWorldHeight();
+
+        if (pixelate) {
+            screenWidth = (int) viewport.getWorldWidth();
+            screenHeight = (int) viewport.getWorldHeight();
+        } else {
+            screenWidth = viewport.getScreenWidth();
+            screenHeight = viewport.getScreenHeight();
+        }
 
         if (worldWidth == oldWorldWidth && worldHeight == oldWorldHeight)
             return;
@@ -170,6 +177,8 @@ public class RenderSystem extends SortedIteratingSystem {
                     drawY -= heightTmp/2f;
                 }
 
+                if (pixelate) pixelatePos();
+
                 // ==== Draw texture ====
                 spriteBatch.setColor(renderableTmp.color);
                 spriteBatch.draw(regionTmp.textureRegion, drawX, drawY,
@@ -184,9 +193,15 @@ public class RenderSystem extends SortedIteratingSystem {
                 textTmp.font.setColor(renderableTmp.color);
                 textTmp.glyphLayout.setText(textTmp.font, textTmp.text);
 
+                if (pixelate) pixelatePos();
                 textTmp.font.draw(spriteBatch, textTmp.text, drawX - textTmp.glyphLayout.width/2f, drawY - textTmp.glyphLayout.height/2f);
             }
         }
+    }
+
+    private void pixelatePos() {
+        drawX = MathUtils.floor(drawX);
+        drawY = MathUtils.floor(drawY);
     }
 
     public void init(Assets assets) {

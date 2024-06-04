@@ -21,5 +21,7 @@ public class Core {
     public static float xGutOffset = 0;
     public static float yGutOffset = 0;
 
+    public static boolean pixelate = true;
+
     public static final float[] sandColor = { -33, 0.285f, 0.965f };
 }
