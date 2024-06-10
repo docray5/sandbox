@@ -2,18 +2,18 @@ package com.falling.systems;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.falling.components.AnimationComponent;
+import com.falling.components.PosAnimationComponent;
 
-import static com.falling.utils.Families.animationFamily;
+import static com.falling.utils.Families.posAnimationFamily;
 import static com.falling.utils.Mappers.*;
 
-public class AnimationSystem extends IteratingSystem {
-    private AnimationComponent tmpAnimation;
+public class PosAnimationSystem extends IteratingSystem {
+    private PosAnimationComponent tmpAnimation;
     private boolean onX;
     private boolean onY;
 
-    public AnimationSystem(int priority) {
-        super(animationFamily, priority);
+    public PosAnimationSystem(int priority) {
+        super(posAnimationFamily, priority);
         tmpAnimation = null;
         onX = false;
         onY = false;
@@ -21,7 +21,7 @@ public class AnimationSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        tmpAnimation = animationMapper.get(entity);
+        tmpAnimation = posAnimationMapper.get(entity);
 
         if (tmpAnimation.isAnimating) {
             tmpAnimation.pos.interpolate(tmpAnimation.target, deltaTime * tmpAnimation.accel, tmpAnimation.interpolation);
@@ -50,26 +50,6 @@ public class AnimationSystem extends IteratingSystem {
                         tmpAnimation.pingPongPos.set(tmpAnimation.pos);
                         tmpAnimation.isAnimating = true;
                         break;
-                    case CHAIN:
-                        if (tmpAnimation.chain.size > 0 && tmpAnimation.iChain < tmpAnimation.chain.size) {
-                            tmpAnimation.target.set(tmpAnimation.chain.get(tmpAnimation.iChain));
-                            tmpAnimation.iChain++;
-                            if (tmpAnimation.iChain >= tmpAnimation.chain.size || tmpAnimation.iChain < 0) {
-                                tmpAnimation.isAnimating = false;
-                                tmpAnimation.iChain = 0;
-                            }
-                        }
-                        break;
-                    case CHAIN_PING_PONG:
-                        if (tmpAnimation.chain.size > 0 && tmpAnimation.iChain < tmpAnimation.chain.size) {
-                            tmpAnimation.target.set(tmpAnimation.chain.get(tmpAnimation.iChain));
-                            if (tmpAnimation.up) tmpAnimation.iChain--;
-                            else tmpAnimation.iChain++;
-                            if (tmpAnimation.iChain >= tmpAnimation.chain.size || tmpAnimation.iChain < 0) {
-                                tmpAnimation.up = !tmpAnimation.up;
-                            }
-                        }
-                        break;
                 }
                 // Animation finished
                 if (tmpAnimation.commandOnFinish != null)
@@ -78,5 +58,15 @@ public class AnimationSystem extends IteratingSystem {
         }
 
         transformMapper.get(entity).pos.set(tmpAnimation.pos);
+    }
+
+    public void animateByXY(PosAnimationComponent animationComponent, float x, float y) {
+        animationComponent.target.set(animationComponent.pos.x + x, animationComponent.pos.y + y);
+        animationComponent.isAnimating = true;
+    }
+
+    public void animateTo(PosAnimationComponent animationComponent, float tx, float ty) {
+        animationComponent.target.set(tx, ty);
+        animationComponent.isAnimating = true;
     }
 }

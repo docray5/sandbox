@@ -3,11 +3,10 @@ package com.falling.components;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.falling.commands.Command;
 
-public class AnimationComponent implements Component, Pool.Poolable {
+public class PosAnimationComponent implements Component, Pool.Poolable {
     public Vector2 pos = new Vector2();
     public Vector2 target = new Vector2();
     public float accel = 8;
@@ -18,8 +17,6 @@ public class AnimationComponent implements Component, Pool.Poolable {
     public AnimationMode mode = AnimationMode.NORMAL;
     /**when using pingPong initially set it to values from pos;*/
     public Vector2 pingPongPos = new Vector2();
-    public Array<Vector2> chain = null;
-    public int iChain = 0;
     public boolean up = false;
 
     @Override
@@ -33,12 +30,10 @@ public class AnimationComponent implements Component, Pool.Poolable {
         commandOnFinish = null;
         mode = AnimationMode.NORMAL;
         pingPongPos.set(0, 0);
-        chain = null;
-        iChain = 0;
         up = false;
     }
 
     public enum AnimationMode {
-        PING_PONG, CHAIN, CHAIN_PING_PONG, NORMAL, LOOP
+        PING_PONG, NORMAL, LOOP
     }
 }

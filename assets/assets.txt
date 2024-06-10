@@ -2,6 +2,7 @@ fonts/alagard.fnt
 fonts/alagard.png
 shaders/blurFrag.glsl
 shaders/blurVert.glsl
+textures/abtn.png
 textures/boot.png
 textures/btn.png
 textures/title.png

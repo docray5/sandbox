@@ -5,11 +5,13 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.falling.assets.Assets;
+import com.falling.commands.AnimateByXY;
 import com.falling.commands.Command;
 import com.falling.commands.Commands;
+import com.falling.commands.ScaleTo;
+import com.falling.commands.TranslateByXY;
 import com.falling.components.ResizeComponent;
 import com.falling.components.TypeComponent;
-import com.falling.components.ButtonComponent.AnimationType;
 import com.falling.components.ResizeComponent.STICK_TYPE;
 
 import static com.falling.components.ElementComponent.*;
@@ -21,11 +23,13 @@ public class Director {
     public static void setInstance(Director _instance) { instance = _instance; }
 
     private final Factory factory;
+    private final Engine engine;
 
     private Color colorTmp = new Color();
 
     public Director(Engine engine, Assets assets) {
         this.factory = new Factory(engine, assets);
+        this.engine = engine;
     }
     // ================================ Main Menu ================================
 
@@ -37,19 +41,17 @@ public class Director {
                 .setCenter(true)
                 .endComponent()
                 .addTextureRegion("title")
-                .addAnimation()
-                .setPos(worldWidth/2f, worldHeight/2f)
-                .setRounding(10)
-                .endComponent()
+                .addPosAnimationNormal()
                 .endEntity();
     }
 
     public void createSpawnArea() {
         factory.createEntity()
         .addTransform(0, 0)
-                .addClickable(0, 0, worldWidth, worldHeight)
+                .addClickable(0, 0, worldWidth, worldHeight,
+                null, Commands.instance.spawnElementDown, Commands.instance.spawnElementUp,
+                null, null, 2, 0)
                 .addResize(ResizeComponent.STICK_TYPE.LEFT_BOTTOM)
-                .addButton(null, Commands.instance.spawnElementDown, Commands.instance.spawnElementUp, null, null, 2, 0)
                 .addType(TypeComponent.Type.FULLSCREEN_CLICK)
                 .endEntity();
     }
@@ -57,18 +59,23 @@ public class Director {
     public void createUIButton(float x, float y, float width, float height, String fn, STICK_TYPE stick, Command commandOnClick) {
         factory.createEntity()
             .addTransform(x-width/2, y-height/2)
-                .addClickable(0, 0, width, height)
-                .addResize(stick)
-                .addButton(commandOnClick, null, null, AnimationType.SCALE, AnimationType.SCALE, 0, 10)
-                .addRenderable()
+            .addResize(stick)
+            .addRenderable()
                 .setPriority(10)
-                .setCenter(true).endComponent()
-                .addTextureRegion(fn)
-                .endEntity();
+                .setCenter(true)
+            .endComponent()
+            .addTextureRegion(fn)
+            .addPosAnimationNormal()
+            .addClickableAuto(commandOnClick, new ScaleTo(engine, 0.7f), new ScaleTo(engine, 1), new ScaleTo(engine, 1.1f), new ScaleTo(engine, 1), 0, 10)
+            .endEntity();
     }
 
     public void createBlurBtn() {
         createUIButton(worldWidth-4, worldHeight-4, 27, 33, "btn", STICK_TYPE.RIGHT_TOP, Commands.instance.shiftBlur);
+    }
+
+    public void createPauseBtn() {
+        createUIButton(100, 100, 30, 30, "abtn", STICK_TYPE.LEFT_BOTTOM, Commands.instance.pauseWorld);
     }
 
     public void createStartText() {

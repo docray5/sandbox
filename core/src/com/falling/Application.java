@@ -30,7 +30,7 @@ public class Application implements ApplicationListener  {
         Director.setInstance(new Director(engine, assets));
         Commands.setInstance(new Commands(engine, this));
 
-        engine.addSystem(new AnimationSystem(1));
+        engine.addSystem(new PosAnimationSystem(1));
         engine.addSystem(new ResizeableSystem(7));
         renderSystem = new RenderSystem(8);
         engine.addSystem(renderSystem);
@@ -53,7 +53,7 @@ public class Application implements ApplicationListener  {
         // Engine related:
         renderSystem.init(assets);
 
-        engine.addSystem(new ButtonSystem(2));
+        engine.addSystem(new ClickableSystem(2));
         engine.addSystem(new UITranslateSystem(2));
         engine.addSystem(new TempCursorSystem(4));
         engine.addSystem(new WorldSystem(5));
@@ -65,6 +65,7 @@ public class Application implements ApplicationListener  {
         Director.instance.createSpawnArea();
         Director.instance.createStartText();
         Director.instance.createBlurBtn();
+        Director.instance.createPauseBtn();
     }
 
     @Override

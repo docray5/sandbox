@@ -1,19 +1,19 @@
 package com.falling.commands;
 
 import com.badlogic.ashley.core.Engine;
-import com.falling.systems.ButtonSystem;
+import com.falling.systems.ClickableSystem;
 
 /** TouchUp */
 public class TouchUp extends Command {
-    private final ButtonSystem buttonSystem;
+    private final ClickableSystem clickableSystem;
 
 	public TouchUp(Engine engine) {
 		super(engine);
-        buttonSystem = engine.getSystem(ButtonSystem.class);
+        clickableSystem = engine.getSystem(ClickableSystem.class);
 	}
 
 	@Override
 	public void execute() {
-        buttonSystem.touchUp();
+        clickableSystem.touchUp();
 	}
 }

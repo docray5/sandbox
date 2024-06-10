@@ -7,8 +7,7 @@ public class Mappers {
     public static ComponentMapper<TransformComponent> transformMapper;
     public static ComponentMapper<TextureRegionComponent> texRegionMapper;
     public static ComponentMapper<ClickableComponent> clickableMapper;
-    public static ComponentMapper<ButtonComponent> buttonMapper;
-    public static ComponentMapper<AnimationComponent> animationMapper;
+    public static ComponentMapper<PosAnimationComponent> posAnimationMapper;
     public static ComponentMapper<TextComponent> textMapper;
     public static ComponentMapper<RenderableComponent> renderableMapper;
     public static ComponentMapper<CursorComponent> cursorMapper;
@@ -21,7 +20,7 @@ public class Mappers {
     public static void init() {
         transformMapper = ComponentMapper.getFor(TransformComponent.class);
         texRegionMapper = ComponentMapper.getFor(TextureRegionComponent.class);
-        animationMapper = ComponentMapper.getFor(AnimationComponent.class);
+        posAnimationMapper = ComponentMapper.getFor(PosAnimationComponent.class);
         clickableMapper = ComponentMapper.getFor(ClickableComponent.class);
         textMapper = ComponentMapper.getFor(TextComponent.class);
         renderableMapper = ComponentMapper.getFor(RenderableComponent.class);
@@ -30,7 +29,6 @@ public class Mappers {
         resizeMapper = ComponentMapper.getFor(ResizeComponent.class);
         typeMapper = ComponentMapper.getFor(TypeComponent.class);
         elementMapper = ComponentMapper.getFor(ElementComponent.class);
-        buttonMapper = ComponentMapper.getFor(ButtonComponent.class);
         uiTranslateMapper = ComponentMapper.getFor(UITranslateComponent.class);
     }
 }
