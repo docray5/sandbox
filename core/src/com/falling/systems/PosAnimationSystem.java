@@ -60,7 +60,7 @@ public class PosAnimationSystem extends IteratingSystem {
         transformMapper.get(entity).pos.set(tmpAnimation.pos);
     }
 
-    public void animateByXY(PosAnimationComponent animationComponent, float x, float y) {
+    public void animateBy(PosAnimationComponent animationComponent, float x, float y) {
         animationComponent.target.set(animationComponent.pos.x + x, animationComponent.pos.y + y);
         animationComponent.isAnimating = true;
     }

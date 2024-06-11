@@ -4,10 +4,10 @@ import static com.falling.utils.Mappers.transformMapper;
 
 import com.badlogic.ashley.core.Engine;
 
-public class ScaleTo extends Command {
+public class ScaleToCmd extends Command {
     private float scale;
 
-    public ScaleTo(Engine engine, float scaleTo) {
+    public ScaleToCmd(Engine engine, float scaleTo) {
         super(engine);
         scale = scaleTo;
     }

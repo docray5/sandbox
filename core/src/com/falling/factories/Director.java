@@ -5,11 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.falling.assets.Assets;
-import com.falling.commands.AnimateByXY;
-import com.falling.commands.Command;
-import com.falling.commands.Commands;
-import com.falling.commands.ScaleTo;
-import com.falling.commands.TranslateByXY;
+import com.falling.commands.*;
 import com.falling.components.ResizeComponent;
 import com.falling.components.TypeComponent;
 import com.falling.components.ResizeComponent.STICK_TYPE;
@@ -66,7 +62,7 @@ public class Director {
             .endComponent()
             .addTextureRegion(fn)
             .addPosAnimationNormal()
-            .addClickableAuto(commandOnClick, new ScaleTo(engine, 0.7f), new ScaleTo(engine, 1), new ScaleTo(engine, 1.1f), new ScaleTo(engine, 1), 0, 10)
+            .addClickableAuto(commandOnClick, new ScaleToCmd(engine, 0.7f), new ScaleToCmd(engine, 1), new ScaleToCmd(engine, 1.1f), new ScaleToCmd(engine, 1), 0, 10)
             .endEntity();
     }
 
@@ -75,7 +71,7 @@ public class Director {
     }
 
     public void createPauseBtn() {
-        createUIButton(100, 100, 30, 30, "abtn", STICK_TYPE.LEFT_BOTTOM, Commands.instance.pauseWorld);
+        createUIButton(100, 100, 30, 30, "test", STICK_TYPE.LEFT_BOTTOM, Commands.instance.pauseWorld);
     }
 
     public void createStartText() {
