@@ -4,12 +4,12 @@ import com.badlogic.ashley.core.Engine;
 import com.falling.systems.UITranslateSystem;
 
 /**
- * PrepMenu
+ * OpenMenu
  */
-public class PrepMenu extends Command {
+public class OpenMenuCmd extends Command {
     private final UITranslateSystem uiTranslateSystem;
 
-    public PrepMenu(Engine engine) {
+    public OpenMenuCmd(Engine engine) {
         super(engine);
         uiTranslateSystem = engine.getSystem(UITranslateSystem.class);
     }

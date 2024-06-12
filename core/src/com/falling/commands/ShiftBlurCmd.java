@@ -6,10 +6,10 @@ import com.falling.systems.RenderSystem;
 /**
  * ShiftBlur
  */
-public class ShiftBlur extends Command {
+public class ShiftBlurCmd extends Command {
     private final RenderSystem renderSystem;
 
-    public ShiftBlur(Engine engine) {
+    public ShiftBlurCmd(Engine engine) {
         super(engine);
         renderSystem = engine.getSystem(RenderSystem.class);
     }

@@ -4,11 +4,11 @@ import com.badlogic.ashley.core.Engine;
 import com.falling.systems.WorldSystem;
 import com.falling.systems.WorldSystem.BrushType;
 
-public class SelectBrush extends Command {
+public class SelectBrushCmd extends Command {
     private final WorldSystem worldSystem;
     private BrushType brushType;
 
-	public SelectBrush(Engine engine) {
+	public SelectBrushCmd(Engine engine) {
 		super(engine);
         worldSystem = engine.getSystem(WorldSystem.class);
 	}
@@ -20,7 +20,7 @@ public class SelectBrush extends Command {
         brushType = null;
 	}
 
-    public SelectBrush setBrushType(BrushType brushType) {
+    public SelectBrushCmd setBrushType(BrushType brushType) {
         this.brushType = brushType;
         return this;
     }

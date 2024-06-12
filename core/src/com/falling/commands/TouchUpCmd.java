@@ -4,10 +4,10 @@ import com.badlogic.ashley.core.Engine;
 import com.falling.systems.ClickableSystem;
 
 /** TouchUp */
-public class TouchUp extends Command {
+public class TouchUpCmd extends Command {
     private final ClickableSystem clickableSystem;
 
-	public TouchUp(Engine engine) {
+	public TouchUpCmd(Engine engine) {
 		super(engine);
         clickableSystem = engine.getSystem(ClickableSystem.class);
 	}

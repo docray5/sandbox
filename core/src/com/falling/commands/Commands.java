@@ -9,41 +9,41 @@ public class Commands {
     public static Commands instance;
     public static void setInstance(Commands _instance) { instance = _instance; }
 
-    public final StartGame startGame;
+    public final StartGameCmd startGame;
 
-    public TouchDown touchDown;
-    public TouchUp touchUp;
-    public MouseMoved mouseMoved;
-    public OpenMenu openMenu;
-    public CloseMenu closeMenu;
-    public PrepMenu prepMenu;
-    public ShiftBlur shiftBlur;
-    public SpawnElementDown spawnElementDown;
-    public SpawnElementUp spawnElementUp;
-    public SelectElement selectElement;
-    public SelectBrush selectBrush;
-    public Resize resize;
-    public PauseWorld pauseWorld;
+    public TouchDownCmd touchDown;
+    public TouchUpCmd touchUp;
+    public MouseMovedCmd mouseMoved;
+    public OpenMenuCmd openMenu;
+    public CloseMenuCmd closeMenu;
+    public PrepMenuCmd prepMenu;
+    public ShiftBlurCmd shiftBlur;
+    public SpawnElementDownCmd spawnElementDown;
+    public SpawnElementUpCmd spawnElementUp;
+    public SelectElementCmd selectElement;
+    public SelectBrushCmd selectBrush;
+    public ResizeCmd resize;
+    public PauseWorldCmd pauseWorld;
 
     /** inits core commands for loading screen */
     public Commands(Engine engine, Application application) {
-        startGame = new StartGame(engine, application);
+        startGame = new StartGameCmd(engine, application);
     }
 
     /** init the other commands that are used with systems that need assets to be loaded */
     public void initAfterAssets(Engine engine) {
-        touchDown = new TouchDown(engine);
-        touchUp = new TouchUp(engine);
-        mouseMoved = new MouseMoved(engine);
-        shiftBlur = new ShiftBlur(engine);
-        openMenu = new OpenMenu(engine);
-        closeMenu = new CloseMenu(engine);
-        prepMenu = new PrepMenu(engine);
-        spawnElementDown = new SpawnElementDown(engine);
-        spawnElementUp = new SpawnElementUp(engine);
-        selectElement = new SelectElement(engine);
-        selectBrush = new SelectBrush(engine);
-        resize = new Resize(engine);
-        pauseWorld = new PauseWorld(engine);
+        touchDown = new TouchDownCmd(engine);
+        touchUp = new TouchUpCmd(engine);
+        mouseMoved = new MouseMovedCmd(engine);
+        shiftBlur = new ShiftBlurCmd(engine);
+        openMenu = new OpenMenuCmd(engine);
+        closeMenu = new CloseMenuCmd(engine);
+        prepMenu = new PrepMenuCmd(engine);
+        spawnElementDown = new SpawnElementDownCmd(engine);
+        spawnElementUp = new SpawnElementUpCmd(engine);
+        selectElement = new SelectElementCmd(engine);
+        selectBrush = new SelectBrushCmd(engine);
+        resize = new ResizeCmd(engine);
+        pauseWorld = new PauseWorldCmd(engine);
     }
 }

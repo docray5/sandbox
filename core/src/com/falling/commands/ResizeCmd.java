@@ -4,11 +4,11 @@ import com.badlogic.ashley.core.Engine;
 import com.falling.systems.ResizeableSystem;
 import com.falling.systems.WorldSystem;
 
-public class Resize extends Command {
+public class ResizeCmd extends Command {
     private final ResizeableSystem resizeableSystem;
     private final WorldSystem worldSystem;
 
-    public Resize(Engine engine) {
+    public ResizeCmd(Engine engine) {
         super(engine);
         resizeableSystem = engine.getSystem(ResizeableSystem.class);
         worldSystem = engine.getSystem(WorldSystem.class);

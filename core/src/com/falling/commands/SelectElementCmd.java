@@ -4,11 +4,11 @@ import com.badlogic.ashley.core.Engine;
 import com.falling.components.ElementComponent.ElementType;
 import com.falling.systems.WorldSystem;
 
-public class SelectElement extends Command {
+public class SelectElementCmd extends Command {
     private final WorldSystem worldSystem;
     private ElementType elementType;
 
-	public SelectElement(Engine engine) {
+	public SelectElementCmd(Engine engine) {
 		super(engine);
         worldSystem = engine.getSystem(WorldSystem.class);
 	}
@@ -19,7 +19,7 @@ public class SelectElement extends Command {
 	}
 
     // returns this for chaining
-    public SelectElement setElementType(ElementType elementType) {
+    public SelectElementCmd setElementType(ElementType elementType) {
         this.elementType = elementType;
         return this;
     }

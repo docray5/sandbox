@@ -6,10 +6,10 @@ import com.badlogic.ashley.core.Engine;
 /**
  * CloseMenu
  */
-public class CloseMenu extends Command {
+public class CloseMenuCmd extends Command {
    private final UITranslateSystem uiTranslateSystem;
 
-    public CloseMenu(Engine engine) {
+    public CloseMenuCmd(Engine engine) {
         super(engine);
         uiTranslateSystem = engine.getSystem(UITranslateSystem.class);
     }
