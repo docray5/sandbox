@@ -9,7 +9,7 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("Leap!");
-		config.setForegroundFPS(60);
+		config.setForegroundFPS(fps);
 		config.setIdleFPS(10);
 		// config.setWindowIcon("icon.png");
 		// config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());

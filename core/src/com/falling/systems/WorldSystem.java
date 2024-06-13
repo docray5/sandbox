@@ -336,6 +336,7 @@ public class WorldSystem extends EntitySystem {
         if (typeToSpawn == null) {
             if (world[y][x] != null) getEngine().removeEntity(world[y][x]);
             world[y][x] = null;
+            render = true;
             return;
         }
         if (world[y][x] != null) return;

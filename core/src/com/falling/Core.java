@@ -10,7 +10,7 @@ public class Core {
     public static final Vector3 cameraPos = new Vector3();
 
     /** Used to control blur, set to true if updating something thats under blur */
-    public static boolean updateBlur = false;
+    public static boolean updateBlur = true;
 
     public static float worldWidth = startWorldWidth;
     public static float worldHeight = startWorldHeight;
@@ -23,6 +23,7 @@ public class Core {
 
     /** makes screen pixel art and floors float positions only for render */
     public static boolean pixelate = true;
+    public static int fps = 60;
 
     public static final float[] sandColor = { -33, 0.285f, 0.965f };
 }
