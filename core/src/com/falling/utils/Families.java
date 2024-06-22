@@ -6,7 +6,7 @@ import com.falling.components.*;
 public class Families {
     public static Family renderableFamily;
     public static Family clickableFamily;
-    public static Family posAnimationFamily;
+    public static Family animationFamily;
     public static Family textFamily;
     public static Family cursorFamily;
     public static Family resizeFamily;
@@ -16,8 +16,8 @@ public class Families {
     public static void init() {
         renderableFamily = Family.all(TransformComponent.class, RenderableComponent.class).one(TextureRegionComponent.class, TextComponent.class).get();
         clickableFamily = Family.all(ClickableComponent.class, TransformComponent.class).get();
-        posAnimationFamily = Family.all(PosAnimationComponent.class, TransformComponent.class).get();
-        textFamily = Family.all(RenderableComponent.class, TransformComponent.class, TextComponent.class, PosAnimationComponent.class).get();
+        animationFamily = Family.all(AnimationComponent.class, TransformComponent.class).get();
+        textFamily = Family.all(RenderableComponent.class, TransformComponent.class, TextComponent.class).get();
         cursorFamily = Family.all(CursorComponent.class).get();
         resizeFamily = Family.all(ResizeComponent.class).get();
         uiTranslateFamily = Family.all(UITranslateComponent.class).get();

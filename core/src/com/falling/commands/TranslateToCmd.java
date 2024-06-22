@@ -1,17 +1,19 @@
 package com.falling.commands;
 
-import static com.falling.utils.Mappers.posAnimationMapper;
+import static com.falling.utils.Mappers.animationMapper;
 import static com.falling.utils.Mappers.transformMapper;
 
 import com.badlogic.ashley.core.Engine;
-import com.falling.components.PosAnimationComponent;
+import com.badlogic.gdx.utils.Array;
+import com.falling.components.VecAnimatorComponent;
+import com.falling.components.VecAnimatorComponent.AnimatorType;
 import com.falling.components.TransformComponent;
 
 public class TranslateToCmd extends Command {
     private float x;
     private float y;
     private TransformComponent transCompTmp;
-    private PosAnimationComponent posAnimCompTmp;
+    private Array<VecAnimatorComponent> animatorsTmp;
     private boolean additive;
 
     public TranslateToCmd(Engine engine, float transToX, float transToY, boolean additive) {
@@ -23,12 +25,17 @@ public class TranslateToCmd extends Command {
 
     @Override
     public void execute() {
-        if (posAnimationMapper.has(entity)) {
-            posAnimCompTmp = posAnimationMapper.get(entity);
-            if (additive)
-                posAnimCompTmp.pos.set(posAnimCompTmp.pos.x + x, posAnimCompTmp.pos.y + y);
-            else
-                posAnimCompTmp.pos.set(x, y);
+        if (animationMapper.has(entity)) {
+            animatorsTmp = animationMapper.get(entity).animators;
+
+            for (int i = animatorsTmp.size-1; i >= 0; i--) {
+                if (animatorsTmp.get(i).type == AnimatorType.POS) {
+                    if (additive)
+                        animatorsTmp.get(i).animatedVecPointer.set(animatorsTmp.get(i).animatedVecPointer.x + x, animatorsTmp.get(i).animatedVecPointer.y + y);
+                    else
+                        animatorsTmp.get(i).animatedVecPointer.set(x, y);
+                }
+            }
         } else if (transformMapper.has(entity)) {
             transCompTmp = transformMapper.get(entity);
             if (additive)

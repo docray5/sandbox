@@ -1,0 +1,42 @@
+package com.falling.commands;
+
+import static com.falling.utils.Mappers.animationMapper;
+
+import com.badlogic.ashley.core.Engine;
+import com.falling.components.VecAnimatorComponent.AnimatorType;
+import com.falling.systems.AnimationSystem;
+
+/**
+ * Animates entity to new Position
+ */
+public class AnimToCmd extends Command {
+    private final AnimationSystem posAnimationSystem;
+    private AnimatorType animatorType;
+    private float animToX;
+    private float animToY;
+    private boolean additive;
+
+    /**
+     * @param additive determines whether to add the x and y to current positon or move to x and y
+     */
+    public AnimToCmd(Engine engine, AnimatorType animatorType, float animToX, float animToY, boolean additive) {
+        super(engine);
+        posAnimationSystem = engine.getSystem(AnimationSystem.class);
+        this.animatorType = animatorType;
+        this.animToX = animToX;
+        this.animToY = animToY;
+        this.additive = additive;
+    }
+
+	@Override
+	public void execute() {
+        posAnimationSystem.animateTo(animationMapper.get(entity), animatorType, animToX, animToY, additive);
+	}
+
+    public void setAnimTo(AnimatorType animatorType, float animToX, float animToY, boolean additive) {
+        this.animatorType = animatorType;
+        this.animToX = animToX;
+        this.animToY = animToY;
+        this.additive = additive;
+    }
+}

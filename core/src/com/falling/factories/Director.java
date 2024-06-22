@@ -3,12 +3,14 @@ package com.falling.factories;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.falling.assets.Assets;
 import com.falling.commands.*;
 import com.falling.components.ResizeComponent;
 import com.falling.components.TypeComponent;
 import com.falling.components.ResizeComponent.STICK_TYPE;
+import com.falling.components.VecAnimatorComponent.AnimatorType;
 
 import static com.falling.components.ElementComponent.*;
 import static com.falling.Core.*;
@@ -37,7 +39,7 @@ public class Director {
                 .setCenter(true)
                 .endComponent()
                 .addTextureRegion("title")
-                .addPosAnimationNormal()
+                .addAnimation(factory.createPosAnimator(1, null, Interpolation.swingOut))
                 .endEntity();
     }
 
@@ -61,8 +63,8 @@ public class Director {
                 .setCenter(true)
             .endComponent()
             .addTextureRegion(fn)
-            .addPosAnimationNormal()
-            .addClickableAuto(commandOnClick, new ScaleToCmd(engine, 0.7f), new ScaleToCmd(engine, 1), new ScaleToCmd(engine, 1.1f), new ScaleToCmd(engine, 1), 0, 10)
+            .addAnimation(factory.createPosAnimator(1, null, Interpolation.swingOut), factory.createScaleAnimator(0.25f, null, Interpolation.swingOut))
+            .addClickableAuto(commandOnClick, new AnimToCmd(engine, AnimatorType.SCALE, 0.7f, 0.7f, false), new AnimToCmd(engine, AnimatorType.SCALE, 1f, 1f, false), new AnimToCmd(engine, AnimatorType.SCALE, 1.1f, 1.1f, false), new AnimToCmd(engine, AnimatorType.SCALE, 1f, 1f, false), 0, 10)
             .endEntity();
     }
 

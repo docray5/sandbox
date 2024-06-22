@@ -30,7 +30,7 @@ public class Application implements ApplicationListener  {
         Director.setInstance(new Director(engine, assets));
         Commands.setInstance(new Commands(engine, this));
 
-        engine.addSystem(new PosAnimationSystem(1));
+        engine.addSystem(new AnimationSystem(1));
         engine.addSystem(new ResizeableSystem(7));
         renderSystem = new RenderSystem(8);
         engine.addSystem(renderSystem);

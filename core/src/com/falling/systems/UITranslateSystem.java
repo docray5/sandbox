@@ -2,10 +2,8 @@ package com.falling.systems;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.badlogic.gdx.math.Vector2;
 
 import static com.falling.utils.Families.uiTranslateFamily;
-import static com.falling.utils.Mappers.posAnimationMapper;
 import static com.falling.utils.Mappers.uiTranslateMapper;
 
 public class UITranslateSystem extends IteratingSystem {
@@ -30,25 +28,22 @@ public class UITranslateSystem extends IteratingSystem {
     public void openMenu() {
         for (int i = 0; i < super.getEntities().size(); i++) {
             entity = super.getEntities().get(i);
-            posAnimationMapper.get(entity).target.set(uiTranslateMapper.get(entity).openPos);
-            posAnimationMapper.get(entity).isAnimating = true;
+
+            uiTranslateMapper.get(entity).openCmd.execute();
         }
     }
 
     public void closeMenu() {
         for (int i = 0; i < super.getEntities().size(); i++) {
             entity = super.getEntities().get(i);
-            posAnimationMapper.get(entity).target.set(uiTranslateMapper.get(entity).closePos);
-            posAnimationMapper.get(entity).isAnimating = true;
 
+            uiTranslateMapper.get(entity).closeCmd.execute();
         }
     }
 
     public void prepMenu() {
         for (int i = 0; i < super.getEntities().size(); i++) {
             entity = super.getEntities().get(i);
-            posAnimationMapper.get(entity).target.set(new Vector2(uiTranslateMapper.get(entity).openPos).sub(0, 4));
-            posAnimationMapper.get(entity).isAnimating = true;
         }
     }
 }

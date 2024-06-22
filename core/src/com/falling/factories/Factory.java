@@ -8,7 +8,7 @@ import com.falling.commands.Command;
 import com.falling.components.*;
 import com.falling.components.ElementComponent.ElementType;
 import com.falling.components.ElementComponent.MatterType;
-import com.falling.components.PosAnimationComponent.AnimationMode;
+import com.falling.components.VecAnimatorComponent.AnimatorType;
 import com.falling.factories.builders.RenderableBuilder;
 
 public class Factory {
@@ -16,7 +16,8 @@ public class Factory {
     protected final Assets assets;
 
     private Entity entity;
-    private PosAnimationComponent posAnimComp;
+    private VecAnimatorComponent animatorComp;
+    private AnimationComponent animationComp;
     private CursorComponent cursorComp;
     private final RenderableBuilder renderableBuilder;
     private ResizeComponent resizeComp;
@@ -59,72 +60,38 @@ public class Factory {
         return entity;
     }
 
+    public Factory addAnimation(VecAnimatorComponent... animatorComps) {
+        if (!creating) return null;
+        animationComp = engine.createComponent(AnimationComponent.class);
+
+        for (int i = 0; i < animatorComps.length; i++) {
+            animationComp.animators.add(animatorComps[i]);
+        }
+
+        entity.add(animationComp);
+        return this;
+    }
+
     /** Put After setting transform */
-    public Factory addPosAnimationNormal() {
-        if (!creating) return null;
-        posAnimComp = engine.createComponent(PosAnimationComponent.class);
-        posAnimComp.pos.set(transformComp.pos);
-
-        entity.add(posAnimComp);
-        return this;
+    public VecAnimatorComponent createPosAnimator(float duration, Command commandOnFinish, Interpolation interpolation) {
+        animatorComp = engine.createComponent(VecAnimatorComponent.class);
+        animatorComp.animatedVecPointer = transformComp.pos;
+        animatorComp.type = AnimatorType.POS;
+        animatorComp.duration = duration;
+        animatorComp.commandOnFinish = commandOnFinish;
+        animatorComp.interpolation = interpolation;
+        return animatorComp;
     }
 
-    public Factory addPosAnimationNormal(float accel, float rounding, Command commandOnFinish, Interpolation interpolation) {
-        if (!creating) return null;
-        posAnimComp = engine.createComponent(PosAnimationComponent.class);
-        posAnimComp.pos.set(transformComp.pos);
-        posAnimComp.accel = accel;
-        posAnimComp.rounding = rounding;
-        posAnimComp.commandOnFinish = commandOnFinish;
-        posAnimComp.interpolation = interpolation;
-
-        entity.add(posAnimComp);
-        return this;
-    }
-
-    public Factory addAnimationNormal(float targetX, float targetY, float accel, float rounding, Command commandOnFinish, Interpolation interpolation) {
-        if (!creating) return null;
-        posAnimComp = engine.createComponent(PosAnimationComponent.class);
-        posAnimComp.pos.set(transformComp.pos);
-        posAnimComp.target.set(targetX, targetY);
-        posAnimComp.accel = accel;
-        posAnimComp.rounding = rounding;
-        posAnimComp.commandOnFinish = commandOnFinish;
-        posAnimComp.interpolation = interpolation;
-
-        entity.add(posAnimComp);
-        return this;
-    }
-
-    public Factory addAnimationLoop(float targetX, float targetY, float accel, float rounding, Command commandOnFinish, Interpolation interpolation) {
-        if (!creating) return null;
-        posAnimComp = engine.createComponent(PosAnimationComponent.class);
-        posAnimComp.pos.set(transformComp.pos);
-        posAnimComp.target.set(targetX, targetY);
-        posAnimComp.accel = accel;
-        posAnimComp.rounding = rounding;
-        posAnimComp.commandOnFinish = commandOnFinish;
-        posAnimComp.interpolation = interpolation;
-        posAnimComp.mode = AnimationMode.LOOP;
-
-        entity.add(posAnimComp);
-        return this;
-    }
-
-    public Factory addAnimationPingPong(float targetX, float targetY, float accel, float rounding, Command commandOnFinish, Interpolation interpolation, float pingX, float pingY) {
-        if (!creating) return null;
-        posAnimComp = engine.createComponent(PosAnimationComponent.class);
-        posAnimComp.pos.set(transformComp.pos);
-        posAnimComp.target.set(targetX, targetY);
-        posAnimComp.accel = accel;
-        posAnimComp.rounding = rounding;
-        posAnimComp.commandOnFinish = commandOnFinish;
-        posAnimComp.interpolation = interpolation;
-        posAnimComp.mode = AnimationMode.PING_PONG;
-        posAnimComp.pingPongPos.set(pingX, pingY);
-
-        entity.add(posAnimComp);
-        return this;
+    /** Put After setting transform */
+    public VecAnimatorComponent createScaleAnimator(float duration, Command commandOnFinish, Interpolation interpolation) {
+        animatorComp = engine.createComponent(VecAnimatorComponent.class);
+        animatorComp.animatedVecPointer = transformComp.scale;
+        animatorComp.type = AnimatorType.SCALE;
+        animatorComp.duration = duration;
+        animatorComp.commandOnFinish = commandOnFinish;
+        animatorComp.interpolation = interpolation;
+        return animatorComp;
     }
 
     public Factory addCursor() {
