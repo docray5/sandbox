@@ -63,12 +63,18 @@ public class ClickableSystem extends SortedIteratingSystem {
 
             updateBlur = true;
             
-            if (clickCompTmp.onTouchUpCommand != null)
+            if (clickCompTmp.onTouchUpCommand != null) {
                 clickCompTmp.onTouchUpCommand.setEntity(entityTmp).execute();
-
-            if (clickCompTmp.hitBox.contains(mousePos) && clickCompTmp.onClickCommand != null) {
-                clickCompTmp.onClickCommand.execute();
+                // We are not 100% sure if cursor is on top so if it is then: (a neat Qof)
+                if (clickCompTmp.hitBox.contains(mousePos)) {
+                    clickCompTmp.hovered = true;
+                    if (clickCompTmp.onMouseOverCommand != null)
+                        clickCompTmp.onMouseOverCommand.setEntity(entityTmp).execute();
+                }
             }
+
+            if (clickCompTmp.hitBox.contains(mousePos) && clickCompTmp.onClickCommand != null)
+                clickCompTmp.onClickCommand.execute();
         }
     }
 
