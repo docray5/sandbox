@@ -2,6 +2,7 @@ package com.falling.systems;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.Vector2;
 import com.falling.components.AnimationComponent;
 import com.falling.components.VecAnimatorComponent;
 import com.falling.components.VecAnimatorComponent.AnimatorType;
@@ -14,10 +15,12 @@ public class AnimationSystem extends IteratingSystem {
     private VecAnimatorComponent vecAnimator;
     private AnimationComponent animation;
     private float progress;
+    private Vector2 vector2Helper;
 
     public AnimationSystem(int priority) {
         super(animationFamily, priority);
         vecAnimator = null;
+        vector2Helper = new Vector2();
     }
 
     @Override
@@ -27,7 +30,7 @@ public class AnimationSystem extends IteratingSystem {
         for (int i = animation.animators.size-1; i >= 0; i--) {
             vecAnimator = animation.animators.get(i);
 
-            if (!vecAnimator.isAnimating) continue;
+            if (vecAnimator.repeatTimes == 0) continue;
 
             vecAnimator.elapsed += deltaTime;
 
@@ -40,16 +43,21 @@ public class AnimationSystem extends IteratingSystem {
 
             // Animation ended
             if (progress == 1f) {
-                vecAnimator.isAnimating = false;
+                vecAnimator.repeatTimes--;
                 vecAnimator.elapsed = 0;
-                if (vecAnimator.commandOnFinish != null)
+                if (vecAnimator.repeatTimes > 0 || vecAnimator.repeatTimes == -1) {
+                    vector2Helper.set(vecAnimator.start);
+                    vecAnimator.start.set(vecAnimator.target);
+                    vecAnimator.target.set(vector2Helper);
+                }
+                if (vecAnimator.commandOnFinish != null && (vecAnimator.cmdOnEveryFinish || vecAnimator.repeatTimes == 0))
                     vecAnimator.commandOnFinish.execute();
             }
         }
 
     }
 
-    public void animateTo(AnimationComponent animationComponent, AnimatorType animatorType, float tx, float ty, boolean additive) {
+    public void animateTo(AnimationComponent animationComponent, AnimatorType animatorType, float tx, float ty, boolean additive, int repeat) {
         for (int i = animationComponent.animators.size-1; i >= 0; i--) {
             vecAnimator = animationComponent.animators.get(i);
             if (vecAnimator.type == animatorType) {
@@ -60,7 +68,7 @@ public class AnimationSystem extends IteratingSystem {
                 else 
                     vecAnimator.target.set(tx, ty);
 
-                vecAnimator.isAnimating = true;
+                vecAnimator.repeatTimes = repeat;
                 vecAnimator.elapsed = 0;
                 updateBlur = true;
             }

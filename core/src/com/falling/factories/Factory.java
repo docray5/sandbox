@@ -74,23 +74,35 @@ public class Factory {
 
     /** Put After setting transform */
     public VecAnimatorComponent createPosAnimator(float duration, Command commandOnFinish, Interpolation interpolation) {
+        return createPosAnimator(duration, commandOnFinish, interpolation, false);
+    }
+
+    /** Put After setting transform */
+    public VecAnimatorComponent createScaleAnimator(float duration, Command commandOnFinish, Interpolation interpolation) {
+        return createScaleAnimator(duration, commandOnFinish, interpolation, false);
+    }
+
+    /** Put After setting transform */
+    public VecAnimatorComponent createPosAnimator(float duration, Command commandOnFinish, Interpolation interpolation, boolean cmdOnEveryFinish) {
         animatorComp = engine.createComponent(VecAnimatorComponent.class);
         animatorComp.animatedVecPointer = transformComp.pos;
         animatorComp.type = AnimatorType.POS;
         animatorComp.duration = duration;
         animatorComp.commandOnFinish = commandOnFinish;
         animatorComp.interpolation = interpolation;
+        animatorComp.cmdOnEveryFinish = cmdOnEveryFinish;
         return animatorComp;
     }
 
     /** Put After setting transform */
-    public VecAnimatorComponent createScaleAnimator(float duration, Command commandOnFinish, Interpolation interpolation) {
+    public VecAnimatorComponent createScaleAnimator(float duration, Command commandOnFinish, Interpolation interpolation, boolean cmdOnEveryFinish) {
         animatorComp = engine.createComponent(VecAnimatorComponent.class);
         animatorComp.animatedVecPointer = transformComp.scale;
         animatorComp.type = AnimatorType.SCALE;
         animatorComp.duration = duration;
         animatorComp.commandOnFinish = commandOnFinish;
         animatorComp.interpolation = interpolation;
+        animatorComp.cmdOnEveryFinish = cmdOnEveryFinish;
         return animatorComp;
     }
 

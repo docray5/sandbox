@@ -16,9 +16,11 @@ public class VecAnimatorComponent implements Component, Pool.Poolable {
     public float elapsed = 0;
     public float duration = 1f;
     public Interpolation interpolation = Interpolation.linear;
-    public boolean isAnimating = false;
     public Command commandOnFinish = null;
     public AnimatorType type = null;
+    /** n=-1 -> loop | n=1 -> normal | n>1 -> repeat n times | n=0 no animation */
+    public int repeatTimes = 0;
+    public boolean cmdOnEveryFinish = false;
 
     @Override
     public void reset() {
@@ -28,9 +30,10 @@ public class VecAnimatorComponent implements Component, Pool.Poolable {
         elapsed = 0;
         duration = 1f;
         interpolation = Interpolation.linear;
-        isAnimating = false;
         commandOnFinish = null;
         type = null;
+        repeatTimes = 0;
+        cmdOnEveryFinish = false;
     }
 
     public enum AnimatorType {
