@@ -24,14 +24,22 @@ public class ClickableSystem extends SortedIteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        if (renderableMapper.has(entity) && texRegionMapper.has(entity) && renderableMapper.get(entity).center) {
+        if (renderableMapper.has(entity) && renderableMapper.get(entity).center) {
             posTmp.set(transformMapper.get(entity).pos);
-            posTmp.x -= texRegionMapper.get(entity).textureRegion.getRegionWidth()/2f;
-            posTmp.y -= texRegionMapper.get(entity).textureRegion.getRegionHeight()/2f;
+            if (texRegionMapper.has(entity)) {
+                posTmp.x -= texRegionMapper.get(entity).textureRegion.getRegionWidth()/2f;
+                posTmp.y -= texRegionMapper.get(entity).textureRegion.getRegionHeight()/2f;
+            } else if (ninepatchMapper.has(entity)) {
+                posTmp.x -= ninepatchMapper.get(entity).size.x/2f;
+                posTmp.y -= ninepatchMapper.get(entity).size.y/2f;
+            }
             clickableMapper.get(entity).hitBox.setPosition(posTmp);
         }
         else
             clickableMapper.get(entity).hitBox.setPosition(transformMapper.get(entity).pos);
+
+        if (ninepatchMapper.has(entity))
+            clickableMapper.get(entity).hitBox.setSize(ninepatchMapper.get(entity).size.x, ninepatchMapper.get(entity).size.y);
     }
 
     public void touchDown() {

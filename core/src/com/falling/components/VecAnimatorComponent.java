@@ -37,7 +37,7 @@ public class VecAnimatorComponent implements Component, Pool.Poolable {
     }
 
     public enum AnimatorType {
-        POS, SCALE, ROTATION
+        POS, SCALE, ROTATION, SIZE
     }
 
     // Old but did not want to delete

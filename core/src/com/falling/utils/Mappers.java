@@ -16,6 +16,7 @@ public class Mappers {
     public static ComponentMapper<TypeComponent> typeMapper;
     public static ComponentMapper<ElementComponent> elementMapper;
     public static ComponentMapper<UITranslateComponent> uiTranslateMapper;
+    public static ComponentMapper<NinepatchComponent> ninepatchMapper;
 
     public static void init() {
         transformMapper = ComponentMapper.getFor(TransformComponent.class);
@@ -30,5 +31,6 @@ public class Mappers {
         typeMapper = ComponentMapper.getFor(TypeComponent.class);
         elementMapper = ComponentMapper.getFor(ElementComponent.class);
         uiTranslateMapper = ComponentMapper.getFor(UITranslateComponent.class);
+        ninepatchMapper = ComponentMapper.getFor(NinepatchComponent.class);
     }
 }

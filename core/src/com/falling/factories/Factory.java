@@ -1,6 +1,7 @@
 package com.falling.factories;
 
 import com.badlogic.ashley.core.*;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
@@ -28,6 +29,7 @@ public class Factory {
     private PixmapComponent pixmapComp;
     private ElementComponent elementComp;
     private ClickableComponent clickableComp;
+    private NinepatchComponent ninepatchComp;
 
     private boolean creating;
 
@@ -72,21 +74,29 @@ public class Factory {
         return this;
     }
 
-    /** Put After setting transform */
-    public VecAnimatorComponent createPosAnimator(float duration, Command commandOnFinish, Interpolation interpolation) {
-        return createPosAnimator(duration, commandOnFinish, interpolation, false);
+    /** Put After setting transform and or NinePatch */
+    public VecAnimatorComponent createAnimator(AnimatorType type, float duration, Command commandOnFinish, Interpolation interpolation) {
+        return createAnimator(type, duration, commandOnFinish, interpolation, false);
     }
 
-    /** Put After setting transform */
-    public VecAnimatorComponent createScaleAnimator(float duration, Command commandOnFinish, Interpolation interpolation) {
-        return createScaleAnimator(duration, commandOnFinish, interpolation, false);
-    }
-
-    /** Put After setting transform */
-    public VecAnimatorComponent createPosAnimator(float duration, Command commandOnFinish, Interpolation interpolation, boolean cmdOnEveryFinish) {
+    /** Put After setting transform and or NinePatch */
+    public VecAnimatorComponent createAnimator(AnimatorType type, float duration, Command commandOnFinish, Interpolation interpolation, boolean cmdOnEveryFinish) {
         animatorComp = engine.createComponent(VecAnimatorComponent.class);
-        animatorComp.animatedVecPointer = transformComp.pos;
-        animatorComp.type = AnimatorType.POS;
+
+        switch (type) {
+            case POS:
+                animatorComp.animatedVecPointer = transformComp.pos;
+                break;
+            case SCALE:
+                animatorComp.animatedVecPointer = transformComp.scale;
+                break;
+            case SIZE:
+                animatorComp.animatedVecPointer = ninepatchComp.size;
+            default:
+                break;
+        }
+
+        animatorComp.type = type;
         animatorComp.duration = duration;
         animatorComp.commandOnFinish = commandOnFinish;
         animatorComp.interpolation = interpolation;
@@ -94,18 +104,7 @@ public class Factory {
         return animatorComp;
     }
 
-    /** Put After setting transform */
-    public VecAnimatorComponent createScaleAnimator(float duration, Command commandOnFinish, Interpolation interpolation, boolean cmdOnEveryFinish) {
-        animatorComp = engine.createComponent(VecAnimatorComponent.class);
-        animatorComp.animatedVecPointer = transformComp.scale;
-        animatorComp.type = AnimatorType.SCALE;
-        animatorComp.duration = duration;
-        animatorComp.commandOnFinish = commandOnFinish;
-        animatorComp.interpolation = interpolation;
-        animatorComp.cmdOnEveryFinish = cmdOnEveryFinish;
-        return animatorComp;
-    }
-
+    /** what the fk???? */
     public Factory addCursor() {
         if (!creating) return null;
         cursorComp = engine.createComponent(CursorComponent.class);
@@ -283,6 +282,31 @@ public class Factory {
         clickableComp.vibrationMs = vibrationMs;
 
         entity.add(clickableComp);
+        return this;
+    }
+
+    public Factory addNinePatch(String textureFn, int left, int right, int top, int bottom, float width, float height) {
+        if (!creating) return null;
+        ninepatchComp = engine.createComponent(NinepatchComponent.class);
+
+        ninepatchComp.ninePatch = new NinePatch(assets.getTexture(textureFn), left, right, top, bottom);
+        ninepatchComp.size.x = width;
+        ninepatchComp.size.y = height;
+
+        entity.add(ninepatchComp);
+        return this;
+    }
+
+    /** width and height is set to width and height of the texture */
+    public Factory addNinePatch(String textureFn, int left, int right, int top, int bottom) {
+        if (!creating) return null;
+        ninepatchComp = engine.createComponent(NinepatchComponent.class);
+
+        ninepatchComp.ninePatch = new NinePatch(assets.getTexture(textureFn), left, right, top, bottom);
+        ninepatchComp.size.x = ninepatchComp.ninePatch.getTotalWidth();
+        ninepatchComp.size.y = ninepatchComp.ninePatch.getTotalHeight();
+
+        entity.add(ninepatchComp);
         return this;
     }
 }

@@ -14,7 +14,7 @@ public class Families {
     public static Family worldFamily;
 
     public static void init() {
-        renderableFamily = Family.all(TransformComponent.class, RenderableComponent.class).one(TextureRegionComponent.class, TextComponent.class).get();
+        renderableFamily = Family.all(TransformComponent.class, RenderableComponent.class).one(TextureRegionComponent.class, TextComponent.class, NinepatchComponent.class).get();
         clickableFamily = Family.all(ClickableComponent.class, TransformComponent.class).get();
         animationFamily = Family.all(AnimationComponent.class, TransformComponent.class).get();
         textFamily = Family.all(RenderableComponent.class, TransformComponent.class, TextComponent.class).get();

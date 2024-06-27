@@ -2,10 +2,12 @@ package com.falling.systems;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -46,6 +48,7 @@ public class RenderSystem extends SortedIteratingSystem {
     private float heightTmp;
     private float drawX;
     private float drawY;
+    private NinepatchComponent ninepatchTmp;
 
     public RenderSystem(int priority) {
         super(renderableFamily, new PriorityComparator(), priority);
@@ -195,6 +198,26 @@ public class RenderSystem extends SortedIteratingSystem {
 
                 if (pixelate) pixelatePos();
                 textTmp.font.draw(spriteBatch, textTmp.text, drawX - textTmp.glyphLayout.width/2f, drawY - textTmp.glyphLayout.height/2f);
+            } else if (ninepatchMapper.has(entityTmp)) {
+                ninepatchTmp = ninepatchMapper.get(entityTmp);
+
+                widthTmp = ninepatchTmp.size.x;
+                heightTmp = ninepatchTmp.size.y;
+                
+                if (renderableTmp.center) {
+                    drawX -= widthTmp/2f;
+                    drawY -= heightTmp/2f;
+                }
+
+                if (pixelate) pixelatePos();
+
+                spriteBatch.setColor(renderableTmp.color);
+                ninepatchTmp.ninePatch.draw(spriteBatch, drawX, drawY,
+                    widthTmp/2f, heightTmp/2f,
+                    ninepatchTmp.size.x, ninepatchTmp.size.y,
+                    transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
+
+                spriteBatch.setColor(1, 1, 1, 1);
             }
         }
     }

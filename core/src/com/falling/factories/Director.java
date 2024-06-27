@@ -10,11 +10,11 @@ import com.falling.commands.*;
 import com.falling.components.ResizeComponent;
 import com.falling.components.TypeComponent;
 import com.falling.components.ResizeComponent.STICK_TYPE;
-import com.falling.components.VecAnimatorComponent.AnimatorType;
 
 import static com.falling.components.ElementComponent.*;
 import static com.falling.Core.*;
 import static com.falling.components.ElementComponent.ElementType.*;
+import static com.falling.components.VecAnimatorComponent.AnimatorType.*;
 
 public class Director {
     public static Director instance;
@@ -39,8 +39,22 @@ public class Director {
                 .setCenter(true)
                 .endComponent()
                 .addTextureRegion("title")
-                .addAnimation(factory.createPosAnimator(1, null, Interpolation.swingOut))
+                .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut))
                 .endEntity();
+    }
+    
+    public void createNinePatch() {
+        factory.createEntity()
+            .addTransform(100, 100)
+            .addResize(STICK_TYPE.RIGHT_TOP)
+            .addRenderable()
+                .setPriority(10)
+                .setCenter(true)
+            .endComponent()
+            .addNinePatch("np", 14, 14, 14, 14, 40, 40)
+            .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut), factory.createAnimator(SIZE, 0.25f, null, Interpolation.swingOut))
+            .addClickableAuto(null, new AnimToCmd(engine, SIZE, 40-10, 40-10, false), new AnimToCmd(engine, SIZE, 40, 40, false), new AnimToCmd(engine, SIZE, 44, 44, false), new AnimToCmd(engine, SIZE, 40, 40, false), 0, 10)
+            .endEntity();
     }
 
     public void createSpawnArea() {
@@ -63,8 +77,8 @@ public class Director {
                 .setCenter(true)
             .endComponent()
             .addTextureRegion(fn)
-            .addAnimation(factory.createPosAnimator(1, null, Interpolation.swingOut), factory.createScaleAnimator(0.25f, null, Interpolation.swingOut))
-            .addClickableAuto(commandOnClick, new AnimToCmd(engine, AnimatorType.SCALE, 0.7f, 0.7f, false), new AnimToCmd(engine, AnimatorType.SCALE, 1f, 1f, false), new AnimToCmd(engine, AnimatorType.SCALE, 1.1f, 1.1f, false), new AnimToCmd(engine, AnimatorType.SCALE, 1f, 1f, false), 0, 10)
+            .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut))
+            .addClickableAuto(commandOnClick, new AnimToCmd(engine, SCALE, 0.7f, 0.7f, false), new AnimToCmd(engine, SCALE, 1f, 1f, false), new AnimToCmd(engine, SCALE, 1.1f, 1.1f, false), new AnimToCmd(engine, SCALE, 1f, 1f, false), 0, 10)
             .endEntity();
     }
 

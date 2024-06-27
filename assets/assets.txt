@@ -5,5 +5,6 @@ shaders/blurVert.glsl
 textures/abtn.png
 textures/boot.png
 textures/btn.png
+textures/np.png
 textures/test.png
 textures/title.png

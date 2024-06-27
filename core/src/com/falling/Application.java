@@ -66,6 +66,7 @@ public class Application implements ApplicationListener  {
         Director.instance.createStartText();
         Director.instance.createBlurBtn();
         Director.instance.createPauseBtn();
+        Director.instance.createNinePatch();
     }
 
     @Override
