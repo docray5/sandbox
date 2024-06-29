@@ -6,6 +6,7 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.falling.assets.Assets;
 import com.falling.commands.Commands;
+import com.falling.events.EventQueue;
 import com.falling.factories.Director;
 import com.falling.systems.*;
 import com.falling.utils.*;
@@ -29,6 +30,7 @@ public class Application implements ApplicationListener  {
         engine = new PooledEngine();
         Director.setInstance(new Director(engine, assets));
         Commands.setInstance(new Commands(engine, this));
+        EventQueue.setInstance();
 
         engine.addSystem(new AnimationSystem(1));
         engine.addSystem(new ResizeableSystem(7));
@@ -45,6 +47,8 @@ public class Application implements ApplicationListener  {
 
         // =================== Input -> Update -> Render, The Engine ===================
         engine.update(Gdx.graphics.getDeltaTime());
+
+        EventQueue.instance.clearEvents();
 	}
 
     public void startGame() {

@@ -180,7 +180,7 @@ public class RenderSystem extends SortedIteratingSystem {
                     drawY -= heightTmp/2f;
                 }
 
-                if (pixelate) pixelatePos();
+                // if (pixelate) pixelatePos();
 
                 // ==== Draw texture ====
                 spriteBatch.setColor(renderableTmp.color);
@@ -196,7 +196,7 @@ public class RenderSystem extends SortedIteratingSystem {
                 textTmp.font.setColor(renderableTmp.color);
                 textTmp.glyphLayout.setText(textTmp.font, textTmp.text);
 
-                if (pixelate) pixelatePos();
+                // if (pixelate) pixelatePos();
                 textTmp.font.draw(spriteBatch, textTmp.text, drawX - textTmp.glyphLayout.width/2f, drawY - textTmp.glyphLayout.height/2f);
             } else if (ninepatchMapper.has(entityTmp)) {
                 ninepatchTmp = ninepatchMapper.get(entityTmp);
@@ -209,7 +209,7 @@ public class RenderSystem extends SortedIteratingSystem {
                     drawY -= heightTmp/2f;
                 }
 
-                if (pixelate) pixelatePos();
+                // if (pixelate) pixelatePos();
 
                 spriteBatch.setColor(renderableTmp.color);
                 ninepatchTmp.ninePatch.draw(spriteBatch, drawX, drawY,

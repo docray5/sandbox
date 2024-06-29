@@ -18,7 +18,7 @@ import static com.falling.components.VecAnimatorComponent.AnimatorType.*;
 
 public class Director {
     public static Director instance;
-    public static void setInstance(Director _instance) { instance = _instance; }
+    public static void setInstance(Director _instance) { if (instance==null) instance = _instance; }
 
     private final Factory factory;
     private final Engine engine;

@@ -7,7 +7,7 @@ import com.falling.Application;
 public class Commands {
 
     public static Commands instance;
-    public static void setInstance(Commands _instance) { instance = _instance; }
+    public static void setInstance(Commands _instance) { if (instance==null) instance = _instance; }
 
     public final StartGameCmd startGame;
 
