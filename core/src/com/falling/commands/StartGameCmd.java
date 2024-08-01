@@ -1,13 +1,11 @@
 package com.falling.commands;
 
-import com.badlogic.ashley.core.Engine;
 import com.falling.Application;
 
 public class StartGameCmd extends Command {
     private final Application application;
 
-	public StartGameCmd(Engine engine, Application application) {
-		super(engine);
+	public StartGameCmd(Application application) {
         this.application = application;
 	}
 

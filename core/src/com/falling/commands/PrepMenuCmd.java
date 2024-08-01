@@ -1,6 +1,5 @@
 package com.falling.commands;
 
-import com.badlogic.ashley.core.Engine;
 import com.falling.systems.UITranslateSystem;
 
 /**
@@ -9,8 +8,7 @@ import com.falling.systems.UITranslateSystem;
 public class PrepMenuCmd extends Command {
     private final UITranslateSystem uiTranslateSystem;
 
-    public PrepMenuCmd(Engine engine) {
-        super(engine);
+    public PrepMenuCmd() {
         uiTranslateSystem = engine.getSystem(UITranslateSystem.class);
     }
 

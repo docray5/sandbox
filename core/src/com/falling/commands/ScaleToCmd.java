@@ -2,13 +2,13 @@ package com.falling.commands;
 
 import static com.falling.utils.Mappers.transformMapper;
 
-import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
 
 public class ScaleToCmd extends Command {
     private float scale;
 
-    public ScaleToCmd(Engine engine, float scaleTo) {
-        super(engine);
+    public ScaleToCmd(Entity entity, float scaleTo) {
+        super(entity);
         scale = scaleTo;
     }
 

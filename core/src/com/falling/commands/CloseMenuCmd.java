@@ -1,7 +1,6 @@
 package com.falling.commands;
 
 import com.falling.systems.UITranslateSystem;
-import com.badlogic.ashley.core.Engine;
 
 /**
  * CloseMenu
@@ -9,8 +8,7 @@ import com.badlogic.ashley.core.Engine;
 public class CloseMenuCmd extends Command {
    private final UITranslateSystem uiTranslateSystem;
 
-    public CloseMenuCmd(Engine engine) {
-        super(engine);
+    public CloseMenuCmd() {
         uiTranslateSystem = engine.getSystem(UITranslateSystem.class);
     }
 

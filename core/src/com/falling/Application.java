@@ -12,7 +12,10 @@ import com.falling.systems.*;
 import com.falling.utils.*;
 
 public class Application implements ApplicationListener  {
-    private PooledEngine engine;
+
+    public static PooledEngine getEngine() { return engine; }
+
+    private static PooledEngine engine;
     private RenderSystem renderSystem;
     private Assets assets;
     private boolean started = false;
@@ -29,7 +32,7 @@ public class Application implements ApplicationListener  {
         // ======================= Initialize Engine =======================
         engine = new PooledEngine();
         Director.setInstance(new Director(engine, assets));
-        Commands.setInstance(new Commands(engine, this));
+        Commands.setInstance(new Commands(this));
         EventQueue.setInstance();
 
         engine.addSystem(new AnimationSystem(1));
@@ -62,14 +65,14 @@ public class Application implements ApplicationListener  {
         engine.addSystem(new TempCursorSystem(4));
         engine.addSystem(new WorldSystem(5));
 
-        Commands.instance.initAfterAssets(engine);
+        Commands.instance.initAfterAssets();
         Gdx.input.setInputProcessor(new InputSystem(renderSystem.getViewport(), engine));
 
         // Scene related:
         Director.instance.createSpawnArea();
         Director.instance.createStartText();
         Director.instance.createBlurBtn();
-        Director.instance.createPauseBtn();
+        // Director.instance.createPauseBtn();
         Director.instance.createNinePatch();
     }
 

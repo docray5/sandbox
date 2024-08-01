@@ -2,14 +2,14 @@ package com.falling.commands;
 
 import static com.falling.utils.Mappers.transformMapper;
 
-import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
 
 public class RotateToCmd extends Command {
     private float rotateTo;
     private boolean additive;
 
-    public RotateToCmd(Engine engine, float rotateTo, boolean additive) {
-        super(engine);
+    public RotateToCmd(Entity entity, float rotateTo, boolean additive) {
+        super(entity);
         this.rotateTo = rotateTo;
         this.additive = additive;
     }

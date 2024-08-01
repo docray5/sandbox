@@ -1,6 +1,5 @@
 package com.falling.commands;
 
-import com.badlogic.ashley.core.Engine;
 import com.falling.Application;
 
 /** Global Commands and a Wrapper class for cleaner Director class */
@@ -26,24 +25,24 @@ public class Commands {
     public PauseWorldCmd pauseWorld;
 
     /** inits core commands for loading screen */
-    public Commands(Engine engine, Application application) {
-        startGame = new StartGameCmd(engine, application);
+    public Commands(Application application) {
+        startGame = new StartGameCmd(application);
     }
 
     /** init the other commands that are used with systems that need assets to be loaded */
-    public void initAfterAssets(Engine engine) {
-        touchDown = new TouchDownCmd(engine);
-        touchUp = new TouchUpCmd(engine);
-        mouseMoved = new MouseMovedCmd(engine);
-        shiftBlur = new ShiftBlurCmd(engine);
-        openMenu = new OpenMenuCmd(engine);
-        closeMenu = new CloseMenuCmd(engine);
-        prepMenu = new PrepMenuCmd(engine);
-        spawnElementDown = new SpawnElementDownCmd(engine);
-        spawnElementUp = new SpawnElementUpCmd(engine);
-        selectElement = new SelectElementCmd(engine);
-        selectBrush = new SelectBrushCmd(engine);
-        resize = new ResizeCmd(engine);
-        pauseWorld = new PauseWorldCmd(engine);
+    public void initAfterAssets() {
+        touchDown = new TouchDownCmd();
+        touchUp = new TouchUpCmd();
+        mouseMoved = new MouseMovedCmd();
+        shiftBlur = new ShiftBlurCmd();
+        openMenu = new OpenMenuCmd();
+        closeMenu = new CloseMenuCmd();
+        prepMenu = new PrepMenuCmd();
+        spawnElementDown = new SpawnElementDownCmd();
+        spawnElementUp = new SpawnElementUpCmd();
+        selectElement = new SelectElementCmd();
+        selectBrush = new SelectBrushCmd();
+        resize = new ResizeCmd();
+        pauseWorld = new PauseWorldCmd();
     }
 }

@@ -1,13 +1,11 @@
 package com.falling.commands;
 
 import com.falling.systems.WorldSystem;
-import com.badlogic.ashley.core.Engine;
 
 public class SpawnElementUpCmd extends Command {
     private final WorldSystem worldSystem;
 
-    public SpawnElementUpCmd(Engine engine) {
-        super(engine);
+    public SpawnElementUpCmd() {
         worldSystem = engine.getSystem(WorldSystem.class);
     }
 

@@ -3,7 +3,7 @@ package com.falling.commands;
 import static com.falling.utils.Mappers.animationMapper;
 import static com.falling.utils.Mappers.transformMapper;
 
-import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.Array;
 import com.falling.components.VecAnimatorComponent;
 import com.falling.components.VecAnimatorComponent.AnimatorType;
@@ -16,8 +16,8 @@ public class TranslateToCmd extends Command {
     private Array<VecAnimatorComponent> animatorsTmp;
     private boolean additive;
 
-    public TranslateToCmd(Engine engine, float transToX, float transToY, boolean additive) {
-        super(engine);
+    public TranslateToCmd(Entity entity, float transToX, float transToY, boolean additive) {
+        super(entity);
         x = transToX;
         y = transToY;
         this.additive = additive;

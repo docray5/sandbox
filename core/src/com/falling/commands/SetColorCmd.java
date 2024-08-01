@@ -2,21 +2,20 @@ package com.falling.commands;
 
 import static com.falling.utils.Mappers.renderableMapper;
 
-import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 
 public class SetColorCmd extends Command {
     private Color color;
     private boolean additive;
 
-    public SetColorCmd(Engine engine, float r, float g, float b, float a, boolean additive) {
-        super(engine);
+    public SetColorCmd(Entity entity, float r, float g, float b, float a, boolean additive) {
+        super(entity);
         color = new Color(r, g, b, a);
         this.additive = additive;
     }
 
-    public SetColorCmd(Engine engine, Color color) {
-        super(engine);
+    public SetColorCmd(Color color) {
         this.color = new Color(color);
     }
 

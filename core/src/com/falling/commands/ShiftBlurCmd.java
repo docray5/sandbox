@@ -1,6 +1,5 @@
 package com.falling.commands;
 
-import com.badlogic.ashley.core.Engine;
 import com.falling.systems.RenderSystem;
 
 /**
@@ -9,8 +8,7 @@ import com.falling.systems.RenderSystem;
 public class ShiftBlurCmd extends Command {
     private final RenderSystem renderSystem;
 
-    public ShiftBlurCmd(Engine engine) {
-        super(engine);
+    public ShiftBlurCmd() {
         renderSystem = engine.getSystem(RenderSystem.class);
     }
 

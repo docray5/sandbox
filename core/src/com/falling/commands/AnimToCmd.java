@@ -2,7 +2,7 @@ package com.falling.commands;
 
 import static com.falling.utils.Mappers.animationMapper;
 
-import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
 import com.falling.components.VecAnimatorComponent.AnimatorType;
 import com.falling.systems.AnimationSystem;
 
@@ -20,16 +20,16 @@ public class AnimToCmd extends Command {
     /**
      * @param additive determines whether to add the x and y to current positon or move to x and y
      */
-    public AnimToCmd(Engine engine, AnimatorType animatorType, float animToX, float animToY, boolean additive) {
-        this(engine, animatorType, animToX, animToY, additive, 1);
+    public AnimToCmd(Entity entity, AnimatorType animatorType, float animToX, float animToY, boolean additive) {
+        this(entity, animatorType, animToX, animToY, additive, 1);
     }
 
     /**
      * @param additive determines whether to add the x and y to current positon or move to x and y
      * @param repeatTimes n=-1 -> loop | n=1 -> normal | n>1 -> repeat n times | n=0 no animation
      */
-    public AnimToCmd(Engine engine, AnimatorType animatorType, float animToX, float animToY, boolean additive, int repeatTimes) {
-        super(engine);
+    public AnimToCmd(Entity entity, AnimatorType animatorType, float animToX, float animToY, boolean additive, int repeatTimes) {
+        super(entity);
         posAnimationSystem = engine.getSystem(AnimationSystem.class);
         this.animatorType = animatorType;
         this.animToX = animToX;

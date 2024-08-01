@@ -1,6 +1,5 @@
 package com.falling.commands;
 
-import com.badlogic.ashley.core.Engine;
 import com.falling.systems.WorldSystem;
 import com.falling.systems.WorldSystem.BrushType;
 
@@ -8,8 +7,7 @@ public class SelectBrushCmd extends Command {
     private final WorldSystem worldSystem;
     private BrushType brushType;
 
-	public SelectBrushCmd(Engine engine) {
-		super(engine);
+	public SelectBrushCmd() {
         worldSystem = engine.getSystem(WorldSystem.class);
 	}
 

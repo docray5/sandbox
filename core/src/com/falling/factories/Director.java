@@ -53,7 +53,7 @@ public class Director {
             .endComponent()
             .addNinePatch("np", 14, 14, 14, 14, 40, 40)
             .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut), factory.createAnimator(SIZE, 0.25f, null, Interpolation.swingOut))
-            .addClickableAuto(null, new AnimToCmd(engine, SIZE, 40-10, 40-10, false), new AnimToCmd(engine, SIZE, 40, 40, false), new AnimToCmd(engine, SIZE, 44, 44, false), new AnimToCmd(engine, SIZE, 40, 40, false), 0, 10)
+            .addClickableAuto(Commands.instance.pauseWorld, new AnimToCmd(factory.getEntity(), SIZE, 40-10, 40-10, false), new AnimToCmd(factory.getEntity(), SIZE, 40, 40, false), new AnimToCmd(factory.getEntity(), SIZE, 44, 44, false), new AnimToCmd(factory.getEntity(), SIZE, 40, 40, false), 0, 10)
             .endEntity();
     }
 
@@ -78,7 +78,7 @@ public class Director {
             .endComponent()
             .addTextureRegion(fn)
             .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut))
-            .addClickableAuto(commandOnClick, new AnimToCmd(engine, SCALE, 0.7f, 0.7f, false), new AnimToCmd(engine, SCALE, 1f, 1f, false), new AnimToCmd(engine, SCALE, 1.1f, 1.1f, false), new AnimToCmd(engine, SCALE, 1f, 1f, false), 0, 10)
+            .addClickableAuto(commandOnClick, new AnimToCmd(factory.getEntity(), SCALE, 0.7f, 0.7f, false), new AnimToCmd(factory.getEntity(), SCALE, 1f, 1f, false), new AnimToCmd(factory.getEntity(), SCALE, 1.1f, 1.1f, false), new AnimToCmd(factory.getEntity(), SCALE, 1f, 1f, false), 0, 10)
             .endEntity();
     }
 
