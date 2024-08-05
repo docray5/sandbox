@@ -6,7 +6,6 @@ public class SpawnElementDownCmd extends Command {
     private final WorldSystem worldSystem;
 
     public SpawnElementDownCmd() {
-        super();
         worldSystem = engine.getSystem(WorldSystem.class);
     }
 

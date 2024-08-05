@@ -10,8 +10,6 @@ import com.falling.components.ElementComponent;
 import com.falling.components.PixmapComponent;
 import com.falling.components.TextureRegionComponent;
 import com.falling.components.ElementComponent.ElementType;
-import com.falling.events.Event;
-import com.falling.events.EventHandler;
 import com.falling.factories.Director;
 
 import static com.falling.utils.Mappers.*;
@@ -20,8 +18,6 @@ import static com.falling.components.ElementComponent.ElementType.*;
 import static com.falling.components.ElementComponent.MatterType.*;
 
 public class WorldSystem extends EntitySystem {
-    private EventHandler eventHandler;
-
     private Entity[][] world;
     private int worldSW;
     private int worldSH;
@@ -57,12 +53,6 @@ public class WorldSystem extends EntitySystem {
     public WorldSystem(int priority) {
 		super(priority);
 
-        eventHandler = new EventHandler(this.getClass()) {
-            @Override
-            public void processEvent(Event event) {
-            }
-        };
-
         worldSW = (int) worldWidth;
         worldSH = (int) worldHeight;
         xOffsetI = (int) xGutOffset;
@@ -87,8 +77,6 @@ public class WorldSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        eventHandler.handleEvents();
-
         if (spawnElement) {
             draw();
             if (!pause) update = true;
