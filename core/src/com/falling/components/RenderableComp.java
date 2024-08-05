@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Pool;
 
-public class RenderableComponent implements Component, Pool.Poolable {
+public class RenderableComp implements Component, Pool.Poolable {
     public Color color = new Color(1, 1, 1, 1);
     /**lowest will be drawn first*/
     public int priority = 0;

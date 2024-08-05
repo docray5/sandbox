@@ -7,9 +7,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
 import com.falling.commands.Command;
 import com.falling.components.*;
-import com.falling.components.ElementComponent.ElementType;
-import com.falling.components.ElementComponent.MatterType;
-import com.falling.components.VecAnimatorComponent.AnimatorType;
+import com.falling.components.ElementComp.ElementType;
+import com.falling.components.ElementComp.MatterType;
+import com.falling.components.VecAnimatorComp.AnimatorType;
 import com.falling.factories.builders.RenderableBuilder;
 
 public class Factory {
@@ -17,19 +17,19 @@ public class Factory {
     protected final Assets assets;
 
     private Entity entity;
-    private VecAnimatorComponent animatorComp;
-    private AnimationComponent animationComp;
-    private CursorComponent cursorComp;
+    private VecAnimatorComp animatorComp;
+    private AnimationComp animationComp;
+    private CursorComp cursorComp;
     private final RenderableBuilder renderableBuilder;
-    private ResizeComponent resizeComp;
-    private TextComponent textComp;
-    private TextureRegionComponent regionComp;
-    private TransformComponent transformComp;
-    private TypeComponent typeComp;
-    private PixmapComponent pixmapComp;
-    private ElementComponent elementComp;
-    private ClickableComponent clickableComp;
-    private NinepatchComponent ninepatchComp;
+    private ResizeComp resizeComp;
+    private TextComp textComp;
+    private TextureRegionComp regionComp;
+    private TransformComp transformComp;
+    private TypeComp typeComp;
+    private PixmapComp pixmapComp;
+    private ElementComp elementComp;
+    private ClickableComp clickableComp;
+    private NinepatchComp ninepatchComp;
 
     private boolean creating;
 
@@ -62,9 +62,9 @@ public class Factory {
         return entity;
     }
 
-    public Factory addAnimation(VecAnimatorComponent... animatorComps) {
+    public Factory addAnimation(VecAnimatorComp... animatorComps) {
         if (!creating) return null;
-        animationComp = engine.createComponent(AnimationComponent.class);
+        animationComp = engine.createComponent(AnimationComp.class);
 
         for (int i = 0; i < animatorComps.length; i++) {
             animationComp.animators.add(animatorComps[i]);
@@ -75,13 +75,13 @@ public class Factory {
     }
 
     /** Put After setting transform and or NinePatch */
-    public VecAnimatorComponent createAnimator(AnimatorType type, float duration, Command commandOnFinish, Interpolation interpolation) {
+    public VecAnimatorComp createAnimator(AnimatorType type, float duration, Command commandOnFinish, Interpolation interpolation) {
         return createAnimator(type, duration, commandOnFinish, interpolation, false);
     }
 
     /** Put After setting transform and or NinePatch */
-    public VecAnimatorComponent createAnimator(AnimatorType type, float duration, Command commandOnFinish, Interpolation interpolation, boolean cmdOnEveryFinish) {
-        animatorComp = engine.createComponent(VecAnimatorComponent.class);
+    public VecAnimatorComp createAnimator(AnimatorType type, float duration, Command commandOnFinish, Interpolation interpolation, boolean cmdOnEveryFinish) {
+        animatorComp = engine.createComponent(VecAnimatorComp.class);
 
         switch (type) {
             case POS:
@@ -107,7 +107,7 @@ public class Factory {
     /** what the fk???? */
     public Factory addCursor() {
         if (!creating) return null;
-        cursorComp = engine.createComponent(CursorComponent.class);
+        cursorComp = engine.createComponent(CursorComp.class);
 
         entity.add(cursorComp);
         return this;
@@ -118,9 +118,9 @@ public class Factory {
         return renderableBuilder.createComponent();
     }
 
-    public Factory addResize(ResizeComponent.STICK_TYPE stick) {
+    public Factory addResize(ResizeComp.STICK_TYPE stick) {
         if (!creating) return null;
-        resizeComp = engine.createComponent(ResizeComponent.class);
+        resizeComp = engine.createComponent(ResizeComp.class);
         resizeComp.stick = stick;
 
         entity.add(resizeComp);
@@ -129,7 +129,7 @@ public class Factory {
 
    public Factory addText(String text) {
         if (!creating) return null;
-        textComp = engine.createComponent(TextComponent.class);
+        textComp = engine.createComponent(TextComp.class);
         textComp.text = text;
         textComp.font = assets.getFont("alagard.fnt");
 
@@ -139,7 +139,7 @@ public class Factory {
 
     public Factory addText(String text, String fontFN) {
         if (!creating) return null;
-        textComp = engine.createComponent(TextComponent.class);
+        textComp = engine.createComponent(TextComp.class);
         textComp.text = text;
         textComp.font = assets.getFont(fontFN);
 
@@ -149,7 +149,7 @@ public class Factory {
 
     public Factory addTextureRegion(String textureFN) {
         if (!creating) return null;
-        regionComp = engine.createComponent(TextureRegionComponent.class);
+        regionComp = engine.createComponent(TextureRegionComp.class);
         if (regionComp.textureRegion.getTexture() != assets.getTexture(textureFN)) {
             regionComp.textureRegion.setRegion(assets.getTexture(textureFN));
             regionComp.originX = regionComp.textureRegion.getRegionWidth()/2f;
@@ -162,7 +162,7 @@ public class Factory {
 
     public Factory addTextureRegion(String textureFN, boolean originX, boolean originY) {
         if (!creating) return null;
-        regionComp = engine.createComponent(TextureRegionComponent.class);
+        regionComp = engine.createComponent(TextureRegionComp.class);
         if (regionComp.textureRegion.getTexture() != assets.getTexture(textureFN)) {
             regionComp.textureRegion.setRegion(assets.getTexture(textureFN));
             if (originX) regionComp.originX = regionComp.textureRegion.getRegionWidth()/2f;
@@ -175,7 +175,7 @@ public class Factory {
 
     public Factory addTextureRegion() {
         if (!creating) return null;
-        regionComp = engine.createComponent(TextureRegionComponent.class);
+        regionComp = engine.createComponent(TextureRegionComp.class);
 
         entity.add(regionComp);
         return this;
@@ -183,7 +183,7 @@ public class Factory {
 
     public Factory addTransform(float x, float y) {
         if (!creating) return null;
-        transformComp = engine.createComponent(TransformComponent.class);
+        transformComp = engine.createComponent(TransformComp.class);
         transformComp.pos.set(x, y);
 
         entity.add(transformComp);
@@ -192,7 +192,7 @@ public class Factory {
 
     public Factory addTransform(float x, float y, float scale, float rotation) {
         if (!creating) return null;
-        transformComp = engine.createComponent(TransformComponent.class);
+        transformComp = engine.createComponent(TransformComp.class);
         transformComp.pos.set(x, y);
         transformComp.scale.set(scale, scale);
         transformComp.rotation = rotation;
@@ -203,7 +203,7 @@ public class Factory {
 
     public Factory addTransform(Vector2 pos) {
         if (!creating) return null;
-        transformComp = engine.createComponent(TransformComponent.class);
+        transformComp = engine.createComponent(TransformComp.class);
         transformComp.pos.set(pos);
 
         entity.add(transformComp);
@@ -212,7 +212,7 @@ public class Factory {
 
     public Factory addTransform(Vector2 pos, float scale, float rotation) {
         if (!creating) return null;
-        transformComp = engine.createComponent(TransformComponent.class);
+        transformComp = engine.createComponent(TransformComp.class);
         transformComp.pos.set(pos);
         transformComp.scale.set(scale, scale);
         transformComp.rotation = rotation;
@@ -221,9 +221,9 @@ public class Factory {
         return this;
     }
 
-    public Factory addType(TypeComponent.Type type) {
+    public Factory addType(TypeComp.Type type) {
         if (!creating) return null;
-        typeComp = engine.createComponent(TypeComponent.class);
+        typeComp = engine.createComponent(TypeComp.class);
         typeComp.type = type;
 
         entity.add(typeComp);
@@ -232,7 +232,7 @@ public class Factory {
 
     public Factory addPixmap() {
         if (!creating) return null;
-        pixmapComp = engine.createComponent(PixmapComponent.class);
+        pixmapComp = engine.createComponent(PixmapComp.class);
 
         entity.add(pixmapComp);
         return this;
@@ -240,7 +240,7 @@ public class Factory {
 
     public Factory addElement(int colorBits, ElementType elementType, MatterType matterType, float maxSpeed, float accel, int spread) {
         if (!creating) return null;
-        elementComp = engine.createComponent(ElementComponent.class);
+        elementComp = engine.createComponent(ElementComp.class);
         elementComp.colorBits = colorBits;
         elementComp.elementType = elementType;
         elementComp.matterType = matterType;
@@ -255,7 +255,7 @@ public class Factory {
     /**This one Needs to be AFTER!! transform and region components!!!*/
     public Factory addClickableAuto(Command onClickCommand, Command onTouchDownCommand, Command onTouchUpCommand, Command onMouseOverCommand, Command onMouseOffCommand, int priority, int vibrationMs) {
         if (!creating) return null;
-        clickableComp = engine.createComponent(ClickableComponent.class);
+        clickableComp = engine.createComponent(ClickableComp.class);
         clickableComp.hitBox.set(transformComp.pos.x, transformComp.pos.y, regionComp.textureRegion.getRegionWidth(), regionComp.textureRegion.getRegionHeight());
         clickableComp.onClickCommand = onClickCommand;
         clickableComp.onTouchDownCommand = onTouchDownCommand;
@@ -271,7 +271,7 @@ public class Factory {
 
     public Factory addClickable(float x, float y, float width, float height, Command onClickCommand, Command onTouchDownCommand, Command onTouchUpCommand, Command onMouseOverCommand, Command onMouseOffCommand, int priority, int vibrationMs) {
         if (!creating) return null;
-        clickableComp = engine.createComponent(ClickableComponent.class);
+        clickableComp = engine.createComponent(ClickableComp.class);
         clickableComp.hitBox.set(x, y, width, height);
         clickableComp.onClickCommand = onClickCommand;
         clickableComp.onTouchDownCommand = onTouchDownCommand;
@@ -287,7 +287,7 @@ public class Factory {
 
     public Factory addNinePatch(String textureFn, int left, int right, int top, int bottom, float width, float height) {
         if (!creating) return null;
-        ninepatchComp = engine.createComponent(NinepatchComponent.class);
+        ninepatchComp = engine.createComponent(NinepatchComp.class);
 
         ninepatchComp.ninePatch = new NinePatch(assets.getTexture(textureFn), left, right, top, bottom);
         ninepatchComp.size.x = width;
@@ -300,7 +300,7 @@ public class Factory {
     /** width and height is set to width and height of the texture */
     public Factory addNinePatch(String textureFn, int left, int right, int top, int bottom) {
         if (!creating) return null;
-        ninepatchComp = engine.createComponent(NinepatchComponent.class);
+        ninepatchComp = engine.createComponent(NinepatchComp.class);
 
         ninepatchComp.ninePatch = new NinePatch(assets.getTexture(textureFn), left, right, top, bottom);
         ninepatchComp.size.x = ninepatchComp.ninePatch.getTotalWidth();

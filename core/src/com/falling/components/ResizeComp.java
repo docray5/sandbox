@@ -3,7 +3,7 @@ package com.falling.components;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Pool;
 
-public class ResizeComponent implements Component, Pool.Poolable {
+public class ResizeComp implements Component, Pool.Poolable {
     public STICK_TYPE stick = null;
 
     @Override

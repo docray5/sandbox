@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.falling.commands.*;
 
 import static com.falling.Core.*;
-import static com.falling.components.ElementComponent.ElementType.*;
+import static com.falling.components.ElementComp.ElementType.*;
 import static com.falling.systems.WorldSystem.BrushType.*;
 
 public class InputSystem implements InputProcessor {

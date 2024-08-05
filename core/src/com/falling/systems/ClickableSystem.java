@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
-import com.falling.components.ClickableComponent;
+import com.falling.components.ClickableComp;
 import com.falling.utils.ZComparator;
 
 import static com.falling.Core.mousePos;
@@ -15,7 +15,7 @@ import static com.falling.utils.Mappers.*;
 public class ClickableSystem extends SortedIteratingSystem {
     private Vector2 posTmp;
     private Entity entityTmp;
-    private ClickableComponent clickCompTmp;
+    private ClickableComp clickCompTmp;
 
     public ClickableSystem(int priority) {
         super(clickableFamily, new ZComparator(), priority);

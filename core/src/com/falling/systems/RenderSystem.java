@@ -40,15 +40,15 @@ public class RenderSystem extends SortedIteratingSystem {
     private float oldWorldHeight;
 
     private Entity entityTmp;
-    private TransformComponent transformTmp;
-    private TextureRegionComponent regionTmp;
-    private TextComponent textTmp;
-    private RenderableComponent renderableTmp;
+    private TransformComp transformTmp;
+    private TextureRegionComp regionTmp;
+    private TextComp textTmp;
+    private RenderableComp renderableTmp;
     private float widthTmp;
     private float heightTmp;
     private float drawX;
     private float drawY;
-    private NinepatchComponent ninepatchTmp;
+    private NinepatchComp ninepatchTmp;
 
     public RenderSystem(int priority) {
         super(renderableFamily, new PriorityComparator(), priority);

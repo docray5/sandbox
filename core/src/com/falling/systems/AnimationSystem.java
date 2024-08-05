@@ -3,17 +3,17 @@ package com.falling.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
-import com.falling.components.AnimationComponent;
-import com.falling.components.VecAnimatorComponent;
-import com.falling.components.VecAnimatorComponent.AnimatorType;
+import com.falling.components.AnimationComp;
+import com.falling.components.VecAnimatorComp;
+import com.falling.components.VecAnimatorComp.AnimatorType;
 
 import static com.falling.Core.updateBlur;
 import static com.falling.utils.Families.animationFamily;
 import static com.falling.utils.Mappers.*;
 
 public class AnimationSystem extends IteratingSystem {
-    private VecAnimatorComponent vecAnimator;
-    private AnimationComponent animation;
+    private VecAnimatorComp vecAnimator;
+    private AnimationComp animation;
     private float progress;
     private Vector2 vector2Helper;
 
@@ -57,7 +57,7 @@ public class AnimationSystem extends IteratingSystem {
 
     }
 
-    public void animateTo(AnimationComponent animationComponent, AnimatorType animatorType, float tx, float ty, boolean additive, int repeat) {
+    public void animateTo(AnimationComp animationComponent, AnimatorType animatorType, float tx, float ty, boolean additive, int repeat) {
         for (int i = animationComponent.animators.size-1; i >= 0; i--) {
             vecAnimator = animationComponent.animators.get(i);
             if (vecAnimator.type == animatorType) {

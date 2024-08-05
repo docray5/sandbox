@@ -4,33 +4,33 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.falling.components.*;
 
 public class Mappers {
-    public static ComponentMapper<TransformComponent> transformMapper;
-    public static ComponentMapper<TextureRegionComponent> texRegionMapper;
-    public static ComponentMapper<ClickableComponent> clickableMapper;
-    public static ComponentMapper<AnimationComponent> animationMapper;
-    public static ComponentMapper<TextComponent> textMapper;
-    public static ComponentMapper<RenderableComponent> renderableMapper;
-    public static ComponentMapper<CursorComponent> cursorMapper;
-    public static ComponentMapper<PixmapComponent> pixmapMapper;
-    public static ComponentMapper<ResizeComponent> resizeMapper;
-    public static ComponentMapper<TypeComponent> typeMapper;
-    public static ComponentMapper<ElementComponent> elementMapper;
-    public static ComponentMapper<UITranslateComponent> uiTranslateMapper;
-    public static ComponentMapper<NinepatchComponent> ninepatchMapper;
+    public static ComponentMapper<TransformComp> transformMapper;
+    public static ComponentMapper<TextureRegionComp> texRegionMapper;
+    public static ComponentMapper<ClickableComp> clickableMapper;
+    public static ComponentMapper<AnimationComp> animationMapper;
+    public static ComponentMapper<TextComp> textMapper;
+    public static ComponentMapper<RenderableComp> renderableMapper;
+    public static ComponentMapper<CursorComp> cursorMapper;
+    public static ComponentMapper<PixmapComp> pixmapMapper;
+    public static ComponentMapper<ResizeComp> resizeMapper;
+    public static ComponentMapper<TypeComp> typeMapper;
+    public static ComponentMapper<ElementComp> elementMapper;
+    public static ComponentMapper<UITranslateComp> uiTranslateMapper;
+    public static ComponentMapper<NinepatchComp> ninepatchMapper;
 
     public static void init() {
-        transformMapper = ComponentMapper.getFor(TransformComponent.class);
-        texRegionMapper = ComponentMapper.getFor(TextureRegionComponent.class);
-        animationMapper = ComponentMapper.getFor(AnimationComponent.class);
-        clickableMapper = ComponentMapper.getFor(ClickableComponent.class);
-        textMapper = ComponentMapper.getFor(TextComponent.class);
-        renderableMapper = ComponentMapper.getFor(RenderableComponent.class);
-        cursorMapper = ComponentMapper.getFor(CursorComponent.class);
-        pixmapMapper = ComponentMapper.getFor(PixmapComponent.class);
-        resizeMapper = ComponentMapper.getFor(ResizeComponent.class);
-        typeMapper = ComponentMapper.getFor(TypeComponent.class);
-        elementMapper = ComponentMapper.getFor(ElementComponent.class);
-        uiTranslateMapper = ComponentMapper.getFor(UITranslateComponent.class);
-        ninepatchMapper = ComponentMapper.getFor(NinepatchComponent.class);
+        transformMapper = ComponentMapper.getFor(TransformComp.class);
+        texRegionMapper = ComponentMapper.getFor(TextureRegionComp.class);
+        animationMapper = ComponentMapper.getFor(AnimationComp.class);
+        clickableMapper = ComponentMapper.getFor(ClickableComp.class);
+        textMapper = ComponentMapper.getFor(TextComp.class);
+        renderableMapper = ComponentMapper.getFor(RenderableComp.class);
+        cursorMapper = ComponentMapper.getFor(CursorComp.class);
+        pixmapMapper = ComponentMapper.getFor(PixmapComp.class);
+        resizeMapper = ComponentMapper.getFor(ResizeComp.class);
+        typeMapper = ComponentMapper.getFor(TypeComp.class);
+        elementMapper = ComponentMapper.getFor(ElementComp.class);
+        uiTranslateMapper = ComponentMapper.getFor(UITranslateComp.class);
+        ninepatchMapper = ComponentMapper.getFor(NinepatchComp.class);
     }
 }

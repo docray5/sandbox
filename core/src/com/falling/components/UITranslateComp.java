@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Pool;
 import com.falling.commands.Command;
 
-public class UITranslateComponent implements Component, Pool.Poolable {
+public class UITranslateComp implements Component, Pool.Poolable {
     public Command openCmd = null;
     public Command closeCmd = null;
 

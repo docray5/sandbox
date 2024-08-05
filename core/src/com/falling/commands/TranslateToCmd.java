@@ -5,15 +5,15 @@ import static com.falling.utils.Mappers.transformMapper;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.Array;
-import com.falling.components.VecAnimatorComponent;
-import com.falling.components.VecAnimatorComponent.AnimatorType;
-import com.falling.components.TransformComponent;
+import com.falling.components.VecAnimatorComp;
+import com.falling.components.VecAnimatorComp.AnimatorType;
+import com.falling.components.TransformComp;
 
 public class TranslateToCmd extends Command {
     private float x;
     private float y;
-    private TransformComponent transCompTmp;
-    private Array<VecAnimatorComponent> animatorsTmp;
+    private TransformComp transCompTmp;
+    private Array<VecAnimatorComp> animatorsTmp;
     private boolean additive;
 
     public TranslateToCmd(Entity entity, float transToX, float transToY, boolean additive) {

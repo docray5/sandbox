@@ -4,9 +4,9 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool.Poolable;
 
-public class AnimationComponent implements Component, Poolable {
+public class AnimationComp implements Component, Poolable {
 
-    public Array<VecAnimatorComponent> animators = new Array<>();
+    public Array<VecAnimatorComp> animators = new Array<>();
 
 	@Override
 	public void reset() {

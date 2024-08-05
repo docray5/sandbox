@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Pool;
 import com.falling.commands.Command;
 
-public class ClickableComponent implements Component, Pool.Poolable {
+public class ClickableComp implements Component, Pool.Poolable {
     public Rectangle hitBox = new Rectangle();
     public boolean clicked = false;
     public boolean clickable = true;

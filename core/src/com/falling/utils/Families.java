@@ -14,13 +14,13 @@ public class Families {
     public static Family worldFamily;
 
     public static void init() {
-        renderableFamily = Family.all(TransformComponent.class, RenderableComponent.class).one(TextureRegionComponent.class, TextComponent.class, NinepatchComponent.class).get();
-        clickableFamily = Family.all(ClickableComponent.class, TransformComponent.class).get();
-        animationFamily = Family.all(AnimationComponent.class, TransformComponent.class).get();
-        textFamily = Family.all(RenderableComponent.class, TransformComponent.class, TextComponent.class).get();
-        cursorFamily = Family.all(CursorComponent.class).get();
-        resizeFamily = Family.all(ResizeComponent.class).get();
-        uiTranslateFamily = Family.all(UITranslateComponent.class).get();
+        renderableFamily = Family.all(TransformComp.class, RenderableComp.class).one(TextureRegionComp.class, TextComp.class, NinepatchComp.class).get();
+        clickableFamily = Family.all(ClickableComp.class, TransformComp.class).get();
+        animationFamily = Family.all(AnimationComp.class, TransformComp.class).get();
+        textFamily = Family.all(RenderableComp.class, TransformComp.class, TextComp.class).get();
+        cursorFamily = Family.all(CursorComp.class).get();
+        resizeFamily = Family.all(ResizeComp.class).get();
+        uiTranslateFamily = Family.all(UITranslateComp.class).get();
         worldFamily = Family.all().get();
     }
 }

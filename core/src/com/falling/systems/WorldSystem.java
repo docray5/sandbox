@@ -6,16 +6,16 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
-import com.falling.components.ElementComponent;
-import com.falling.components.PixmapComponent;
-import com.falling.components.TextureRegionComponent;
-import com.falling.components.ElementComponent.ElementType;
+import com.falling.components.ElementComp;
+import com.falling.components.PixmapComp;
+import com.falling.components.TextureRegionComp;
+import com.falling.components.ElementComp.ElementType;
 import com.falling.factories.Director;
 
 import static com.falling.utils.Mappers.*;
 import static com.falling.Core.*;
-import static com.falling.components.ElementComponent.ElementType.*;
-import static com.falling.components.ElementComponent.MatterType.*;
+import static com.falling.components.ElementComp.ElementType.*;
+import static com.falling.components.ElementComp.MatterType.*;
 
 public class WorldSystem extends EntitySystem {
     private Entity[][] world;
@@ -29,10 +29,10 @@ public class WorldSystem extends EntitySystem {
     private int lastMX;
     private int lastMY;
 
-    private final TextureRegionComponent textureRegionComponent;
-    private final PixmapComponent pixmapComponent;
+    private final TextureRegionComp textureRegionComponent;
+    private final PixmapComp pixmapComponent;
     private Entity entityTmp;
-    private ElementComponent elementComponent;
+    private ElementComp elementComponent;
     private int xTmp;
     private int yTmp;
     private int xTargetTmp;

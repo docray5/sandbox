@@ -9,7 +9,7 @@ import com.falling.commands.Command;
 /**
  * This class is not supposed to be attatched to any entity on its own, use AnimationComponent class
  */
-public class VecAnimatorComponent implements Component, Pool.Poolable {
+public class VecAnimatorComp implements Component, Pool.Poolable {
     public Vector2 animatedVecPointer = null;
     public Vector2 start = new Vector2();
     public Vector2 target = new Vector2();

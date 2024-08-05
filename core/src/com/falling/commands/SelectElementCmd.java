@@ -1,6 +1,6 @@
 package com.falling.commands;
 
-import com.falling.components.ElementComponent.ElementType;
+import com.falling.components.ElementComp.ElementType;
 import com.falling.systems.WorldSystem;
 
 public class SelectElementCmd extends Command {

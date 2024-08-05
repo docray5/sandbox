@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 /**
  * Type component for unique cases that need different type of processing
  */
-public class TypeComponent implements Component, Pool.Poolable {
+public class TypeComp implements Component, Pool.Poolable {
     public Type type = null;
 
     @Override

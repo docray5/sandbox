@@ -7,14 +7,14 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.falling.assets.Assets;
 import com.falling.commands.*;
-import com.falling.components.ResizeComponent;
-import com.falling.components.TypeComponent;
-import com.falling.components.ResizeComponent.STICK_TYPE;
+import com.falling.components.ResizeComp;
+import com.falling.components.TypeComp;
+import com.falling.components.ResizeComp.STICK_TYPE;
 
-import static com.falling.components.ElementComponent.*;
+import static com.falling.components.ElementComp.*;
 import static com.falling.Core.*;
-import static com.falling.components.ElementComponent.ElementType.*;
-import static com.falling.components.VecAnimatorComponent.AnimatorType.*;
+import static com.falling.components.ElementComp.ElementType.*;
+import static com.falling.components.VecAnimatorComp.AnimatorType.*;
 
 public class Director {
     public static Director instance;
@@ -63,8 +63,8 @@ public class Director {
                 .addClickable(0, 0, worldWidth, worldHeight,
                 null, Commands.instance.spawnElementDown, Commands.instance.spawnElementUp,
                 null, null, 2, 0)
-                .addResize(ResizeComponent.STICK_TYPE.LEFT_BOTTOM)
-                .addType(TypeComponent.Type.FULLSCREEN_CLICK)
+                .addResize(ResizeComp.STICK_TYPE.LEFT_BOTTOM)
+                .addType(TypeComp.Type.FULLSCREEN_CLICK)
                 .endEntity();
     }
 

@@ -3,7 +3,7 @@ package com.falling.commands;
 import static com.falling.utils.Mappers.animationMapper;
 
 import com.badlogic.ashley.core.Entity;
-import com.falling.components.VecAnimatorComponent.AnimatorType;
+import com.falling.components.VecAnimatorComp.AnimatorType;
 import com.falling.systems.AnimationSystem;
 
 /**

@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Vector2;
-import com.falling.components.ResizeComponent;
+import com.falling.components.ResizeComp;
 
 import static com.falling.Core.*;
 import static com.falling.utils.Families.resizeFamily;
@@ -13,7 +13,7 @@ import static com.falling.utils.Mappers.*;
 public class ResizeableSystem extends IteratingSystem {
     private Entity entity;
     private ImmutableArray<Entity> entitiesTmp;
-    private ResizeComponent resizeTmp;
+    private ResizeComp resizeTmp;
     private Vector2 posTmp;
 
     public ResizeableSystem(int priority) {

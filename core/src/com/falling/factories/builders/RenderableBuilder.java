@@ -2,11 +2,11 @@ package com.falling.factories.builders;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.graphics.Color;
-import com.falling.components.RenderableComponent;
+import com.falling.components.RenderableComp;
 import com.falling.factories.Factory;
 
 public class RenderableBuilder {
-    private RenderableComponent renderableComponent;
+    private RenderableComp renderableComponent;
     private final Engine engine;
     private boolean creating;
     private final Factory factory;
@@ -18,7 +18,7 @@ public class RenderableBuilder {
 
     public RenderableBuilder createComponent() {
         if (creating) return null;
-        renderableComponent = engine.createComponent(RenderableComponent.class);
+        renderableComponent = engine.createComponent(RenderableComp.class);
         creating = true;
         return this;
     }
