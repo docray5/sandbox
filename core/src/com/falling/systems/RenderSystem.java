@@ -2,16 +2,13 @@ package com.falling.systems;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -59,7 +56,10 @@ public class RenderSystem extends SortedIteratingSystem {
         viewport = new ExtendViewport(worldWidth, worldHeight, camera);
         cameraPos.set(camera.position);
 
-        fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth, (int) worldHeight, false);
+        if (pixelate == true)
+            fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth, (int) worldHeight, false);
+        else
+            fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth, screenHeight, false);
         fboMain.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
         fboMainTextureRegion = new TextureRegion(fboMain.getColorBufferTexture());
         fboMainTextureRegion.flip(false, true);
@@ -78,7 +78,7 @@ public class RenderSystem extends SortedIteratingSystem {
 
         camera.position.set(cameraPos);
 
-        // render main scene to a fbo
+        // render main scene to an fbo
         camera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
         fboMain.begin();
@@ -92,9 +92,10 @@ public class RenderSystem extends SortedIteratingSystem {
         fboMain.end();
         renderQueue.clear();
 
+        // Run blur over the fbo if it is enabled
         if (blur != null && blur.isActive()) blur.blur(spriteBatch, fboMainTexture, deltaTime);
 
-        // draw the whole scene
+        // draw the fbo to the screen or draw blur to the screen if it is enabled.
         spriteBatch.begin();
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -180,8 +181,6 @@ public class RenderSystem extends SortedIteratingSystem {
                     drawY -= heightTmp/2f;
                 }
 
-                // if (pixelate) pixelatePos();
-
                 // ==== Draw texture ====
                 spriteBatch.setColor(renderableTmp.color);
                 spriteBatch.draw(regionTmp.textureRegion, drawX, drawY,
@@ -190,13 +189,14 @@ public class RenderSystem extends SortedIteratingSystem {
 
                 spriteBatch.setColor(1, 1, 1, 1);
             } else if (textMapper.has(entityTmp)) {
+                // Draw text
+
                 textTmp = textMapper.get(entityTmp);
 
                 textTmp.font.getData().setScale(transformTmp.scale.x, transformTmp.scale.y);
                 textTmp.font.setColor(renderableTmp.color);
                 textTmp.glyphLayout.setText(textTmp.font, textTmp.text);
 
-                // if (pixelate) pixelatePos();
                 textTmp.font.draw(spriteBatch, textTmp.text, drawX - textTmp.glyphLayout.width/2f, drawY - textTmp.glyphLayout.height/2f);
             } else if (ninepatchMapper.has(entityTmp)) {
                 ninepatchTmp = ninepatchMapper.get(entityTmp);
@@ -209,8 +209,6 @@ public class RenderSystem extends SortedIteratingSystem {
                     drawY -= heightTmp/2f;
                 }
 
-                // if (pixelate) pixelatePos();
-
                 spriteBatch.setColor(renderableTmp.color);
                 ninepatchTmp.ninePatch.draw(spriteBatch, drawX, drawY,
                     widthTmp/2f, heightTmp/2f,
@@ -220,11 +218,6 @@ public class RenderSystem extends SortedIteratingSystem {
                 spriteBatch.setColor(1, 1, 1, 1);
             }
         }
-    }
-
-    private void pixelatePos() {
-        drawX = MathUtils.floor(drawX);
-        drawY = MathUtils.floor(drawY);
     }
 
     public void init(Assets assets) {

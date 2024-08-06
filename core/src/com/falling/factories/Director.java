@@ -21,13 +21,11 @@ public class Director {
     public static void setInstance(Director _instance) { if (instance==null) instance = _instance; }
 
     private final Factory factory;
-    private final Engine engine;
 
     private Color colorTmp = new Color();
 
     public Director(Engine engine, Assets assets) {
         this.factory = new Factory(engine, assets);
-        this.engine = engine;
     }
     // ================================ Main Menu ================================
 

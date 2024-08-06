@@ -21,8 +21,8 @@ public class Core {
     public static float xGutOffset = 0;
     public static float yGutOffset = 0;
 
-    /** makes screen pixel art and floors float positions only for render */
-    public static boolean pixelate = true;
+    /** makes screen look more like pixel art */
+    public static boolean pixelate = false;
     public static int fps = 60;
 
     public static final float[] sandColor = { -33, 0.285f, 0.965f };
