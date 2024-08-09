@@ -13,8 +13,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.falling.assets.Assets;
-import com.falling.commands.Commands;
 import com.falling.components.*;
+import com.falling.events.Event;
+import com.falling.events.Publisher;
 import com.falling.utils.PriorityComparator;
 import com.falling.vfx.Blur;
 
@@ -46,6 +47,8 @@ public class RenderSystem extends SortedIteratingSystem {
     private float drawX;
     private float drawY;
     private NinepatchComp ninepatchTmp;
+
+    public final Publisher publisher = new Publisher();
 
     public RenderSystem(int priority) {
         super(renderableFamily, new PriorityComparator(), priority);
@@ -157,7 +160,7 @@ public class RenderSystem extends SortedIteratingSystem {
 
         if (blur != null) blur.resize();
 
-        Commands.instance.resize.execute();
+        publisher.notify(null, Event.RESIZE);
     }
 
     private void renderQueue(Array<Entity> queue) {

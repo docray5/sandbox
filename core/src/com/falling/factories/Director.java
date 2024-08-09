@@ -10,6 +10,7 @@ import com.falling.commands.*;
 import com.falling.components.ResizeComp;
 import com.falling.components.TypeComp;
 import com.falling.components.ResizeComp.STICK_TYPE;
+import com.falling.components.TypeComp.Type;
 
 import static com.falling.components.ElementComp.*;
 import static com.falling.Core.*;
@@ -109,6 +110,7 @@ public class Director {
                 .addTextureRegion()
                 .addResize(STICK_TYPE.LEFT_BOTTOM)
                 .addPixmap()
+                .addType(Type.WORLD)
                 .endEntity();
     }
 

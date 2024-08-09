@@ -5,7 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.falling.Application;
 
 public abstract class Command {
-    protected Engine engine;
+    protected Engine engine; // Useless ram usage... TODO
     protected Entity entity;
 
     public Command() {

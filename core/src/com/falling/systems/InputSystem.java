@@ -6,6 +6,8 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.falling.commands.*;
+import com.falling.events.Event;
+import com.falling.events.Publisher;
 
 import static com.falling.Core.*;
 import static com.falling.components.ElementComp.ElementType.*;
@@ -15,6 +17,8 @@ public class InputSystem implements InputProcessor {
     private final Vector2 tempMousePos;
     private final Viewport viewport;
     private final Commands commands;
+
+    public final Publisher publisher = new Publisher();
 
     public InputSystem(Viewport viewport, Engine engine) {
         tempMousePos = new Vector2();
@@ -29,7 +33,7 @@ public class InputSystem implements InputProcessor {
         viewport.unproject(tempMousePos);
         mousePos.set(tempMousePos);
 
-        commands.touchDown.execute();
+        publisher.notify(null, Event.TOUCH_DOWN);
 
         return true;
     }
@@ -40,7 +44,7 @@ public class InputSystem implements InputProcessor {
         viewport.unproject(tempMousePos);
         mousePos.set(tempMousePos);
 
-        commands.touchUp.execute();
+        publisher.notify(null, Event.TOUCH_UP);
 
         return true;
     }
@@ -51,7 +55,7 @@ public class InputSystem implements InputProcessor {
         viewport.unproject(tempMousePos);
         mousePos.set(tempMousePos);
 
-        commands.mouseMoved.execute();
+        publisher.notify(null, Event.MOUSE_MOVED);
 
         return true;
     }
@@ -78,11 +82,13 @@ public class InputSystem implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
+        publisher.notify(null, Event.KEY_DOWN);
         return true;
     }
 
     @Override
     public boolean keyUp(int keycode) {
+        publisher.notify(null, Event.KEY_UP);
         switch (keycode) {
             case Input.Keys.E:
                 commands.selectElement.setElementType(null).execute();

@@ -6,16 +6,18 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.falling.assets.Assets;
 import com.falling.commands.Commands;
+import com.falling.events.Observers;
 import com.falling.factories.Director;
 import com.falling.systems.*;
 import com.falling.utils.*;
 
-public class Application implements ApplicationListener  {
+public class Application implements ApplicationListener {
 
     public static PooledEngine getEngine() { return engine; }
 
     private static PooledEngine engine;
     private RenderSystem renderSystem;
+    private InputSystem inputSystem;
     private Assets assets;
     private boolean started = false;
 
@@ -31,12 +33,16 @@ public class Application implements ApplicationListener  {
         // ======================= Initialize Engine =======================
         engine = new PooledEngine();
         Director.setInstance(new Director(engine, assets));
-        Commands.setInstance(new Commands(this));
+        Commands.setInstance(new Commands());
 
         engine.addSystem(new AnimationSystem(1));
         engine.addSystem(new ResizeableSystem(7));
         renderSystem = new RenderSystem(8);
         engine.addSystem(renderSystem);
+
+        Observers.setInstance(new Observers(this));
+        renderSystem.publisher.addObservers(Observers.instance.resizeObsrv);
+        assets.publisher.addObservers(Observers.instance.sceneMgrObsrv);
 
         Director.instance.createTitle();
 	}
@@ -61,14 +67,18 @@ public class Application implements ApplicationListener  {
         engine.addSystem(new TempCursorSystem(4));
         engine.addSystem(new WorldSystem(5));
 
+        inputSystem = new InputSystem(renderSystem.getViewport(), engine);
+        Gdx.input.setInputProcessor(inputSystem);
+
+        // Set up observers and Commands:
         Commands.instance.initAfterAssets();
-        Gdx.input.setInputProcessor(new InputSystem(renderSystem.getViewport(), engine));
+        Observers.instance.initaAfterAssets();
+        inputSystem.publisher.addObservers(Observers.instance.clickableObsrv);
 
         // Scene related:
         Director.instance.createSpawnArea();
         Director.instance.createStartText();
         Director.instance.createBlurBtn();
-        // Director.instance.createPauseBtn();
         Director.instance.createNinePatch();
     }
 

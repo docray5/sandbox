@@ -9,12 +9,15 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
-import com.falling.commands.Commands;
+import com.falling.events.Event;
+import com.falling.events.Publisher;
 
 public class Assets {
     private final AssetManager manager;
     private final Array<MyAssetDescriptor> assets;
     private boolean finished = false;
+
+    public final Publisher publisher = new Publisher();
 
     public Assets() {
         manager = new AssetManager();
@@ -63,7 +66,7 @@ public class Assets {
     public void update() {
         if (manager.update()) {
             loadPrefabs();
-            Commands.instance.startGame.execute();
+            publisher.notify(null, Event.START_GAME);
             finished = true;
         }
     }

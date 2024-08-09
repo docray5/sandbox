@@ -71,6 +71,10 @@ public class ResizeableSystem extends IteratingSystem {
                     case FULLSCREEN_CLICK:
                         clickableMapper.get(entity).hitBox.setSize(worldWidth, worldHeight);
                         break;
+                    case WORLD:
+                        // DIRTY QUICK FIX: TODO
+                        getEngine().getSystem(WorldSystem.class).resize();
+                        break;
                 }
             }        
         }
