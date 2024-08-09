@@ -17,8 +17,8 @@ public class SceneMgrObsrv implements Observer {
 	@Override
 	public void onNotify(Entity entity, Event event) {
         switch (event) {
-            case START_GAME:
-                application.startGame();
+            case LOADED_ASSETS:
+                application.onLoadedAssets();
                 break;
             case OPEN_MENU:
             break;

@@ -10,6 +10,7 @@ import com.falling.events.Observers;
 import com.falling.factories.Director;
 import com.falling.systems.*;
 import com.falling.utils.*;
+import com.falling.input.InputSystem;
 
 public class Application implements ApplicationListener {
 
@@ -56,7 +57,7 @@ public class Application implements ApplicationListener {
         engine.update(Gdx.graphics.getDeltaTime());
 	}
 
-    public void startGame() {
+    public void onLoadedAssets() {
         if (started) return;
         started = true;
         // Engine related:
@@ -73,6 +74,7 @@ public class Application implements ApplicationListener {
         // Set up observers and Commands:
         Commands.instance.initAfterAssets();
         Observers.instance.initaAfterAssets();
+        inputSystem.keyBinds.initAfterAssets();
         inputSystem.publisher.addObservers(Observers.instance.clickableObsrv);
 
         // Scene related:

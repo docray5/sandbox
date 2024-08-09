@@ -1,25 +1,20 @@
 package com.falling.commands;
 
+import com.falling.Application;
 import com.falling.systems.WorldSystem;
 import com.falling.systems.WorldSystem.BrushType;
 
 public class SelectBrushCmd extends Command {
     private final WorldSystem worldSystem;
-    private BrushType brushType;
+    private final BrushType brushType;
 
-	public SelectBrushCmd() {
-        worldSystem = engine.getSystem(WorldSystem.class);
+	public SelectBrushCmd(BrushType brushType) {
+        worldSystem = Application.getEngine().getSystem(WorldSystem.class);
+        this.brushType = brushType;
 	}
 
 	@Override
 	public void execute() {
-        if (brushType == null) return;
         worldSystem.selectBrush(brushType);
-        brushType = null;
 	}
-
-    public SelectBrushCmd setBrushType(BrushType brushType) {
-        this.brushType = brushType;
-        return this;
-    }
 }

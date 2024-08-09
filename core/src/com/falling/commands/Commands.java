@@ -9,8 +9,6 @@ public class Commands {
     public ShiftBlurCmd shiftBlur;
     public SpawnElementDownCmd spawnElementDown;
     public SpawnElementUpCmd spawnElementUp;
-    public SelectElementCmd selectElement;
-    public SelectBrushCmd selectBrush;
     public PauseWorldCmd pauseWorld;
 
     /** inits core commands for loading screen */
@@ -22,8 +20,6 @@ public class Commands {
         shiftBlur = new ShiftBlurCmd();
         spawnElementDown = new SpawnElementDownCmd();
         spawnElementUp = new SpawnElementUpCmd();
-        selectElement = new SelectElementCmd();
-        selectBrush = new SelectBrushCmd();
         pauseWorld = new PauseWorldCmd();
     }
 }

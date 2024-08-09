@@ -5,6 +5,7 @@ import static com.falling.utils.Mappers.animationMapper;
 import com.badlogic.ashley.core.Entity;
 import com.falling.components.VecAnimatorComp.AnimatorType;
 import com.falling.systems.AnimationSystem;
+import com.falling.Application;
 
 /**
  * Animates entity to new Position
@@ -30,7 +31,7 @@ public class AnimToCmd extends Command {
      */
     public AnimToCmd(Entity entity, AnimatorType animatorType, float animToX, float animToY, boolean additive, int repeatTimes) {
         super(entity);
-        posAnimationSystem = engine.getSystem(AnimationSystem.class);
+        posAnimationSystem = Application.getEngine().getSystem(AnimationSystem.class);
         this.animatorType = animatorType;
         this.animToX = animToX;
         this.animToY = animToY;

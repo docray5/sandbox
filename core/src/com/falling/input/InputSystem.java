@@ -1,30 +1,25 @@
-package com.falling.systems;
+package com.falling.input;
 
 import com.badlogic.ashley.core.Engine;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.falling.commands.*;
 import com.falling.events.Event;
 import com.falling.events.Publisher;
 
 import static com.falling.Core.*;
-import static com.falling.components.ElementComp.ElementType.*;
-import static com.falling.systems.WorldSystem.BrushType.*;
 
 public class InputSystem implements InputProcessor {
     private final Vector2 tempMousePos;
     private final Viewport viewport;
-    private final Commands commands;
+    public final KeyBinds keyBinds;
 
     public final Publisher publisher = new Publisher();
 
     public InputSystem(Viewport viewport, Engine engine) {
         tempMousePos = new Vector2();
         this.viewport = viewport;
-
-        commands = Commands.instance;
+        this.keyBinds = new KeyBinds();
     }
 
     @Override
@@ -82,43 +77,14 @@ public class InputSystem implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        publisher.notify(null, Event.KEY_DOWN);
+        this.keyBinds.keyDown(keycode);
+
         return true;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        publisher.notify(null, Event.KEY_UP);
-        switch (keycode) {
-            case Input.Keys.E:
-                commands.selectElement.setElementType(null).execute();
-                break;
-            case Input.Keys.NUM_1:
-                commands.selectElement.setElementType(SAND).execute();
-                break;
-            case Input.Keys.NUM_2:
-                commands.selectElement.setElementType(WATER).execute();
-                break;
-            case Input.Keys.NUM_3:
-                commands.selectElement.setElementType(WOOD).execute();
-                break;
-            case Input.Keys.C:
-                commands.selectBrush.setBrushType(CIRCLE).execute();
-                break;
-            case Input.Keys.X:
-                commands.selectBrush.setBrushType(SQUARE).execute();
-                break;
-            case Input.Keys.Z:
-                commands.selectBrush.setBrushType(PIXEL).execute();
-                break;
-            case Input.Keys.B:
-                commands.shiftBlur.execute();
-                break;
-            case Input.Keys.SPACE:
-                commands.pauseWorld.execute();
-            default:
-                break;
-        }
+        this.keyBinds.keyUp(keycode);
 
         return true;
     }

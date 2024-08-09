@@ -66,7 +66,7 @@ public class Assets {
     public void update() {
         if (manager.update()) {
             loadPrefabs();
-            publisher.notify(null, Event.START_GAME);
+            publisher.notify(null, Event.LOADED_ASSETS);
             finished = true;
         }
     }
