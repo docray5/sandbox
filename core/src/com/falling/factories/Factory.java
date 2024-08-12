@@ -11,6 +11,7 @@ import com.falling.components.ElementComp.ElementType;
 import com.falling.components.ElementComp.MatterType;
 import com.falling.components.VecAnimatorComp.AnimatorType;
 import com.falling.factories.builders.RenderableBuilder;
+import com.falling.components.SceneComp.Scene;
 
 public class Factory {
     private final Engine engine;
@@ -30,6 +31,7 @@ public class Factory {
     private ElementComp elementComp;
     private ClickableComp clickableComp;
     private NinepatchComp ninepatchComp;
+    private SceneComp sceneComp;
 
     private boolean creating;
 
@@ -307,6 +309,18 @@ public class Factory {
         ninepatchComp.size.y = ninepatchComp.ninePatch.getTotalHeight();
 
         entity.add(ninepatchComp);
+        return this;
+    }
+
+    public Factory addSceneComponent(Scene beloningScene, Command openCmd, Command closeCmd) {
+        if (!creating) return null;
+        sceneComp = engine.createComponent(SceneComp.class);
+
+        sceneComp.belongingScene = beloningScene;
+        sceneComp.openCmd = openCmd;
+        sceneComp.closeCmd = closeCmd;
+
+        entity.add(sceneComp);
         return this;
     }
 }

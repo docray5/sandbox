@@ -3,14 +3,11 @@ package com.falling.events;
 import com.badlogic.ashley.core.Entity;
 import com.falling.Application;
 
-/**
- * SceneObserver
- */
-public class SceneMgrObsrv implements Observer {
+public class AssetsObsrv implements Observer {
 
     private final Application application;
 
-    public SceneMgrObsrv(Application application) {
+    public AssetsObsrv(Application application) {
         this.application = application;
     }
 
@@ -20,12 +17,6 @@ public class SceneMgrObsrv implements Observer {
             case LOADED_ASSETS:
                 application.onLoadedAssets();
                 break;
-            case OPEN_MENU:
-            break;
-            case CLOSE_MENU:
-            break;
-            case PREP_MENU:
-            break;
 
             default:
                 break;

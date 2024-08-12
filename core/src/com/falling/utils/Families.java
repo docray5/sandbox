@@ -10,7 +10,7 @@ public class Families {
     public static Family textFamily;
     public static Family cursorFamily;
     public static Family resizeFamily;
-    public static Family uiTranslateFamily;
+    public static Family sceneFamily;
     public static Family worldFamily;
 
     public static void init() {
@@ -20,7 +20,7 @@ public class Families {
         textFamily = Family.all(RenderableComp.class, TransformComp.class, TextComp.class).get();
         cursorFamily = Family.all(CursorComp.class).get();
         resizeFamily = Family.all(ResizeComp.class).get();
-        uiTranslateFamily = Family.all(UITranslateComp.class).get();
+        sceneFamily = Family.all(SceneComp.class).get();
         worldFamily = Family.all().get();
     }
 }

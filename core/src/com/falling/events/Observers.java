@@ -10,13 +10,13 @@ public class Observers {
     public static void setInstance(Observers observers) { instance = observers; }
     public static Observers instance;
 
-    public SceneMgrObsrv sceneMgrObsrv;
+    public AssetsObsrv assetsObsrv;
     public ResizeObsrv resizeObsrv;
 
     public ClickableObsrv clickableObsrv;
 
     public Observers(Application application) {
-        sceneMgrObsrv = new SceneMgrObsrv(application);
+        assetsObsrv = new AssetsObsrv(application);
         resizeObsrv = new ResizeObsrv();
     }
 

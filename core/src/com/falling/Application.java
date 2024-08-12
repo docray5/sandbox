@@ -1,5 +1,8 @@
 package com.falling;
 
+import static com.falling.components.SceneComp.Scene.LOADING;
+import static com.falling.components.SceneComp.Scene.MAIN;
+
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.ApplicationListener;
@@ -19,6 +22,7 @@ public class Application implements ApplicationListener {
     private static PooledEngine engine;
     private RenderSystem renderSystem;
     private InputSystem inputSystem;
+    private SceneMgrSystem sceneMgrSystem;
     private Assets assets;
     private boolean started = false;
 
@@ -36,16 +40,20 @@ public class Application implements ApplicationListener {
         Director.setInstance(new Director(engine, assets));
         Commands.setInstance(new Commands());
 
+        sceneMgrSystem = new SceneMgrSystem(20);
+
         engine.addSystem(new AnimationSystem(1));
+        engine.addSystem(sceneMgrSystem);
         engine.addSystem(new ResizeableSystem(7));
         renderSystem = new RenderSystem(8);
         engine.addSystem(renderSystem);
 
         Observers.setInstance(new Observers(this));
         renderSystem.publisher.addObservers(Observers.instance.resizeObsrv);
-        assets.publisher.addObservers(Observers.instance.sceneMgrObsrv);
+        assets.publisher.addObservers(Observers.instance.assetsObsrv);
 
-        Director.instance.createTitle();
+        Director.instance.createLoadingScene();
+        sceneMgrSystem.init(LOADING);
 	}
 
 	@Override
@@ -64,7 +72,6 @@ public class Application implements ApplicationListener {
         renderSystem.init(assets);
 
         engine.addSystem(new ClickableSystem(2));
-        engine.addSystem(new UITranslateSystem(2));
         engine.addSystem(new TempCursorSystem(4));
         engine.addSystem(new WorldSystem(5));
 
@@ -82,6 +89,8 @@ public class Application implements ApplicationListener {
         Director.instance.createStartText();
         Director.instance.createBlurBtn();
         Director.instance.createNinePatch();
+
+        sceneMgrSystem.swapScene(MAIN);
     }
 
     @Override

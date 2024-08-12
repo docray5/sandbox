@@ -15,7 +15,7 @@ public class Mappers {
     public static ComponentMapper<ResizeComp> resizeMapper;
     public static ComponentMapper<TypeComp> typeMapper;
     public static ComponentMapper<ElementComp> elementMapper;
-    public static ComponentMapper<UITranslateComp> uiTranslateMapper;
+    public static ComponentMapper<SceneComp> sceneMapper;
     public static ComponentMapper<NinepatchComp> ninepatchMapper;
 
     public static void init() {
@@ -30,7 +30,7 @@ public class Mappers {
         resizeMapper = ComponentMapper.getFor(ResizeComp.class);
         typeMapper = ComponentMapper.getFor(TypeComp.class);
         elementMapper = ComponentMapper.getFor(ElementComp.class);
-        uiTranslateMapper = ComponentMapper.getFor(UITranslateComp.class);
+        sceneMapper = ComponentMapper.getFor(SceneComp.class);
         ninepatchMapper = ComponentMapper.getFor(NinepatchComp.class);
     }
 }

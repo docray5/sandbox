@@ -16,6 +16,7 @@ import static com.falling.components.ElementComp.*;
 import static com.falling.Core.*;
 import static com.falling.components.ElementComp.ElementType.*;
 import static com.falling.components.VecAnimatorComp.AnimatorType.*;
+import static com.falling.components.SceneComp.Scene.*;
 
 public class Director {
     public static Director instance;
@@ -28,17 +29,28 @@ public class Director {
     public Director(Engine engine, Assets assets) {
         this.factory = new Factory(engine, assets);
     }
+
+    public void createLoadingScene() {
+        createTitle();
+    }
+
+    public void createMainScene() {
+
+    }
+
     // ================================ Main Menu ================================
 
     public void createTitle() {
         factory.createEntity()
-                .addTransform(worldWidth/2f, worldHeight/2f)
+                .addTransform(worldWidth/2f, worldHeight)
                 .addRenderable()
                 .setPriority(2)
                 .setCenter(true)
                 .endComponent()
                 .addTextureRegion("title")
-                .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut))
+                .addAnimation(factory.createAnimator(POS, 0.8f, null, Interpolation.pow4Out))
+                .addSceneComponent(LOADING, new AnimToCmd(factory.getEntity(), POS, 0, -15, true),
+                new AnimToCmd(factory.getEntity(), POS, 0, -30, true))
                 .endEntity();
     }
     
