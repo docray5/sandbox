@@ -2,6 +2,7 @@ package com.falling.systems;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -30,6 +31,7 @@ public class RenderSystem extends SortedIteratingSystem {
     private final Viewport viewport;
     private FrameBuffer fboMain;
     private final TextureRegion fboMainTextureRegion;
+    private final TextureRegion toBlurRegion;
     private Texture fboMainTexture;
     private final Array<Entity> renderQueue;
     private final Array<Entity> renderAfterVFXQueue;
@@ -47,6 +49,8 @@ public class RenderSystem extends SortedIteratingSystem {
     private float drawX;
     private float drawY;
     private NinepatchComp ninepatchTmp;
+
+    private Texture mask;
 
     public final Publisher publisher = new Publisher();
 
@@ -67,6 +71,9 @@ public class RenderSystem extends SortedIteratingSystem {
         fboMainTextureRegion = new TextureRegion(fboMain.getColorBufferTexture());
         fboMainTextureRegion.flip(false, true);
         fboMainTexture = fboMain.getColorBufferTexture();
+
+        toBlurRegion = new TextureRegion(fboMain.getColorBufferTexture(), 16, 16, 32, 32);
+        toBlurRegion.flip(false, true);
 
         renderQueue = new Array<>();
         renderAfterVFXQueue = new Array<>();
@@ -96,14 +103,60 @@ public class RenderSystem extends SortedIteratingSystem {
         renderQueue.clear();
 
         // Run blur over the fbo if it is enabled
-        if (blur != null && blur.isActive()) blur.blur(spriteBatch, fboMainTexture, deltaTime);
+        if (blur != null && blur.isActive()) {
+            // blur.blur(spriteBatch, fboMainTexture, deltaTime);
+            blur.miniBlur(spriteBatch, toBlurRegion);
+            spriteBatch.setProjectionMatrix(camera.combined);
+        }
 
         // draw the fbo to the screen or draw blur to the screen if it is enabled.
         spriteBatch.begin();
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         spriteBatch.draw(fboMainTextureRegion, cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight());
-        if (blur != null && blur.isActive()) spriteBatch.draw(blur.getBlurredTexture(), cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight(), 0, 0, 1, 1);
+        // if (blur != null && blur.isActive()) spriteBatch.draw(blur.getBlurredTexture(), cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight(), 0, 0, 1, 1);
+        // if (blur != null && blur.isActive()) spriteBatch.draw(blur.getMiniBlurredTexture(), 16, 16, 32, 32);
+        
+        spriteBatch.end();
+
+        spriteBatch.begin();
+
+        if (blur != null && blur.isActive()) {
+
+            Gdx.gl.glColorMask(false, false, false, true);
+
+            /* Change the blending function for our alpha map. */
+            spriteBatch.setBlendFunction(GL20.GL_ONE, GL20.GL_ZERO);
+
+            /* Draw alpha masks. */
+            spriteBatch.draw(mask, 16, 16);
+
+            /* This blending function makes it so we subtract instead of adding to the alpha map. */
+            spriteBatch.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_ALPHA);
+
+            /* Remove the masked sprite's inverse alpha from the map. */
+            spriteBatch.draw(blur.getMiniBlurredTexture(), 16, 16, 32, 32);
+
+
+            /* Flush the batch to the GPU. */
+            spriteBatch.flush();
+
+
+
+            /* Now that the buffer has our alpha, we simply draw the sprite with the mask applied. */
+            Gdx.gl.glColorMask(true, true, true, true);
+
+            /* Change the blending function so the rendered pixels alpha blend with our alpha map. */
+            spriteBatch.setBlendFunction(GL20.GL_DST_ALPHA, GL20.GL_ONE_MINUS_DST_ALPHA);
+
+            /* Draw our sprite to be masked. */
+            spriteBatch.draw(blur.getMiniBlurredTexture(), 16, 16, 32, 32);
+
+            /* Remember to flush before changing GL states again. */
+            spriteBatch.flush();
+            
+            spriteBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        }
 
         // render objects after vfx
         renderQueue(renderAfterVFXQueue);
@@ -155,6 +208,9 @@ public class RenderSystem extends SortedIteratingSystem {
 
         fboMainTextureRegion.setRegion(fboMain.getColorBufferTexture());
         fboMainTextureRegion.flip(false, true);
+
+        toBlurRegion.setRegion(fboMain.getColorBufferTexture());
+        toBlurRegion.flip(false, true);
 
         fboMainTexture = fboMain.getColorBufferTexture();
 
@@ -225,6 +281,7 @@ public class RenderSystem extends SortedIteratingSystem {
 
     public void init(Assets assets) {
         blur = new Blur(assets);
+        mask = assets.getTexture("mask");
     }
 
     public void dispose() {
