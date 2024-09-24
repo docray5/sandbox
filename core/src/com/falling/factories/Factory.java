@@ -1,7 +1,9 @@
 package com.falling.factories;
 
 import com.badlogic.ashley.core.*;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
@@ -32,6 +34,8 @@ public class Factory {
     private ClickableComp clickableComp;
     private NinepatchComp ninepatchComp;
     private SceneComp sceneComp;
+    private BlurComp blurComp;
+    private MaskComp maskComp;
 
     private boolean creating;
 
@@ -321,6 +325,37 @@ public class Factory {
         sceneComp.closeCmd = closeCmd;
 
         entity.add(sceneComp);
+        return this;
+    }
+
+    public Factory addBlurComp(boolean blurBackground, int fboWidth, int fboHeight) {
+        if (!creating) return null;
+        blurComp = engine.createComponent(BlurComp.class);
+    
+        blurComp.blurBackground = blurBackground;
+        blurComp.fboWidth = fboWidth;
+        blurComp.fboHeight = fboHeight;
+        blurComp.matrix4.setToOrtho2D(0, 0, fboWidth, fboHeight);
+        blurComp.fbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, fboWidth, fboHeight, false);
+        blurComp.fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, fboWidth, fboHeight, false);
+
+        blurComp.fboTexture1 = blurComp.fbo1.getColorBufferTexture();
+        blurComp.fboTexture2 = blurComp.fbo2.getColorBufferTexture();
+
+        entity.add(blurComp);
+        return this;
+    }
+
+    public Factory addMaskComp(String textureFN) {
+        if (!creating) return null;
+        maskComp = engine.createComponent(MaskComp.class);
+        if (maskComp.textureRegion.getTexture() != assets.getTexture(textureFN)) {
+            maskComp.textureRegion.setRegion(assets.getTexture(textureFN));
+            maskComp.originX = maskComp.textureRegion.getRegionWidth()/2f;
+            maskComp.originY = maskComp.textureRegion.getRegionHeight()/2f;
+        }
+
+        entity.add(maskComp);
         return this;
     }
 }

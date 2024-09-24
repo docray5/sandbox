@@ -1,6 +1,5 @@
 package com.falling.vfx;
 
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -10,8 +9,8 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
+import com.falling.components.BlurComp;
 
-import static com.badlogic.gdx.Gdx.gl;
 import static com.falling.Core.*;
 
 public class Blur {
@@ -63,36 +62,40 @@ public class Blur {
         matrix4.setToOrtho2D(0, 0, (int)size.x, (int)size.y);
     }
 
-    public void miniBlur(SpriteBatch batch, TextureRegion textureToBlur) {
+    public void miniBlur(SpriteBatch batch, TextureRegion textureToBlur, BlurComp blurComp) {
+        // TODO replace this: with region.getTexture() == lastRegion.getTexture()
         if (!updateBlur) return;
         updateBlur = false;
 
-        // TODO the region is returing a too big size and we need to scale it then
-        textureToBlur.setRegion((int)(pos.x)*4, (int)(pos.y)*4, (int)size.x*4, (int)size.y*4);
+        blurComp.fbo2.begin();
+        batch.begin();
+        batch.draw(textureToBlur, 0, 0, blurComp.fboWidth, blurComp.fboHeight);
+        batch.end();
+        blurComp.fbo2.end();
+    
+        // TODO make it so all the blurring is happening with one shader pass instead of n shader passes
+        batch.setShader(blurShader);
 
-        batch.setProjectionMatrix(matrix4);
-
-        for (int i = 0; i < iterations; i++) {
-            testFbo1.begin();
+        for (int i = 0; i < blurComp.iterations; i++) {
+            blurComp.fbo1.begin();
             batch.begin();
             blurShader.setUniformf("dir", 1f, 0f);
             blurShader.setUniformf("radius", 1);
-            blurShader.setUniformf("resolution", size.x);
+            blurShader.setUniformf("resolution", blurComp.fboWidth);
 
-            if (i==0) batch.draw(textureToBlur, 0, 0, size.x, size.y);
-            else batch.draw(testFbo2Texture, 0, 0, size.x, size.y, 0, 0, 1, 1);
+            batch.draw(blurComp.fboTexture2, 0, 0, blurComp.fboWidth, blurComp.fboHeight, 0, 0, 1, 1);
 
             batch.end();
-            testFbo1.end();
+            blurComp.fbo1.end();
 
-            batch.setShader(blurShader);
-            testFbo2.begin();
+            blurComp.fbo2.begin();
             batch.begin();
             blurShader.setUniformf("dir", 0f, 1f);
-            blurShader.setUniformf("resolution", size.y);
-            batch.draw(testFbo1Texture, 0, 0, size.x, size.y, 0, 0, 1, 1);
+            blurShader.setUniformf("radius", 1);
+            blurShader.setUniformf("resolution", blurComp.fboHeight);
+            batch.draw(blurComp.fboTexture1, 0, 0, blurComp.fboWidth, blurComp.fboHeight, 0, 0, 1, 1);
             batch.end();
-            testFbo2.end();
+            blurComp.fbo2.end();
         }
 
         batch.setShader(null);
@@ -191,7 +194,9 @@ public class Blur {
 
         fbo1Texture = fbo1.getColorBufferTexture();
         fbo2Texture = fbo2.getColorBufferTexture();
+    }
 
+    public void resizeMiniBlur() {
         testFbo1Texture.dispose();
         testFbo1Texture = null;
 

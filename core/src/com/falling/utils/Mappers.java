@@ -17,6 +17,8 @@ public class Mappers {
     public static ComponentMapper<ElementComp> elementMapper;
     public static ComponentMapper<SceneComp> sceneMapper;
     public static ComponentMapper<NinepatchComp> ninepatchMapper;
+    public static ComponentMapper<BlurComp> blurMapper;
+    public static ComponentMapper<MaskComp> maskMapper;
 
     public static void init() {
         transformMapper = ComponentMapper.getFor(TransformComp.class);
@@ -32,5 +34,7 @@ public class Mappers {
         elementMapper = ComponentMapper.getFor(ElementComp.class);
         sceneMapper = ComponentMapper.getFor(SceneComp.class);
         ninepatchMapper = ComponentMapper.getFor(NinepatchComp.class);
+        blurMapper = ComponentMapper.getFor(BlurComp.class);
+        maskMapper = ComponentMapper.getFor(MaskComp.class);
     }
 }

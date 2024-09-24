@@ -89,6 +89,7 @@ public class Application implements ApplicationListener {
         Director.instance.createStartText();
         Director.instance.createBlurBtn();
         Director.instance.createNinePatch();
+        Director.instance.createTestBtn();
 
         sceneMgrSystem.swapScene(MAIN);
     }

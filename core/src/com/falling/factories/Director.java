@@ -79,6 +79,22 @@ public class Director {
                 .endEntity();
     }
 
+    public void createUIButtonWithBlurBckg(float x, float y, float width, float height, String fn, STICK_TYPE stick, Command commandOnClick) {
+        factory.createEntity()
+            .addTransform(x, y)
+            .addResize(stick)
+            .addRenderable()
+                .setPriority(10)
+                .setCenter(false)
+            .endComponent()
+            .addTextureRegion(fn)
+            .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut))
+            .addClickableAuto(commandOnClick, new AnimToCmd(factory.getEntity(), SCALE, 0.7f, 0.7f, false), new AnimToCmd(factory.getEntity(), SCALE, 1f, 1f, false), new AnimToCmd(factory.getEntity(), SCALE, 1.1f, 1.1f, false), new AnimToCmd(factory.getEntity(), SCALE, 1f, 1f, false), 0, 10)
+            .addBlurComp(true, (int)width, (int)height)
+            .addMaskComp("mask")
+            .endEntity();
+    }
+
     public void createUIButton(float x, float y, float width, float height, String fn, STICK_TYPE stick, Command commandOnClick) {
         factory.createEntity()
             .addTransform(x-width/2, y-height/2)
@@ -95,6 +111,10 @@ public class Director {
 
     public void createBlurBtn() {
         createUIButton(worldWidth-4, worldHeight-4, 27, 33, "btn", STICK_TYPE.RIGHT_TOP, Commands.instance.shiftBlur);
+    }
+
+    public void createTestBtn() {
+        createUIButtonWithBlurBckg(16, 16, 32, 32, "test", STICK_TYPE.LEFT_BOTTOM, Commands.instance.shiftBlur);
     }
 
     public void createPauseBtn() {
