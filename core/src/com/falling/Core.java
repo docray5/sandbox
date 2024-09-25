@@ -20,6 +20,8 @@ public class Core {
     public static float tbGutter = 0;
     public static float xGutOffset = 0;
     public static float yGutOffset = 0;
+    public static float windowScaleX = screenWidth/worldWidth;
+    public static float windowScaleY = screenHeight/worldHeight;
 
     /** makes screen look more like pixel art */
     public static boolean pixelate = false;

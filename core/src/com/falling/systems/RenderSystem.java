@@ -33,7 +33,7 @@ public class RenderSystem extends SortedIteratingSystem {
     private FrameBuffer fboMain;
     private final TextureRegion fboMainTextureRegion;
     private final TextureRegion toBlurRegion;
-    private Texture fboMainTexture;
+    private Texture fboMainTexture; // TODO DELETE
     private FrameBuffer fboMasks;
     private TextureRegion fboMasksTexture;
     private final Array<Entity> renderQueue;
@@ -43,8 +43,6 @@ public class RenderSystem extends SortedIteratingSystem {
     private Blur blur;
     private float oldWorldWidth;
     private float oldWorldHeight;
-    private float windowScaleX;
-    private float windowScaleY;
 
     private Entity entityTmp;
     private TransformComp transformTmp;
@@ -96,9 +94,6 @@ public class RenderSystem extends SortedIteratingSystem {
 
         oldWorldWidth = worldWidth;
         oldWorldHeight = worldHeight;
-
-        windowScaleX = screenWidth/worldWidth;
-        windowScaleY = screenHeight/worldHeight;
     }
 
     @Override
@@ -127,17 +122,19 @@ public class RenderSystem extends SortedIteratingSystem {
             for (int i = blurQueue.size-1; i >= 0; i--) {
                 entityTmp = blurQueue.get(i);
                 blurCompTmp = blurMapper.get(entityTmp);
-                transformTmp = transformMapper.get(entityTmp);
-                drawX = transformTmp.pos.x;
-                drawY = transformTmp.pos.y;
+                drawX = blurCompTmp.regionPos.x;
+                drawY = blurCompTmp.regionPos.y;
                 if (renderableMapper.get(entityTmp).center) {
                     drawX -= widthTmp/2f;
                     drawY -= heightTmp/2f;
                 }
                 
-                // TODO the region is returing a too big size and we need to scale it then
-                // TODO Use MathUtils.floor
-                toBlurRegion.setRegion((int) (drawX*windowScaleX), (int) (drawY*windowScaleY), blurCompTmp.fboWidth*4, blurCompTmp.fboHeight*4);
+                if (pixelate) {
+                    toBlurRegion.setRegion((int) (drawX), (int) (drawY), (int) (blurCompTmp.fboWidth), (int) (blurCompTmp.fboHeight));
+                } else {
+                // we are scaling because the fbo is of screen size
+                    toBlurRegion.setRegion((int) (drawX*windowScaleX), (int) (drawY*windowScaleY), (int) (blurCompTmp.fboWidth*windowScaleX), (int) (blurCompTmp.fboHeight*windowScaleY));
+                }
                 spriteBatch.setProjectionMatrix(blurCompTmp.matrix4);
 
                 blur.miniBlur(spriteBatch, toBlurRegion, blurCompTmp);
@@ -351,7 +348,7 @@ public class RenderSystem extends SortedIteratingSystem {
 
         fboMainTexture = fboMain.getColorBufferTexture();
 
-        if (blur != null) blur.resize();
+        if (blur != null && blur.isActive()) blur.resize();
 
         publisher.notify(null, Event.RESIZE);
     }

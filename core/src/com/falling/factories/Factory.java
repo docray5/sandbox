@@ -1,5 +1,7 @@
 package com.falling.factories;
 
+import static com.falling.utils.Mappers.transformMapper;
+
 import com.badlogic.ashley.core.*;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
@@ -341,6 +343,8 @@ public class Factory {
 
         blurComp.fboTexture1 = blurComp.fbo1.getColorBufferTexture();
         blurComp.fboTexture2 = blurComp.fbo2.getColorBufferTexture();
+
+        blurComp.regionPos.set(transformComp.pos);
 
         entity.add(blurComp);
         return this;

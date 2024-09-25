@@ -25,13 +25,6 @@ public class Blur {
     private Texture fbo1Texture;
     private Texture fbo2Texture;
 
-    private Texture testFbo1Texture;
-    private Texture testFbo2Texture;
-    private FrameBuffer testFbo1, testFbo2;
-    private Vector2 pos;
-    private Vector2 size;
-    private Matrix4 matrix4;
-
     public Blur(Assets assets) {
         accel = 4f;
         radius = 0;
@@ -49,17 +42,6 @@ public class Blur {
         fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
         fbo1Texture = fbo1.getColorBufferTexture();
         fbo2Texture = fbo2.getColorBufferTexture();
-
-        size = new Vector2(32, 32);
-        pos = new Vector2(16, 16);
-
-        testFbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) size.x, (int) size.y, false);
-        testFbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) size.x, (int) size.y, false);
-
-        testFbo1Texture = testFbo1.getColorBufferTexture();
-        testFbo2Texture = testFbo2.getColorBufferTexture();
-        matrix4 = new Matrix4();
-        matrix4.setToOrtho2D(0, 0, (int)size.x, (int)size.y);
     }
 
     public void miniBlur(SpriteBatch batch, TextureRegion textureToBlur, BlurComp blurComp) {
@@ -76,11 +58,11 @@ public class Blur {
         // TODO make it so all the blurring is happening with one shader pass instead of n shader passes
         batch.setShader(blurShader);
 
-        for (int i = 0; i < blurComp.iterations; i++) {
+        for (int i = 0; i < 1; i++) {
             blurComp.fbo1.begin();
             batch.begin();
             blurShader.setUniformf("dir", 1f, 0f);
-            blurShader.setUniformf("radius", 1);
+            blurShader.setUniformf("radius", 1f);
             blurShader.setUniformf("resolution", blurComp.fboWidth);
 
             batch.draw(blurComp.fboTexture2, 0, 0, blurComp.fboWidth, blurComp.fboHeight, 0, 0, 1, 1);
@@ -132,10 +114,6 @@ public class Blur {
 
     public Texture getBlurredTexture() {
         return fbo2Texture;
-    }
-
-    public Texture getMiniBlurredTexture() {
-        return testFbo2Texture;
     }
 
     public void dispose() {
@@ -197,21 +175,21 @@ public class Blur {
     }
 
     public void resizeMiniBlur() {
-        testFbo1Texture.dispose();
-        testFbo1Texture = null;
-
-        testFbo2Texture.dispose();
-        testFbo2Texture = null;
-
-        testFbo1.dispose();
-        testFbo2.dispose();
-        testFbo1 = null;
-        testFbo2 = null;
-
-        testFbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) size.x, (int) size.y, false);
-        testFbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) size.x, (int) size.y, false);
-
-        testFbo1Texture = testFbo1.getColorBufferTexture();
-        testFbo2Texture = testFbo2.getColorBufferTexture();
+        // testFbo1Texture.dispose();
+        // testFbo1Texture = null;
+        //
+        // testFbo2Texture.dispose();
+        // testFbo2Texture = null;
+        //
+        // testFbo1.dispose();
+        // testFbo2.dispose();
+        // testFbo1 = null;
+        // testFbo2 = null;
+        //
+        // testFbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) size.x, (int) size.y, false);
+        // testFbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) size.x, (int) size.y, false);
+        //
+        // testFbo1Texture = testFbo1.getColorBufferTexture();
+        // testFbo2Texture = testFbo2.getColorBufferTexture();
     }
 }

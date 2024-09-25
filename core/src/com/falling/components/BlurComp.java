@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool.Poolable;
 
 /**
@@ -21,6 +22,7 @@ public class BlurComp implements Component, Poolable {
     public int iterations = 4;
     public int fboWidth;
     public int fboHeight;
+    public Vector2 regionPos = new Vector2();
 
 	@Override
 	public void reset() {
@@ -33,5 +35,6 @@ public class BlurComp implements Component, Poolable {
         iterations = 4;
         fboWidth = 0;
         fboHeight = 0;
+        regionPos.set(0, 0);
 	}
 }
