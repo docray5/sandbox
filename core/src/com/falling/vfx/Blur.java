@@ -6,8 +6,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
 import com.falling.components.BlurComp;
 
@@ -42,13 +40,11 @@ public class Blur {
         fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
         fbo1Texture = fbo1.getColorBufferTexture();
         fbo2Texture = fbo2.getColorBufferTexture();
+
+        updateBlur = true;
     }
 
     public void miniBlur(SpriteBatch batch, TextureRegion textureToBlur, BlurComp blurComp) {
-        // TODO replace this: with region.getTexture() == lastRegion.getTexture()
-        if (!updateBlur) return;
-        updateBlur = false;
-
         blurComp.fbo2.begin();
         batch.begin();
         batch.draw(textureToBlur, 0, 0, blurComp.fboWidth, blurComp.fboHeight);

@@ -79,13 +79,14 @@ public class Director {
                 .endEntity();
     }
 
-    public void createUIButtonWithBlurBckg(float x, float y, float width, float height, String fn, STICK_TYPE stick, Command commandOnClick) {
+    public void createUIButtonWithBlurBckg(float x, float y, float width, float height, String fn, STICK_TYPE stick, Command commandOnClick, Color color) {
         factory.createEntity()
             .addTransform(x, y)
             .addResize(stick)
             .addRenderable()
                 .setPriority(10)
                 .setCenter(false)
+            .setColor(color)
             .endComponent()
             .addTextureRegion(fn)
             .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut))
@@ -114,7 +115,8 @@ public class Director {
     }
 
     public void createTestBtn() {
-        createUIButtonWithBlurBckg(16, 16, 32, 32, "test", STICK_TYPE.LEFT_BOTTOM, Commands.instance.shiftBlur);
+        createUIButtonWithBlurBckg(16, 16, 32, 32, "test", STICK_TYPE.LEFT_BOTTOM, Commands.instance.shiftBlur, Color.WHITE);
+        createUIButtonWithBlurBckg(worldWidth-16-32, 16, 32, 32, "mask", STICK_TYPE.RIGHT_BOTTOM, null, Color.CLEAR);
     }
 
     public void createPauseBtn() {
