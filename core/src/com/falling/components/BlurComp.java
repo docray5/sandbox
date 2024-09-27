@@ -19,7 +19,7 @@ public class BlurComp implements Component, Poolable {
     public Texture fboTexture1;
     /** Your blurred Texture */
     public Texture fboTexture2;
-    public int iterations = 4;
+    public int iterations = 2;
     public int fboWidth;
     public int fboHeight;
     public Vector2 regionPos = new Vector2();
@@ -32,7 +32,7 @@ public class BlurComp implements Component, Poolable {
         fbo1 = null;
         if (fbo2 != null) fbo2.dispose();
         fbo2 = null;
-        iterations = 4;
+        iterations = 2;
         fboWidth = 0;
         fboHeight = 0;
         regionPos.set(0, 0);

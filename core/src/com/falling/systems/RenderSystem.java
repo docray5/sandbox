@@ -58,8 +58,6 @@ public class RenderSystem extends SortedIteratingSystem {
     private BlurComp blurCompTmp;
     private MaskComp maskCompTmp;
 
-    private Texture mask;
-
     public final Publisher publisher = new Publisher();
 
     private FPSLogger fpsLogger;
@@ -73,29 +71,30 @@ public class RenderSystem extends SortedIteratingSystem {
         viewport = new ExtendViewport(worldWidth, worldHeight, camera);
         cameraPos.set(camera.position);
 
-        if (pixelate == true)
+        if (pixelate == true) {
             fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth, (int) worldHeight, false);
-        else
+            fboMain2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth, (int) worldHeight, false);
+            fboMasks = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth, (int) worldHeight, false);
+        } else {
             fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth, screenHeight, false);
+            fboMain2 = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth, screenHeight, false);
+            fboMasks = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth, screenHeight, false);
+        }
+
         fboMain.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
         fboMainTextureRegion = new TextureRegion(fboMain.getColorBufferTexture());
         fboMainTextureRegion.flip(false, true);
 
-        toBlurRegion = new TextureRegion(fboMain.getColorBufferTexture(), 16, 16, 32, 32);
-        toBlurRegion.flip(false, true);
-
-        fboMasks = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth, screenHeight, false);
         fboMasks.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
         fboMasksTexture = new TextureRegion(fboMasks.getColorBufferTexture());
         fboMasksTexture.flip(false, true);
 
-        if (pixelate == true)
-            fboMain2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth, (int) worldHeight, false);
-        else
-            fboMain2 = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth, screenHeight, false);
         fboMain2.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
         fboMain2TextureRegion = new TextureRegion(fboMain2.getColorBufferTexture());
         fboMain2TextureRegion.flip(false, true);
+
+        toBlurRegion = new TextureRegion(fboMain.getColorBufferTexture(), 16, 16, 32, 32);
+        toBlurRegion.flip(false, true);
 
         renderQueue = new Array<>();
         renderAfterVFXQueue = new Array<>();
@@ -160,13 +159,15 @@ public class RenderSystem extends SortedIteratingSystem {
         maskQueue.clear();
 
         // === Run blur over the screen ===
+        if (blur != null && blur.isActive()) 
+            blur.blur(spriteBatch, fboMain2TextureRegion.getTexture(), deltaTime);
         
         // === Draw Blur or Main Frame Buffer ===
         spriteBatch.begin();
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        // if (blur != null && blur.isActive()) spriteBatch.draw(blur.getBlurredTexture(), cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight(), 0, 0, 1, 1);
-        spriteBatch.draw(fboMain2TextureRegion, cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight());
+        if (blur != null && blur.isActive()) spriteBatch.draw(blur.getBlurredTexture(), cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight(), 0, 0, 1, 1);
+        else spriteBatch.draw(fboMain2TextureRegion, cameraPos.x - viewport.getWorldWidth()/2f, cameraPos.y - viewport.getWorldHeight()/2f, viewport.getWorldWidth(), viewport.getWorldHeight());
 
         // render objects after vfx
         renderQueue(renderAfterVFXQueue);
@@ -191,7 +192,6 @@ public class RenderSystem extends SortedIteratingSystem {
         if (!updateBlur) return;
         if (!blur.isActive()) updateBlur = false;
 
-        // blur.blur(spriteBatch, fboMainTexture, deltaTime);
         for (int i = blurQueue.size-1; i >= 0; i--) {
             entityTmp = blurQueue.get(i);
             blurCompTmp = blurMapper.get(entityTmp);
@@ -201,6 +201,8 @@ public class RenderSystem extends SortedIteratingSystem {
                 drawX -= widthTmp/2f;
                 drawY -= heightTmp/2f;
             }
+
+            centerBlur();
             
             if (pixelate) {
                 toBlurRegion.setRegion((int) (drawX), (int) (drawY), (int) (blurCompTmp.fboWidth), (int) (blurCompTmp.fboHeight));
@@ -249,8 +251,10 @@ public class RenderSystem extends SortedIteratingSystem {
             Gdx.gl.glColorMask(true, true, true, true);
             spriteBatch.setBlendFunction(GL20.GL_DST_ALPHA, GL20.GL_ZERO);
 
+            centerBlur();
+
             /* Draw our sprite to be masked. */
-            if (blur != null && blur.isActive() && blurMapper.has(entityTmp) && blurMapper.get(entityTmp).blurBackground) {
+            if (blur != null && blurMapper.has(entityTmp) && blurMapper.get(entityTmp).blurBackground) {
                 blurCompTmp = blurMapper.get(entityTmp);
                 spriteBatch.draw(blurCompTmp.fboTexture2, drawX, drawY, blurCompTmp.fboWidth, blurCompTmp.fboHeight);
             }
@@ -348,17 +352,23 @@ public class RenderSystem extends SortedIteratingSystem {
         fboMain.dispose();
         fboMain = null;
 
-        fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth == 0 ? (int) worldWidth : screenWidth, screenHeight == 0 ? (int) worldHeight : screenHeight, false);
-        fboMain.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
-
-        fboMainTextureRegion.setRegion(fboMain.getColorBufferTexture());
-        fboMainTextureRegion.flip(false, true);
-
         fboMain2.dispose();
         fboMain2 = null;
 
+        fboMasks.dispose();
+        fboMasks = null;
+
+        fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth == 0 ? (int) worldWidth : screenWidth, screenHeight == 0 ? (int) worldHeight : screenHeight, false);
+        fboMain.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
+
         fboMain2 = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth == 0 ? (int) worldWidth : screenWidth, screenHeight == 0 ? (int) worldHeight : screenHeight, false);
         fboMain2.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
+
+        fboMasks = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth == 0 ? (int) worldWidth : screenWidth, screenHeight == 0 ? (int) worldHeight : screenHeight, false);
+        fboMasks.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
+
+        fboMainTextureRegion.setRegion(fboMain.getColorBufferTexture());
+        fboMainTextureRegion.flip(false, true);
 
         fboMain2TextureRegion.setRegion(fboMain2.getColorBufferTexture());
         fboMain2TextureRegion.flip(false, true);
@@ -366,20 +376,27 @@ public class RenderSystem extends SortedIteratingSystem {
         toBlurRegion.setRegion(fboMain.getColorBufferTexture());
         toBlurRegion.flip(false, true);
 
-        fboMasks = new FrameBuffer(Pixmap.Format.RGBA8888, screenWidth == 0 ? (int) worldWidth : screenWidth, screenHeight == 0 ? (int) worldHeight : screenHeight, false);
-        fboMasks.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Nearest);
-
         fboMasksTexture.setRegion(fboMasks.getColorBufferTexture());
         fboMasksTexture.flip(false, true);
 
-        if (blur != null && blur.isActive()) blur.resize();
+        updateBlur = true;
+
+        if (blur != null) blur.resizeNext();
 
         publisher.notify(null, Event.RESIZE);
     }
 
+    /** Centering our buffer if its bigger than mask */
+    private void centerBlur() {
+        if (maskMapper.has(entityTmp)) {
+            maskCompTmp = maskMapper.get(entityTmp);
+            drawX -= (blurCompTmp.fboWidth - maskCompTmp.textureRegion.getRegionWidth())/2f;
+            drawY -= (blurCompTmp.fboHeight - maskCompTmp.textureRegion.getRegionHeight())/2f;
+        }
+    }
+
     public void init(Assets assets) {
         blur = new Blur(assets);
-        mask = assets.getTexture("maskk");
     }
 
     public void dispose() {

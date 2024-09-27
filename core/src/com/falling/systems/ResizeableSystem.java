@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.falling.components.ResizeComp;
 
 import static com.falling.Core.*;
@@ -38,6 +37,7 @@ public class ResizeableSystem extends IteratingSystem {
                     blurPosTmp = blurMapper.get(entity).regionPos;
                     blurPosTmp.set(posTmp);
                     absolutePosition(resizeTmp, blurPosTmp);
+                    normalizeBlurPosition(resizeTmp, blurPosTmp);
                 }
             }
 
@@ -56,6 +56,33 @@ public class ResizeableSystem extends IteratingSystem {
                         break;
                 }
             }        
+        }
+    }
+
+    private void normalizeBlurPosition(ResizeComp resize, Vector2 pos) {
+        switch (resize.stick) {
+            case LEFT_TOP:
+                pos.y += tbGutter*2;
+                break;
+            case RIGHT_TOP:
+                pos.x += lrGutter*2;
+                pos.y += tbGutter*2;
+                break;
+            case LEFT_BOTTOM:
+                break;
+            case RIGHT_BOTTOM:
+                pos.x += lrGutter*2;
+                break;
+            case LEFT:
+                break;
+            case RIGHT:
+                pos.x += lrGutter*2;
+                break;
+            case TOP:
+                pos.y += tbGutter*2;
+                break;
+            case BOTTOM:
+                break;
         }
     }
 

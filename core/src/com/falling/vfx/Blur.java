@@ -22,6 +22,7 @@ public class Blur {
     private boolean active;
     private Texture fbo1Texture;
     private Texture fbo2Texture;
+    private boolean resizeNext = false;
 
     public Blur(Assets assets) {
         accel = 4f;
@@ -54,7 +55,7 @@ public class Blur {
         // TODO make it so all the blurring is happening with one shader pass instead of n shader passes
         batch.setShader(blurShader);
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < iterations; i++) {
             blurComp.fbo1.begin();
             batch.begin();
             blurShader.setUniformf("dir", 1f, 0f);
@@ -82,6 +83,11 @@ public class Blur {
     public void blur(SpriteBatch batch, Texture fboTexture, float deltaTime) {
         if (!updateBlur) return;
         updateBlur = false;
+
+        if (resizeNext) {
+            resizeNext = false;
+            resize();
+        }
 
         animation(deltaTime);
 
@@ -149,9 +155,11 @@ public class Blur {
         return active;
     }
 
-    public void resize() {
-        updateBlur = true;
+    public void resizeNext() {
+        resizeNext = true;
+    }
 
+    private void resize() {
         fbo1Texture.dispose();
         fbo1Texture = null;
 
