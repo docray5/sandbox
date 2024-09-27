@@ -258,7 +258,9 @@ public class RenderSystem extends SortedIteratingSystem {
             if (blur != null && blurMapper.has(entityTmp) && blurMapper.get(entityTmp).blurBackground) {
                 blurCompTmp = blurMapper.get(entityTmp);
                 centerBlur();
-                spriteBatch.draw(blurCompTmp.fboTexture2, drawX, drawY, blurCompTmp.fboWidth, blurCompTmp.fboHeight);
+                spriteBatch.draw(blurCompTmp.textureRegion, drawX, drawY,
+                    blurCompTmp.fboWidth, blurCompTmp.fboHeight, blurCompTmp.fboWidth, blurCompTmp.fboHeight,
+                    transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
             }
         }
     }
@@ -442,6 +444,10 @@ public class RenderSystem extends SortedIteratingSystem {
             drawX -= (blurCompTmp.fboWidth - widthTmp)/2f;
             drawY -= (blurCompTmp.fboHeight - widthTmp)/2f;
         }
+    }
+
+    public void resizeBlurComp(BlurComp blurComponent, int newWidth, int newHeight) {
+        blur.resizeMiniBlur(blurComponent, newWidth, newHeight);
     }
 
     public void init(Assets assets) {

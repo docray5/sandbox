@@ -178,22 +178,27 @@ public class Blur {
         fbo2Texture = fbo2.getColorBufferTexture();
     }
 
-    public void resizeMiniBlur() {
-        // testFbo1Texture.dispose();
-        // testFbo1Texture = null;
-        //
-        // testFbo2Texture.dispose();
-        // testFbo2Texture = null;
-        //
-        // testFbo1.dispose();
-        // testFbo2.dispose();
-        // testFbo1 = null;
-        // testFbo2 = null;
-        //
-        // testFbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) size.x, (int) size.y, false);
-        // testFbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) size.x, (int) size.y, false);
-        //
-        // testFbo1Texture = testFbo1.getColorBufferTexture();
-        // testFbo2Texture = testFbo2.getColorBufferTexture();
+    public void resizeMiniBlur(BlurComp blurComponent, int newWidth, int newHeight) {
+        blurComponent.fboWidth = newWidth;
+        blurComponent.fboHeight = newHeight;
+
+        blurComponent.fboTexture1.dispose();
+        blurComponent.fboTexture1 = null;
+
+        blurComponent.fboTexture2.dispose();
+        blurComponent.fboTexture2 = null;
+
+        blurComponent.fbo1.dispose();
+        blurComponent.fbo2.dispose();
+        blurComponent.fbo1 = null;
+        blurComponent.fbo2 = null;
+
+        blurComponent.fbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, blurComponent.fboWidth, blurComponent.fboHeight, false);
+        blurComponent.fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, blurComponent.fboWidth, blurComponent.fboHeight, false);
+
+        blurComponent.fboTexture1 = blurComponent.fbo1.getColorBufferTexture();
+        blurComponent.fboTexture2 = blurComponent.fbo2.getColorBufferTexture();
+
+        blurComponent.textureRegion.setRegion(blurComponent.fboTexture2);
     }
 }

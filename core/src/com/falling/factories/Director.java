@@ -35,7 +35,13 @@ public class Director {
     }
 
     public void createMainScene() {
-
+        createSpawnArea();
+        createStartText();
+        createBlurBtn();
+        createNinePatch();
+        createTestBtn();
+        createNinePatchWithBlur();
+        createTempBg();
     }
 
     // ================================ Main Menu ================================
@@ -54,6 +60,17 @@ public class Director {
                 .endEntity();
     }
 
+    public void createTempBg() {
+        factory.createEntity()
+                .addTransform(worldWidth/2f, worldHeight/2f)
+                .addRenderable()
+                    .setPriority(0)
+                    .setCenter(true)
+                .endComponent()
+                .addTextureRegion("bg")
+                .endEntity();
+    }
+
     public void createNinePatchWithBlur() {
         factory.createEntity()
             .addTransform(44+4, 100)
@@ -61,7 +78,7 @@ public class Director {
             .addRenderable()
                 .setPriority(10)
                 .setCenter(true)
-            .setColor(new Color(1, 1, 1, 0.4f))
+            .setColor(new Color(1, 1, 1, 0.1f))
             .endComponent()
             .addNinePatch("np", 14, 14, 14, 14, 40, 40)
             .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut), factory.createAnimator(SIZE, 0.25f, null, Interpolation.swingOut))

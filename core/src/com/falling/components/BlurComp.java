@@ -2,6 +2,7 @@ package com.falling.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
@@ -23,6 +24,7 @@ public class BlurComp implements Component, Poolable {
     public int fboWidth;
     public int fboHeight;
     public Vector2 regionPos = new Vector2();
+    public TextureRegion textureRegion = new TextureRegion();
 
 	@Override
 	public void reset() {

@@ -344,6 +344,8 @@ public class Factory {
 
         blurComp.regionPos.set(transformComp.pos);
 
+        blurComp.textureRegion.setRegion(blurComp.fboTexture2);
+
         entity.add(blurComp);
         return this;
     }

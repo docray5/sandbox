@@ -4,6 +4,7 @@ shaders/blurFrag.glsl
 shaders/blurVert.glsl
 shaders/whiteFrag.glsl
 textures/abtn.png
+textures/bg.png
 textures/boot.png
 textures/btn.png
 textures/mask.png

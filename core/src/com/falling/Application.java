@@ -85,12 +85,7 @@ public class Application implements ApplicationListener {
         inputSystem.publisher.addObservers(Observers.instance.clickableObsrv);
 
         // Scene related:
-        Director.instance.createSpawnArea();
-        Director.instance.createStartText();
-        Director.instance.createBlurBtn();
-        Director.instance.createNinePatch();
-        Director.instance.createTestBtn();
-        Director.instance.createNinePatchWithBlur();
+        Director.instance.createMainScene();
 
         sceneMgrSystem.swapScene(MAIN);
     }
