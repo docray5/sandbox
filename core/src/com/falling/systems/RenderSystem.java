@@ -259,7 +259,7 @@ public class RenderSystem extends SortedIteratingSystem {
                 blurCompTmp = blurMapper.get(entityTmp);
                 centerBlur();
                 spriteBatch.draw(blurCompTmp.textureRegion, drawX, drawY,
-                    blurCompTmp.fboWidth, blurCompTmp.fboHeight, blurCompTmp.fboWidth, blurCompTmp.fboHeight,
+                    blurCompTmp.fboWidth/2f, blurCompTmp.fboHeight/2f, blurCompTmp.fboWidth, blurCompTmp.fboHeight,
                     transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
             }
         }
