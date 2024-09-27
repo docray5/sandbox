@@ -13,10 +13,12 @@ public class MaskComp implements Component, Poolable {
     public TextureRegion textureRegion = new TextureRegion();
     public float originX;
     public float originY;
+    public boolean autoMask;
 
 	@Override
 	public void reset() {
         originX = 0;
         originY = 0;
+        autoMask = false;
 	}
 }

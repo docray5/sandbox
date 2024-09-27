@@ -3,6 +3,7 @@ package com.falling.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -11,6 +12,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -44,6 +47,7 @@ public class RenderSystem extends SortedIteratingSystem {
     private float oldWorldHeight;
     private FrameBuffer fboMain2;
     private final TextureRegion fboMain2TextureRegion;
+    private ShaderProgram whiteShader;
 
     private Entity entityTmp;
     private TransformComp transformTmp;
@@ -197,6 +201,8 @@ public class RenderSystem extends SortedIteratingSystem {
             blurCompTmp = blurMapper.get(entityTmp);
             drawX = blurCompTmp.regionPos.x;
             drawY = blurCompTmp.regionPos.y;
+            widthTmp = blurCompTmp.fboWidth;
+            heightTmp = blurCompTmp.fboHeight;
             if (renderableMapper.get(entityTmp).center) {
                 drawX -= widthTmp/2f;
                 drawY -= heightTmp/2f;
@@ -221,41 +227,37 @@ public class RenderSystem extends SortedIteratingSystem {
         for (int i = 0; i < maskQueue.size; i++) {
             entityTmp = maskQueue.get(i);
 
-            renderableTmp = renderableMapper.get(entityTmp);
-            transformTmp = transformMapper.get(entityTmp);
-
-            drawX = transformTmp.pos.x;
-            drawY = transformTmp.pos.y;
-
-            maskCompTmp = maskMapper.get(entityTmp);
-
-            widthTmp = maskCompTmp.textureRegion.getRegionWidth();
-            heightTmp = maskCompTmp.textureRegion.getRegionHeight();
-
-            if (renderableTmp.center) {
-                drawX -= widthTmp/2f;
-                drawY -= heightTmp/2f;
-            }
-
             spriteBatch.flush();
 
             Gdx.gl.glColorMask(false, false, false, true);
             spriteBatch.setBlendFunction(GL20.GL_ONE, GL20.GL_ZERO);
 
             /* Draw alpha masks. */
-            spriteBatch.draw(maskCompTmp.textureRegion, drawX, drawY,
-                    maskCompTmp.originX, maskCompTmp.originY, widthTmp, heightTmp,
-                    transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
+            if (maskMapper.get(entityTmp).autoMask) {
+                if (texRegionMapper.has(entityTmp)) {
+                    if (whiteShader!=null) spriteBatch.setShader(whiteShader);
+                    renderRegion();
+                    spriteBatch.setShader(null);
+                }
+                else if (textMapper.has(entityTmp))
+                    renderText(true);
+                else if (ninepatchMapper.has(entityTmp)) {
+                    if (whiteShader!=null) spriteBatch.setShader(whiteShader);
+                    renderNinePatch();
+                    spriteBatch.setShader(null);
+                }
+            } else {
+                renderMask();
+            }
 
             spriteBatch.flush();
             Gdx.gl.glColorMask(true, true, true, true);
             spriteBatch.setBlendFunction(GL20.GL_DST_ALPHA, GL20.GL_ZERO);
 
-            centerBlur();
-
             /* Draw our sprite to be masked. */
             if (blur != null && blurMapper.has(entityTmp) && blurMapper.get(entityTmp).blurBackground) {
                 blurCompTmp = blurMapper.get(entityTmp);
+                centerBlur();
                 spriteBatch.draw(blurCompTmp.fboTexture2, drawX, drawY, blurCompTmp.fboWidth, blurCompTmp.fboHeight);
             }
         }
@@ -265,60 +267,108 @@ public class RenderSystem extends SortedIteratingSystem {
         for (int i = 0; i < queue.size; i++) {
             entityTmp = queue.get(i);
 
-            renderableTmp = renderableMapper.get(entityTmp);
-            transformTmp = transformMapper.get(entityTmp);
-
-            drawX = transformTmp.pos.x;
-            drawY = transformTmp.pos.y;
-
-            if (texRegionMapper.has(entityTmp)) {
-                regionTmp = texRegionMapper.get(entityTmp);
-
-                widthTmp = regionTmp.textureRegion.getRegionWidth();
-                heightTmp = regionTmp.textureRegion.getRegionHeight();
-
-                if (renderableTmp.center) {
-                    drawX -= widthTmp/2f;
-                    drawY -= heightTmp/2f;
-                }
-
-                // ==== Draw texture ====
-                spriteBatch.setColor(renderableTmp.color);
-                spriteBatch.draw(regionTmp.textureRegion, drawX, drawY,
-                        regionTmp.originX, regionTmp.originY, widthTmp, heightTmp,
-                        transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
-
-                spriteBatch.setColor(1, 1, 1, 1);
-            } else if (textMapper.has(entityTmp)) {
-                // Draw text
-
-                textTmp = textMapper.get(entityTmp);
-
-                textTmp.font.getData().setScale(transformTmp.scale.x, transformTmp.scale.y);
-                textTmp.font.setColor(renderableTmp.color);
-                textTmp.glyphLayout.setText(textTmp.font, textTmp.text);
-
-                textTmp.font.draw(spriteBatch, textTmp.text, drawX - textTmp.glyphLayout.width/2f, drawY - textTmp.glyphLayout.height/2f);
-            } else if (ninepatchMapper.has(entityTmp)) {
-                ninepatchTmp = ninepatchMapper.get(entityTmp);
-
-                widthTmp = ninepatchTmp.size.x;
-                heightTmp = ninepatchTmp.size.y;
-                
-                if (renderableTmp.center) {
-                    drawX -= widthTmp/2f;
-                    drawY -= heightTmp/2f;
-                }
-
-                spriteBatch.setColor(renderableTmp.color);
-                ninepatchTmp.ninePatch.draw(spriteBatch, drawX, drawY,
-                    widthTmp/2f, heightTmp/2f,
-                    ninepatchTmp.size.x, ninepatchTmp.size.y,
-                    transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
-
-                spriteBatch.setColor(1, 1, 1, 1);
-            }
+            if (texRegionMapper.has(entityTmp))
+                renderRegion();
+            else if (textMapper.has(entityTmp))
+                renderText(false);
+            else if (ninepatchMapper.has(entityTmp))
+                renderNinePatch();
         }
+    }
+
+    private void renderMask() {
+        renderableTmp = renderableMapper.get(entityTmp);
+        transformTmp = transformMapper.get(entityTmp);
+
+        drawX = transformTmp.pos.x;
+        drawY = transformTmp.pos.y;
+
+        maskCompTmp = maskMapper.get(entityTmp);
+
+        widthTmp = maskCompTmp.textureRegion.getRegionWidth();
+        heightTmp = maskCompTmp.textureRegion.getRegionHeight();
+
+        if (renderableTmp.center) {
+            drawX -= widthTmp/2f;
+            drawY -= heightTmp/2f;
+        }
+
+        spriteBatch.draw(maskCompTmp.textureRegion, drawX, drawY,
+                maskCompTmp.originX, maskCompTmp.originY, widthTmp, heightTmp,
+                transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
+    }
+
+    private void renderNinePatch() {
+        renderableTmp = renderableMapper.get(entityTmp);
+        transformTmp = transformMapper.get(entityTmp);
+
+        drawX = transformTmp.pos.x;
+        drawY = transformTmp.pos.y;
+
+        ninepatchTmp = ninepatchMapper.get(entityTmp);
+
+        widthTmp = ninepatchTmp.size.x;
+        heightTmp = ninepatchTmp.size.y;
+        
+        if (renderableTmp.center) {
+            drawX -= widthTmp/2f;
+            drawY -= heightTmp/2f;
+        }
+
+        spriteBatch.setColor(renderableTmp.color);
+        ninepatchTmp.ninePatch.draw(spriteBatch, drawX, drawY,
+            widthTmp/2f, heightTmp/2f,
+            ninepatchTmp.size.x, ninepatchTmp.size.y,
+            transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
+
+        spriteBatch.setColor(1, 1, 1, 1);
+    }
+
+    private void renderText(boolean fullWhite) {
+        renderableTmp = renderableMapper.get(entityTmp);
+        transformTmp = transformMapper.get(entityTmp);
+
+        drawX = transformTmp.pos.x;
+        drawY = transformTmp.pos.y;
+
+
+        textTmp = textMapper.get(entityTmp);
+
+        textTmp.font.getData().setScale(transformTmp.scale.x, transformTmp.scale.y);
+        if (fullWhite) textTmp.font.setColor(Color.WHITE);
+        else textTmp.font.setColor(renderableTmp.color);
+        textTmp.glyphLayout.setText(textTmp.font, textTmp.text);
+
+        widthTmp = textTmp.glyphLayout.width;
+        heightTmp = textTmp.glyphLayout.height;
+
+        textTmp.font.draw(spriteBatch, textTmp.text, drawX - textTmp.glyphLayout.width/2f, drawY - textTmp.glyphLayout.height/2f);
+    }
+
+    private void renderRegion() {
+        renderableTmp = renderableMapper.get(entityTmp);
+        transformTmp = transformMapper.get(entityTmp);
+
+        drawX = transformTmp.pos.x;
+        drawY = transformTmp.pos.y;
+
+        regionTmp = texRegionMapper.get(entityTmp);
+
+        widthTmp = regionTmp.textureRegion.getRegionWidth();
+        heightTmp = regionTmp.textureRegion.getRegionHeight();
+
+        if (renderableTmp.center) {
+            drawX -= widthTmp/2f;
+            drawY -= heightTmp/2f;
+        }
+
+        // ==== Draw texture ====
+        spriteBatch.setColor(renderableTmp.color);
+        spriteBatch.draw(regionTmp.textureRegion, drawX, drawY,
+                regionTmp.originX, regionTmp.originY, widthTmp, heightTmp,
+                transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
+
+        spriteBatch.setColor(1, 1, 1, 1);
     }
 
     public void resize(int width, int height) {
@@ -389,14 +439,17 @@ public class RenderSystem extends SortedIteratingSystem {
     /** Centering our buffer if its bigger than mask */
     private void centerBlur() {
         if (maskMapper.has(entityTmp)) {
-            maskCompTmp = maskMapper.get(entityTmp);
-            drawX -= (blurCompTmp.fboWidth - maskCompTmp.textureRegion.getRegionWidth())/2f;
-            drawY -= (blurCompTmp.fboHeight - maskCompTmp.textureRegion.getRegionHeight())/2f;
+            drawX -= (blurCompTmp.fboWidth - widthTmp)/2f;
+            drawY -= (blurCompTmp.fboHeight - widthTmp)/2f;
         }
     }
 
     public void init(Assets assets) {
         blur = new Blur(assets);
+        whiteShader = new ShaderProgram(assets.getShader("blurVert"), assets.getShader("whiteFrag"));
+        if (!whiteShader.isCompiled()) System.out.println(whiteShader.getLog());
+        whiteShader.bind();
+        whiteShader.setUniformf("COLOR", new Vector3(1f, 1f, 1f));
     }
 
     public void dispose() {

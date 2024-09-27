@@ -1,7 +1,5 @@
 package com.falling.factories;
 
-import static com.falling.utils.Mappers.transformMapper;
-
 import com.badlogic.ashley.core.*;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
@@ -358,6 +356,16 @@ public class Factory {
             maskComp.originX = maskComp.textureRegion.getRegionWidth()/2f;
             maskComp.originY = maskComp.textureRegion.getRegionHeight()/2f;
         }
+
+        entity.add(maskComp);
+        return this;
+    }
+
+    public Factory addAutoMaskComp() {
+        if (!creating) return null;
+        maskComp = engine.createComponent(MaskComp.class);
+
+        maskComp.autoMask = true;
 
         entity.add(maskComp);
         return this;

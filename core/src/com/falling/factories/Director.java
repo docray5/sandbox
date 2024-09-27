@@ -53,6 +53,23 @@ public class Director {
                 new AnimToCmd(factory.getEntity(), POS, 0, -30, true))
                 .endEntity();
     }
+
+    public void createNinePatchWithBlur() {
+        factory.createEntity()
+            .addTransform(44+4, 100)
+            .addResize(STICK_TYPE.LEFT_TOP)
+            .addRenderable()
+                .setPriority(10)
+                .setCenter(true)
+            .setColor(new Color(1, 1, 1, 0.4f))
+            .endComponent()
+            .addNinePatch("np", 14, 14, 14, 14, 40, 40)
+            .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut), factory.createAnimator(SIZE, 0.25f, null, Interpolation.swingOut))
+            .addClickableAuto(null, new AnimToCmd(factory.getEntity(), SIZE, 40-10, 40-10, false), new AnimToCmd(factory.getEntity(), SIZE, 40, 40, false), new AnimToCmd(factory.getEntity(), SIZE, 44, 44, false), new AnimToCmd(factory.getEntity(), SIZE, 40, 40, false), 0, 10)
+            .addBlurComp(true, 46, 46)
+            .addAutoMaskComp()
+            .endEntity();
+    }
     
     public void createNinePatch() {
         factory.createEntity()
