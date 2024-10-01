@@ -328,6 +328,9 @@ public class Factory {
         return this;
     }
 
+    /**
+     * for fbos larger than mask set center in renderable to true for correct display of blur
+     */
     public Factory addBlurComp(boolean blurBackground, int fboWidth, int fboHeight) {
         if (!creating) return null;
         blurComp = engine.createComponent(BlurComp.class);

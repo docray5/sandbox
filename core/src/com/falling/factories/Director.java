@@ -119,13 +119,13 @@ public class Director {
             .addResize(stick)
             .addRenderable()
                 .setPriority(10)
-                .setCenter(false)
+                .setCenter(true)
             .setColor(color)
             .endComponent()
             .addTextureRegion(fn)
             .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut))
             .addClickableAuto(commandOnClick, new AnimToCmd(factory.getEntity(), SCALE, 0.7f, 0.7f, false), new AnimToCmd(factory.getEntity(), SCALE, 1f, 1f, false), new AnimToCmd(factory.getEntity(), SCALE, 1.1f, 1.1f, false), new AnimToCmd(factory.getEntity(), SCALE, 1f, 1f, false), 0, 10)
-            .addBlurComp(true, (int)(width*1.2f), (int)(height*1.2f))
+            .addBlurComp(true, MathUtils.floor(width*1.2f), MathUtils.floor(height*1.2f))
             .addMaskComp("mask")
             .endEntity();
     }
@@ -149,8 +149,8 @@ public class Director {
     }
 
     public void createTestBtn() {
-        createUIButtonWithBlurBckg(16, 16, 32, 32, "test", STICK_TYPE.LEFT_BOTTOM, null, Color.WHITE);
-        createUIButtonWithBlurBckg(worldWidth-16-32, 16, 32, 32, "mask", STICK_TYPE.RIGHT_BOTTOM, null, Color.CLEAR);
+        createUIButtonWithBlurBckg(32, 32, 32, 32, "test", STICK_TYPE.LEFT_BOTTOM, null, Color.WHITE);
+        createUIButtonWithBlurBckg(worldWidth-32, 32, 32, 32, "mask", STICK_TYPE.RIGHT_BOTTOM, null, Color.CLEAR);
     }
 
     public void createPauseBtn() {

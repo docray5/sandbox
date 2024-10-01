@@ -206,10 +206,8 @@ public class RenderSystem extends SortedIteratingSystem {
             if (renderableMapper.get(entityTmp).center) {
                 drawX -= widthTmp/2f;
                 drawY -= heightTmp/2f;
-            }
+            }            
 
-            centerBlur();
-            
             if (pixelate) {
                 toBlurRegion.setRegion((int) (drawX), (int) (drawY), (int) (blurCompTmp.fboWidth), (int) (blurCompTmp.fboHeight));
             } else {
@@ -260,7 +258,7 @@ public class RenderSystem extends SortedIteratingSystem {
                 centerBlur();
                 spriteBatch.draw(blurCompTmp.textureRegion, drawX, drawY,
                     blurCompTmp.fboWidth/2f, blurCompTmp.fboHeight/2f, blurCompTmp.fboWidth, blurCompTmp.fboHeight,
-                    transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
+                    1, 1, transformTmp.rotation);
             }
         }
     }
@@ -332,7 +330,6 @@ public class RenderSystem extends SortedIteratingSystem {
 
         drawX = transformTmp.pos.x;
         drawY = transformTmp.pos.y;
-
 
         textTmp = textMapper.get(entityTmp);
 
