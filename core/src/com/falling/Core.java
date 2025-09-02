@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector3;
 
 public class Core {
     public static Vector2 mousePos = new Vector2();
-    public static final float startWorldWidth = 200;
+    public static final float startWorldWidth = 400;
     public static final float startWorldHeight = 200;
     public static final Vector3 cameraPos = new Vector3();
 

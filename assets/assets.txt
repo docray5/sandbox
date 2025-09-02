@@ -7,6 +7,7 @@ textures/abtn.png
 textures/bg.png
 textures/boot.png
 textures/btn.png
+textures/fl.png
 textures/mask.png
 textures/maskk.png
 textures/np.png

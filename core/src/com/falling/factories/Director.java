@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.falling.assets.Assets;
 import com.falling.commands.*;
 import com.falling.components.ResizeComp;
@@ -35,13 +36,13 @@ public class Director {
     }
 
     public void createMainScene() {
-        createSpawnArea();
-        createStartText();
+        // createSpawnArea();
+        // createStartText();
         createBlurBtn();
-        createNinePatch();
-        createTestBtn();
-        createNinePatchWithBlur();
-        createTempBg();
+        // createNinePatch();
+        // createTestBtn();
+        // createNinePatchWithBlur();
+        // createTempBg();
     }
 
     // ================================ Main Menu ================================
@@ -226,5 +227,18 @@ public class Director {
             return factory.createEntity()
                 .addElement(Color.rgba8888(Color.BROWN), ElementType.WOOD, MatterType.SOLID, 0, 0, 0)
                 .endEntity();
+    }
+
+    public Entity createFluidParticle(Vector2 pos) {
+        return factory.createEntity()
+            .addTransform(pos)
+                .addRenderable()
+                .setRender(true)
+                .setPriority(5)
+                .setCenter(true)
+                .setColor(Color.rgba8888(Color.SKY))
+                .endComponent()
+            .addTextureRegion("fl")
+            .endEntity();
     }
 }

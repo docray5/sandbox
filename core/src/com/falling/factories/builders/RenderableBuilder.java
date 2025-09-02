@@ -54,6 +54,12 @@ public class RenderableBuilder {
         return this;
     }
 
+    public RenderableBuilder setColor(int color) {
+        if (!creating) return null;
+        renderableComponent.color.set(color);
+        return this;
+    }
+
     public RenderableBuilder setPriority(int priority) {
         if (!creating) return null;
         renderableComponent.priority = priority;

@@ -2,9 +2,7 @@ package com.falling.input;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Array;
-import com.falling.commands.Commands;
-import com.falling.commands.SelectBrushCmd;
-import com.falling.commands.SelectElementCmd;
+import com.falling.commands.*;
 
 import static com.falling.components.ElementComp.ElementType.*;
 import static com.falling.systems.WorldSystem.BrushType.*;
@@ -25,6 +23,8 @@ public class KeyBinds {
     private static Integer SEL_EL_SAND = Input.Keys.NUM_1;
     private static Integer SEL_EL_WATER = Input.Keys.NUM_2;
     private static Integer SEL_EL_WOOD = Input.Keys.NUM_3;
+    private static Integer LEFT_FLUID = Input.Keys.LEFT;
+    private static Integer RIGHT_FLUID = Input.Keys.RIGHT;
 
     private final Array<KeyBind> keyBinds;
 
@@ -49,7 +49,9 @@ public class KeyBinds {
     public void initAfterAssets() {
         keyBinds.addAll(
             new KeyBind(SHIFT_BLUR, Commands.instance.shiftBlur, null),
-            new KeyBind(PAUSE_WORLD, Commands.instance.pauseWorld, null)
+            new KeyBind(PAUSE_WORLD, Commands.instance.pauseWorld, null),
+                new KeyBind(LEFT_FLUID, new LeftFluidCmd(), null),
+                new KeyBind(RIGHT_FLUID, new RightFluidCmd(), null)
         );
     }
 
