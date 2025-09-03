@@ -34,17 +34,28 @@ public class FluidSystem extends EntitySystem {
     private Vector2[] velocities;
     private float[] densities;
 
-//    private int[] startIndices;
-//    private Entry[] spatialLookup;
-
     private final float smoothingRadius = 1f;
-    private Vector2 point = new Vector2(35, 35);
 
     private final float cellSize = smoothingRadius;
     private final Array<Integer>[][] grid; // Stores indexes of particles from all the positions, velocities etc. lists
 
     // temp variables for better mem management
     private TransformComp transformTmp;
+    private Array<Integer> neighborsTmp;
+    private float boundsRXTmp;
+    private float boundsTYTmp;
+    private float boundsLXTmp;
+    private float boundsBYTmp;
+    private Vector2 pressureForceTmp = new Vector2();
+    private float influenceTmp;
+    private float densityTmp;
+    private Vector2 randomDirTmp = new Vector2();
+    private float volumeTmp;
+    private float scaleTmp;
+    private Vector2 dirTmp = new Vector2();
+    private float sharedPressureTmp;
+    private float dstTmp;
+    private float slopeTmp;
 
     public FluidSystem(int priority) {
         super(priority);
@@ -54,9 +65,6 @@ public class FluidSystem extends EntitySystem {
         velocities = new Vector2[numOfParticles];
         densities = new float[numOfParticles];
         particles = new Entity[numOfParticles];
-
-//        startIndices = new int[numOfParticles];
-//        spatialLookup = new Entry[numOfParticles];
 
         grid = new Array[gridWidth][gridHeight];
         for(int x=0;x<gridWidth;x++)
@@ -79,12 +87,11 @@ public class FluidSystem extends EntitySystem {
 
         updateSpatialGrid();
 
-        for (int i = numOfParticles-1; i >=0; i--)
-            densities[i] = calculateDensity(predictedPositions[i]);
+        updateDensities();
 
         for (int i = numOfParticles-1; i >=0; i--) {
-            Vector2 pressureForce = calculatePressureForce(i);
-            velocities[i].add(pressureForce.x * deltaTime / densities[i], pressureForce.y * deltaTime / densities[i]);
+            pressureForceTmp = calculatePressureForce(i);
+            velocities[i].add(pressureForceTmp.x * deltaTime / densities[i], pressureForceTmp.y * deltaTime / densities[i]);
         }
 
         for (int i = numOfParticles-1; i >=0; i--) {
@@ -98,91 +105,81 @@ public class FluidSystem extends EntitySystem {
 
     private float SmoothingKernel(float dst, float radius) {
         if (dst >= radius) return 0;
-        float volume = (MathUtils.PI * (float) Math.pow(radius, 4)) / 6;
-        return (radius - dst) * (radius - dst) / volume;
+        volumeTmp = (MathUtils.PI * (float) Math.pow(radius, 4)) / 6;
+        return (radius - dst) * (radius - dst) / volumeTmp;
     }
 
     private float SmoothingKernelDerivative(float dst, float radius) {
         if (dst >= radius) return 0;
-        float scale = 12 / (MathUtils.PI * (float) Math.pow(radius, 4));
-        return (dst - radius) * scale;
+        scaleTmp = 12 / (MathUtils.PI * (float) Math.pow(radius, 4));
+        return (dst - radius) * scaleTmp;
     }
 
     private float calculateDensity(Vector2 samplePoint) {
-        float density = 0;
-
-        // TODO optimize to only go through particles inside the smoothing radius
-//        for (int i = numOfParticles-1; i >=0; i--) {
-//            float influence = SmoothingKernel(predictedPositions[i].dst(samplePoint), smoothingRadius);
-//            density += mass * influence;
-//        }
+        densityTmp = 0;
 
         for (int i : getNeighbors(samplePoint)) {
-            float influence = SmoothingKernel(predictedPositions[i].dst(samplePoint), smoothingRadius);
-            density += mass * influence;
+            influenceTmp = SmoothingKernel(predictedPositions[i].dst(samplePoint), smoothingRadius);
+            densityTmp += mass * influenceTmp;
         }
 
-        return density;
+        return densityTmp;
     }
     
     // Calculate Property Gradient
     private Vector2 calculatePressureForce(int particleIndex) {
-        Vector2 pressureForce = new Vector2();
-
-        // TODO optimize to only go through particles inside the smoothing radius
-//        for (int i = numOfParticles-1; i >=0; i--) {
-//            if (particleIndex == i) continue;
-//
-//            float dst = positions[i].dst(positions[particleIndex]);
-//            Vector2 dir = dst == 0 ? getRandomDir() : new Vector2((positions[i].x-positions[particleIndex].x)/dst, (positions[i].y - positions[particleIndex].y)/dst);
-//            float slope = SmoothingKernelDerivative(dst, smoothingRadius);
-//            float sharedPressure = calculateSharedPressure(densities[i], densities[particleIndex]);
-//            pressureForce.add(sharedPressure * dir.x * slope * mass / densities[i], sharedPressure * dir.y * slope * mass / densities[i]);
-//        }
+        pressureForceTmp.set(0, 0);
 
         for (int i : getNeighbors(positions[particleIndex])) {
             if (particleIndex == i) continue;
 
-            float dst = positions[i].dst(positions[particleIndex]);
-            Vector2 dir = dst == 0 ? getRandomDir() : new Vector2((positions[i].x-positions[particleIndex].x)/dst, (positions[i].y - positions[particleIndex].y)/dst);
-            float slope = SmoothingKernelDerivative(dst, smoothingRadius);
-            float sharedPressure = calculateSharedPressure(densities[i], densities[particleIndex]);
-            pressureForce.add(sharedPressure * dir.x * slope * mass / densities[i], sharedPressure * dir.y * slope * mass / densities[i]);
+            dstTmp = positions[i].dst(positions[particleIndex]);
+
+            if (dstTmp == 0) dirTmp = getRandomDir();
+            else dirTmp.set((positions[i].x-positions[particleIndex].x)/dstTmp, (positions[i].y - positions[particleIndex].y)/dstTmp);
+
+            slopeTmp = SmoothingKernelDerivative(dstTmp, smoothingRadius);
+            sharedPressureTmp = calculateSharedPressure(densities[i], densities[particleIndex]);
+            pressureForceTmp.add(sharedPressureTmp * dirTmp.x * slopeTmp * mass / densities[i], sharedPressureTmp * dirTmp.y * slopeTmp * mass / densities[i]);
         }
 
-        return pressureForce;
+        return pressureForceTmp;
+    }
+
+    private void updateDensities() {
+        // Could be run in a different thread.
+        for (int i = numOfParticles-1; i >= 0; i--)
+            densities[i] = calculateDensity(predictedPositions[i]);
     }
 
     private void resolveCollisions(int particleIndex) {
-        float boundsRX = bounds.x - particleSize*scale;
-        float boundsTY = bounds.y - particleSize*scale;
-        float boundsLX = 0+particleSize*scale;
-        float boundsBY = 0+particleSize*scale;
+        boundsRXTmp = bounds.x - particleSize*scale;
+        boundsTYTmp = bounds.y - particleSize*scale;
+        boundsLXTmp = 0+particleSize*scale;
+        boundsBYTmp = 0+particleSize*scale;
 
-        if (positions[particleIndex].x > boundsRX) {
-            positions[particleIndex].x = boundsRX;
+        if (positions[particleIndex].x > boundsRXTmp) {
+            positions[particleIndex].x = boundsRXTmp;
             velocities[particleIndex].x *= -collisionDamping;
-        } else if (positions[particleIndex].x < boundsLX) {
-            positions[particleIndex].x = boundsLX;
+        } else if (positions[particleIndex].x < boundsLXTmp) {
+            positions[particleIndex].x = boundsLXTmp;
             velocities[particleIndex].x *= -collisionDamping;
         }
-        if (positions[particleIndex].y > boundsTY) {
-            positions[particleIndex].y = boundsTY;
+        if (positions[particleIndex].y > boundsTYTmp) {
+            positions[particleIndex].y = boundsTYTmp;
             velocities[particleIndex].y *= -collisionDamping;
-        } else if (positions[particleIndex].y < boundsBY) {
-            positions[particleIndex].y = boundsBY;
+        } else if (positions[particleIndex].y < boundsBYTmp) {
+            positions[particleIndex].y = boundsBYTmp;
             velocities[particleIndex].y *= -collisionDamping;
         }
     }
 
     public void leftFluid() {
-        //point.x -= 1;
         gravity+=0.5f;
         System.out.println(gravity);
     }
 
     public void rightFluid() {
-        //point.x += 1;
         pressureMultiplier+=1;
         System.out.println(pressureMultiplier);
     }
@@ -192,7 +189,8 @@ public class FluidSystem extends EntitySystem {
     }
 
     private Vector2 getRandomDir() {
-        return new Vector2(MathUtils.random(-1, 1), MathUtils.random(-1, 1));
+        randomDirTmp.set(MathUtils.random(-1, 1), MathUtils.random(-1, 1));
+        return randomDirTmp;
     }
 
     private float convertDensityToPressure(float density) {
@@ -260,7 +258,7 @@ public class FluidSystem extends EntitySystem {
     }
 
     public Array<Integer> getNeighbors(Vector2 samplePoint) {
-        Array<Integer> neighbors = new Array<>();
+        neighborsTmp = new Array<>();
 
         int centerX = (int) Math.floor(samplePoint.x / cellSize);
         int centerY = (int) Math.floor(samplePoint.y / cellSize);
@@ -272,55 +270,12 @@ public class FluidSystem extends EntitySystem {
                 int y = centerY + dy;
 
                 if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
-                    neighbors.addAll(grid[x][y]);
+                    neighborsTmp.addAll(grid[x][y]);
                 }
             }
         }
-        return neighbors;
+        return neighborsTmp;
     }
-
-//    public long hashCell(int cellX, int cellY) {
-//        return (long) cellX * 15823 + (long) cellY * 9737333;
-//    }
-//
-//    public long getKeyFromHash(long hash) {
-//        return hash % (long) spatialLookup.length;
-//    }
-//
-//    public int[] positionToCellCords(Vector2 point, float radius) {
-//        return new int[]{(int) (point.y / radius), (int) (point.x / radius)};
-//    }
-//
-//    public class SortByCellKey implements Comparator<Entry> {
-//
-//        @Override
-//        public int compare(Entry o1, Entry o2) {
-//            return Math.toIntExact(o1.cellKey - o2.cellKey);
-//        }
-//    }
-//
-//    public void updateSpatialLookup(Vector2[] points, float radius) {
-//        this.positions = points;
-//        this.smoothingRadius = radius;
-//
-//        for (int i = numOfParticles-1; i >=0; i--) {
-//            int[] cellPos = positionToCellCords(positions[i], radius);
-//
-//            long cellKey = getKeyFromHash(hashCell(cellPos[0], cellPos[1]));
-//            spatialLookup[i] = new Entry(i, cellKey);
-//            startIndices[i] = Integer.MAX_VALUE;
-//        }
-//
-//        Arrays.sort(spatialLookup, new SortByCellKey());
-//
-//        for (int i = 0; i < numOfParticles; i++) {
-//            long key = spatialLookup[i].cellKey;
-//            long keyPrev = i == 0 ? Long.MAX_VALUE : spatialLookup[i-1].cellKey;
-//            if (key != keyPrev) {
-//                startIndices[Math.toIntExact(key)] = i;
-//            }
-//        }
-//    }
 
     // TODO:
     // Well storing 1000x texture regions is not really effective, so I would rather just use instancing (for now not)
@@ -340,15 +295,5 @@ public class FluidSystem extends EntitySystem {
 //        float f = radius * radius - dst * dst;
 //        float scale = -24 / (MathUtils.PI * (float) Math.pow(radius, 8));
 //        return scale * dst * f * f;
-//    }
-
-//    public class Entry {
-//        protected int i;
-//        protected long cellKey;
-//
-//        public Entry(int i, long cellKey) {
-//            this.i = i;
-//            this.cellKey = cellKey;
-//        }
 //    }
 }
