@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntArray;
 import com.falling.components.TransformComp;
 import com.falling.factories.Director;
 import com.falling.utils.Mappers;
@@ -28,20 +28,20 @@ public class FluidSystem extends EntitySystem {
     private final int gridWidth = (int) bounds.x;
     private final int gridHeight = (int) bounds.y;
 
-    private Entity[] particles;
-    private Vector2[] positions;
-    private Vector2[] predictedPositions;
-    private Vector2[] velocities;
-    private float[] densities;
+    private final Entity[] particles;
+    private final Vector2[] positions;
+    private final Vector2[] predictedPositions;
+    private final Vector2[] velocities;
+    private final float[] densities;
 
     private final float smoothingRadius = 1f;
 
     private final float cellSize = smoothingRadius;
-    private final Array<Integer>[][] grid; // Stores indexes of particles from all the positions, velocities etc. lists
+    private final IntArray[][] grid; // Stores indexes of particles from all the positions, velocities etc. lists
 
     // temp variables for better mem management
     private TransformComp transformTmp;
-    private Array<Integer> neighborsTmp;
+    private IntArray neighborsTmp = new IntArray(128);
     private float boundsRXTmp;
     private float boundsTYTmp;
     private float boundsLXTmp;
@@ -56,6 +56,11 @@ public class FluidSystem extends EntitySystem {
     private float sharedPressureTmp;
     private float dstTmp;
     private float slopeTmp;
+    private int gridXTmp;
+    private int gridYTmp;
+    private int centerXTmp;
+    private int centerYTmp;
+    private int indexTmp;
 
     public FluidSystem(int priority) {
         super(priority);
@@ -66,10 +71,10 @@ public class FluidSystem extends EntitySystem {
         densities = new float[numOfParticles];
         particles = new Entity[numOfParticles];
 
-        grid = new Array[gridWidth][gridHeight];
+        grid = new IntArray[gridWidth][gridHeight];
         for(int x=0;x<gridWidth;x++)
             for(int y=0;y<gridHeight;y++)
-                grid[x][y] = new Array<>();
+                grid[x][y] = new IntArray(32); // 16 should be optimal
 
         createParticlesRect(1, 1);
     }
@@ -118,29 +123,34 @@ public class FluidSystem extends EntitySystem {
     private float calculateDensity(Vector2 samplePoint) {
         densityTmp = 0;
 
-        for (int i : getNeighbors(samplePoint)) {
-            influenceTmp = SmoothingKernel(predictedPositions[i].dst(samplePoint), smoothingRadius);
+        neighborsTmp = getNeighbors(samplePoint);
+        for (int i = neighborsTmp.size-1; i >= 0; i--) {
+            indexTmp = neighborsTmp.get(i);
+            influenceTmp = SmoothingKernel(predictedPositions[indexTmp].dst(samplePoint), smoothingRadius);
             densityTmp += mass * influenceTmp;
         }
 
         return densityTmp;
     }
-    
+
     // Calculate Property Gradient
-    private Vector2 calculatePressureForce(int particleIndex) {
+    private Vector2 calculatePressureForce(int particleIndex) { // Causes most of CPU usage
         pressureForceTmp.set(0, 0);
 
-        for (int i : getNeighbors(positions[particleIndex])) {
-            if (particleIndex == i) continue;
+        neighborsTmp = getNeighbors(positions[particleIndex]);
+        for (int i = neighborsTmp.size-1; i >= 0; i--) {
+            indexTmp = neighborsTmp.get(i);
 
-            dstTmp = positions[i].dst(positions[particleIndex]);
+            if (particleIndex == indexTmp) continue;
+
+            dstTmp = positions[indexTmp].dst(positions[particleIndex]);
 
             if (dstTmp == 0) dirTmp = getRandomDir();
-            else dirTmp.set((positions[i].x-positions[particleIndex].x)/dstTmp, (positions[i].y - positions[particleIndex].y)/dstTmp);
+            else dirTmp.set((positions[indexTmp].x-positions[particleIndex].x)/dstTmp, (positions[indexTmp].y - positions[particleIndex].y)/dstTmp);
 
             slopeTmp = SmoothingKernelDerivative(dstTmp, smoothingRadius);
-            sharedPressureTmp = calculateSharedPressure(densities[i], densities[particleIndex]);
-            pressureForceTmp.add(sharedPressureTmp * dirTmp.x * slopeTmp * mass / densities[i], sharedPressureTmp * dirTmp.y * slopeTmp * mass / densities[i]);
+            sharedPressureTmp = calculateSharedPressure(densities[indexTmp], densities[particleIndex]);
+            pressureForceTmp.add(sharedPressureTmp * dirTmp.x * slopeTmp * mass / densities[indexTmp], sharedPressureTmp * dirTmp.y * slopeTmp * mass / densities[indexTmp]);
         }
 
         return pressureForceTmp;
@@ -251,31 +261,35 @@ public class FluidSystem extends EntitySystem {
                 grid[x][y].clear();
 
         for (int i = numOfParticles-1; i >=0; i--) {
-            int gridX = (int) Math.floor(positions[i].x / cellSize);
-            int gridY = (int) Math.floor(positions[i].y / cellSize);
-            grid[gridX][gridY].add(i);
+            gridXTmp = (int) Math.floor(positions[i].x / cellSize);
+            gridYTmp = (int) Math.floor(positions[i].y / cellSize);
+            grid[gridXTmp][gridYTmp].add(i);
         }
     }
 
-    public Array<Integer> getNeighbors(Vector2 samplePoint) {
-        neighborsTmp = new Array<>();
+    public IntArray getNeighbors(Vector2 samplePoint) {
+        neighborsTmp.clear();
 
-        int centerX = (int) Math.floor(samplePoint.x / cellSize);
-        int centerY = (int) Math.floor(samplePoint.y / cellSize);
+        centerXTmp = (int) Math.floor(samplePoint.x / cellSize);
+        centerYTmp = (int) Math.floor(samplePoint.y / cellSize);
 
         // Check 3×3 neighborhood
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
-                int x = centerX + dx;
-                int y = centerY + dy;
+                gridXTmp = centerXTmp + dx;
+                gridYTmp = centerYTmp + dy;
 
-                if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
-                    neighborsTmp.addAll(grid[x][y]);
+                if (gridXTmp >= 0 && gridXTmp < gridWidth && gridYTmp >= 0 && gridYTmp < gridHeight) {
+                    for (int i = grid[gridXTmp][gridYTmp].size-1; i >= 0; i--)
+                        neighborsTmp.add(grid[gridXTmp][gridYTmp].get(i));
                 }
             }
         }
         return neighborsTmp;
     }
+
+
+
 
     // TODO:
     // Well storing 1000x texture regions is not really effective, so I would rather just use instancing (for now not)
