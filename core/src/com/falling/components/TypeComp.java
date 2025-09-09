@@ -15,6 +15,6 @@ public class TypeComp implements Component, Pool.Poolable {
     }
 
     public enum Type {
-        FULLSCREEN_CLICK, WORLD
+        FULLSCREEN_CLICK, WORLD, FLUID
     }
 }

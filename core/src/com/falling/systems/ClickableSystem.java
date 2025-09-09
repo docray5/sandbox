@@ -54,7 +54,8 @@ public class ClickableSystem extends SortedIteratingSystem {
                 if (clickCompTmp.onTouchDownCommand != null)
                     clickCompTmp.onTouchDownCommand.execute();
 
-                Gdx.input.vibrate(clickCompTmp.vibrationMs);
+                if (clickCompTmp.vibrationMs > 0 && clickCompTmp.vibrationMs < 100)
+                    Gdx.input.vibrate(clickCompTmp.vibrationMs);
                 return;
             }
         }

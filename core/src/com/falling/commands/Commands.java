@@ -10,6 +10,9 @@ public class Commands {
     public SpawnElementDownCmd spawnElementDown;
     public SpawnElementUpCmd spawnElementUp;
     public PauseWorldCmd pauseWorld;
+    public FluidInteractDown fluidInteractDown;
+    public FluidInteractUp fluidInteractUp;
+    public GravityCmd gravityCmd;
 
     /** inits core commands for loading screen */
     public Commands() {
@@ -21,5 +24,8 @@ public class Commands {
         spawnElementDown = new SpawnElementDownCmd();
         spawnElementUp = new SpawnElementUpCmd();
         pauseWorld = new PauseWorldCmd();
+        fluidInteractDown = new FluidInteractDown();
+        fluidInteractUp = new FluidInteractUp();
+        gravityCmd = new GravityCmd();
     }
 }

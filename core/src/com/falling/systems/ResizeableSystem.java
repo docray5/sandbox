@@ -54,6 +54,9 @@ public class ResizeableSystem extends IteratingSystem {
                         // DIRTY QUICK FIX: TODO
                         getEngine().getSystem(WorldSystem.class).resize();
                         break;
+                    case FLUID:
+                        getEngine().getSystem(FluidSystem.class).resize();
+                        break;
                 }
             }        
         }

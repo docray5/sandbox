@@ -1,13 +1,15 @@
 package com.falling;
 
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 public class Core {
     public static Vector2 mousePos = new Vector2();
-    public static final float startWorldWidth = 400;
-    public static final float startWorldHeight = 200;
+    public static final float startWorldWidth = 400; // 400
+    public static final float startWorldHeight = 220; // 220
     public static final Vector3 cameraPos = new Vector3();
+    public static Matrix4 cameraMatrixTemp = new Matrix4(); // TEMP FOR TESTING PURPOSES
 
     /** Used to control blur, set to true if updating something thats under blur */
     public static boolean updateBlur = true;

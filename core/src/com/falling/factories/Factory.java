@@ -36,6 +36,7 @@ public class Factory {
     private SceneComp sceneComp;
     private BlurComp blurComp;
     private MaskComp maskComp;
+    private FrameBufferComp frameBufferComp;
 
     private boolean creating;
 
@@ -160,6 +161,8 @@ public class Factory {
             regionComp.textureRegion.setRegion(assets.getTexture(textureFN));
             regionComp.originX = regionComp.textureRegion.getRegionWidth()/2f;
             regionComp.originY = regionComp.textureRegion.getRegionHeight()/2f;
+            regionComp.width = regionComp.textureRegion.getRegionWidth();
+            regionComp.height = regionComp.textureRegion.getRegionHeight();
         }
 
         entity.add(regionComp);
@@ -173,12 +176,15 @@ public class Factory {
             regionComp.textureRegion.setRegion(assets.getTexture(textureFN));
             if (originX) regionComp.originX = regionComp.textureRegion.getRegionWidth()/2f;
             if (originY) regionComp.originY = regionComp.textureRegion.getRegionHeight()/2f;
+            regionComp.width = regionComp.textureRegion.getRegionWidth();
+            regionComp.height = regionComp.textureRegion.getRegionHeight();
         }
 
         entity.add(regionComp);
         return this;
     }
 
+    /** Note: You must manually set width, height parameters and use setRegion() */
     public Factory addTextureRegion() {
         if (!creating) return null;
         regionComp = engine.createComponent(TextureRegionComp.class);
@@ -373,6 +379,16 @@ public class Factory {
         maskComp.autoMask = true;
 
         entity.add(maskComp);
+        return this;
+    }
+
+    public Factory addFrameBufferComp(int width, int height) {
+        if (!creating) return null;
+        frameBufferComp = engine.createComponent(FrameBufferComp.class);
+
+        frameBufferComp.fbo = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+
+        entity.add(frameBufferComp);
         return this;
     }
 }

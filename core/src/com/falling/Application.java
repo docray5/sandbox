@@ -74,7 +74,7 @@ public class Application implements ApplicationListener {
         engine.addSystem(new ClickableSystem(2));
         engine.addSystem(new TempCursorSystem(4));
         // engine.addSystem(new WorldSystem(5)); // Commented sandbox
-        engine.addSystem(new FluidSystem(5));
+        engine.addSystem(new FluidSystem(5, assets));
 
 
         inputSystem = new InputSystem(renderSystem.getViewport(), engine);
@@ -101,6 +101,7 @@ public class Application implements ApplicationListener {
 	public void dispose () {
         assets.dispose();
         renderSystem.dispose();
+        engine.getSystem(FluidSystem.class).dispose();
         //engine.getSystem(WorldSystem.class).dispose();
 	}
 

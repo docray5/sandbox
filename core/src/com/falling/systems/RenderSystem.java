@@ -74,6 +74,7 @@ public class RenderSystem extends SortedIteratingSystem {
         camera.setToOrtho(false, worldWidth, worldHeight);
         viewport = new ExtendViewport(worldWidth, worldHeight, camera);
         cameraPos.set(camera.position);
+        cameraMatrixTemp = camera.combined;
 
         if (pixelate == true) {
             fboMain = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth, (int) worldHeight, false);
@@ -353,18 +354,15 @@ public class RenderSystem extends SortedIteratingSystem {
 
         regionTmp = texRegionMapper.get(entityTmp);
 
-        widthTmp = regionTmp.textureRegion.getRegionWidth();
-        heightTmp = regionTmp.textureRegion.getRegionHeight();
-
         if (renderableTmp.center) {
-            drawX -= widthTmp/2f;
-            drawY -= heightTmp/2f;
+            drawX -= regionTmp.width/2f;
+            drawY -= regionTmp.height/2f;
         }
 
         // ==== Draw texture ====
         spriteBatch.setColor(renderableTmp.color);
         spriteBatch.draw(regionTmp.textureRegion, drawX, drawY,
-                regionTmp.originX, regionTmp.originY, widthTmp, heightTmp,
+                regionTmp.originX, regionTmp.originY, regionTmp.width, regionTmp.height,
                 transformTmp.scale.x, transformTmp.scale.y, transformTmp.rotation);
 
         spriteBatch.setColor(1, 1, 1, 1);

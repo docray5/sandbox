@@ -39,6 +39,8 @@ public class Director {
         // createSpawnArea();
         // createStartText();
         createBlurBtn();
+        createFluidClickArea();
+        createGravityBtn();
         // createNinePatch();
         // createTestBtn();
         // createNinePatchWithBlur();
@@ -114,6 +116,17 @@ public class Director {
                 .endEntity();
     }
 
+    public void createFluidClickArea() {
+        factory.createEntity()
+                .addTransform(0, 0)
+                .addClickable(0, 0, worldWidth, worldHeight,
+                        null, Commands.instance.fluidInteractDown, Commands.instance.fluidInteractUp,
+                        null, null, 2, 0)
+                .addResize(ResizeComp.STICK_TYPE.LEFT_BOTTOM)
+                .addType(TypeComp.Type.FULLSCREEN_CLICK)
+                .endEntity();
+    }
+
     public void createUIButtonWithBlurBckg(float x, float y, float width, float height, String fn, STICK_TYPE stick, Command commandOnClick, Color color) {
         factory.createEntity()
             .addTransform(x, y)
@@ -149,6 +162,10 @@ public class Director {
         createUIButton(worldWidth-4, worldHeight-4, 27, 33, "btn", STICK_TYPE.RIGHT_TOP, Commands.instance.shiftBlur);
     }
 
+    public void createGravityBtn() {
+        createUIButton(4+27, worldHeight-4, 27, 33, "btn", STICK_TYPE.LEFT_TOP, Commands.instance.gravityCmd);
+    }
+
     public void createTestBtn() {
         createUIButtonWithBlurBckg(32, 32, 32, 32, "test", STICK_TYPE.LEFT_BOTTOM, null, Color.WHITE);
         createUIButtonWithBlurBckg(worldWidth-32, 32, 32, 32, "mask", STICK_TYPE.RIGHT_BOTTOM, null, Color.CLEAR);
@@ -180,6 +197,17 @@ public class Director {
                 .addResize(STICK_TYPE.LEFT_BOTTOM)
                 .addPixmap()
                 .addType(Type.WORLD)
+                .endEntity();
+    }
+
+    public Entity createFluidFbo() {
+        return factory.createEntity()
+                .addTransform(0, 0)
+                .addRenderable().setPriority(5).endComponent()
+                .addTextureRegion()
+                //.addResize(STICK_TYPE.LEFT_BOTTOM)
+                .addFrameBufferComp(screenWidth, screenHeight)
+                //.addType(Type.FLUID)
                 .endEntity();
     }
 
@@ -232,13 +260,13 @@ public class Director {
     public Entity createFluidParticle(Vector2 pos) {
         return factory.createEntity()
             .addTransform(pos)
-                .addRenderable()
+                /*.addRenderable()
                 .setRender(true)
                 .setPriority(5)
                 .setCenter(true)
                 .setColor(Color.rgba8888(Color.SKY))
                 .endComponent()
-            .addTextureRegion("fl")
+            .addTextureRegion("fl")*/
             .endEntity();
     }
 }
