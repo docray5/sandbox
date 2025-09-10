@@ -6,8 +6,8 @@ import com.badlogic.gdx.math.Vector3;
 
 public class Core {
     public static Vector2 mousePos = new Vector2();
-    public static final float startWorldWidth = 400; // 400
-    public static final float startWorldHeight = 220; // 220
+    public static final float startWorldWidth = 440; // 400
+    public static final float startWorldHeight = 240; // 220
     public static final Vector3 cameraPos = new Vector3();
     public static Matrix4 cameraMatrixTemp = new Matrix4(); // TEMP FOR TESTING PURPOSES
 

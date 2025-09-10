@@ -13,9 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntArray;
 import com.falling.assets.Assets;
 import com.falling.components.TextureRegionComp;
-import com.falling.components.TransformComp;
 import com.falling.factories.Director;
-import com.falling.utils.Mappers;
 
 import static com.badlogic.gdx.Gdx.gl;
 import static com.falling.Core.*;
@@ -30,9 +28,9 @@ public class FluidSystem extends EntitySystem {
     private float particleSize = 5; // width of texture Note: particles are drawn centered already around their vector's pos
     private final float particleSpacing = 0.2f;
     private final float scale = 0.1f; // can't be more than 0.1f for best sims (well actually maybe it could)
-    private final float fixedDeltaTime = 0.1f / (fps/60); // It should rather be 1/fps, but then it's extra slow
+    private final float fixedDeltaTime = 0.1f ; // before was: 0.1f / (fps/60) for a more adaptive sim | It should rather be 1/fps, but then it's extra slow
 
-    private final int numOfParticles = 1568; // 1568
+    private final int numOfParticles = 1682; // 1568
     private final float mass = 1f;
     private float targetDensity = 3;
     private float pressureMultiplier = 40; // Stiffness constant works best at 20-50
@@ -42,7 +40,6 @@ public class FluidSystem extends EntitySystem {
     private final int gridWidth = (int) bounds.x;
     private final int gridHeight = (int) bounds.y;
 
-    private final Entity[] particles;
     private final Vector2[] positions;
     private final Vector2[] predictedPositions;
     private final Vector2[] velocities;
@@ -54,42 +51,21 @@ public class FluidSystem extends EntitySystem {
     private final IntArray[][] grid; // Stores indexes of particles from all the positions, velocities etc. lists
 
     // For rendering
-    private FrameBuffer fluidFbo;
-    private TextureRegionComp fluidTextureRegion;
-    private SpriteBatch fluidBatch;
-    private TextureRegion particleTexture;
+    private final FrameBuffer fluidFbo;
+    private final SpriteBatch fluidBatch;
+    private final TextureRegion particleTexture;
     private final Vector2 particleTextureOffset = new Vector2();
     private final Color fluidColor = Color.SKY;
 
     // temp variables for better mem management
-    private TransformComp transformTmp;
     private IntArray neighborsTmp = new IntArray(128);
-    private float boundsRXTmp;
-    private float boundsTYTmp;
-    private float boundsLXTmp;
-    private float boundsBYTmp;
-    private Vector2 pressureForceTmp = new Vector2();
-    private float influenceTmp;
-    private float densityTmp;
-    private Vector2 randomDirTmp = new Vector2();
-    private float volumeTmp;
-    private float scaleTmp;
-    private Vector2 dirTmp = new Vector2();
-    private float sharedPressureTmp;
-    private float dstTmp;
-    private float slopeTmp;
-    private int gridXTmp;
-    private int gridYTmp;
-    private int centerXTmp;
-    private int centerYTmp;
-    private int indexTmp;
-    private Vector2 interactionForceTmp = new Vector2();
-    private float offsetXTmp;
-    private float offsetYTmp;
-    private float sqrDstTmp;
-    private float inputPointDstTmp;
-    private float centreTTmp;
+    private final Vector2 pressureForceTmp = new Vector2();
+    private final Vector2 interactionForceTmp = new Vector2();
     private Vector2 dirToInputPointTmp;
+
+    // Compute helpers:
+    private float scaleConstant;
+    private float volumeConstant;
 
     public FluidSystem(int priority, Assets assets) {
         super(priority);
@@ -97,7 +73,7 @@ public class FluidSystem extends EntitySystem {
         // Rendering related setup:
         Entity fluidDrawArea = Director.instance.createFluidFbo();
         fluidFbo = frameBufferMapper.get(fluidDrawArea).fbo;
-        fluidTextureRegion = texRegionMapper.get(fluidDrawArea);
+        TextureRegionComp fluidTextureRegion = texRegionMapper.get(fluidDrawArea);
         fluidTextureRegion.textureRegion.setRegion(fluidFbo.getColorBufferTexture());
         fluidTextureRegion.width = (int) worldWidth;
         fluidTextureRegion.height = (int) worldHeight;
@@ -117,7 +93,6 @@ public class FluidSystem extends EntitySystem {
         predictedPositions = new Vector2[numOfParticles];
         velocities = new Vector2[numOfParticles];
         densities = new float[numOfParticles];
-        particles = new Entity[numOfParticles];
 
         grid = new IntArray[gridWidth][gridHeight];
         for(int x=0;x<gridWidth;x++)
@@ -131,6 +106,8 @@ public class FluidSystem extends EntitySystem {
     public void update(float deltaTime) {
         deltaTime = fixedDeltaTime;
         updateBlur = true;
+
+        precomputeKernelConstants(smoothingRadius);
 
         if (leftMousePressed || rightMousePressed) {
             // calculate position of mouse relative to small grid
@@ -155,7 +132,7 @@ public class FluidSystem extends EntitySystem {
         updateDensities();
 
         for (int i = numOfParticles-1; i >=0; i--) {
-            pressureForceTmp = calculatePressureForce(i);
+            pressureForceTmp.set(calculatePressureForce(i));
             velocities[i].add(pressureForceTmp.x * deltaTime / densities[i], pressureForceTmp.y * deltaTime / densities[i]);
         }
 
@@ -163,40 +140,41 @@ public class FluidSystem extends EntitySystem {
             positions[i].x += velocities[i].x * deltaTime;
             positions[i].y += velocities[i].y * deltaTime;
             resolveCollisions(i);
-
-            //syncForDrawing(i);
         }
 
         updateFbo();
     }
 
-    private float SmoothingKernel(float dst, float radius) {
-        if (dst >= radius) return 0;
+    private void precomputeKernelConstants(float radius) {
         // Could be (float) Math.pow(radius, 4) instead of radius * radius * radius * radius,
         // but thanks to that we don't type cast shit
-        volumeTmp = (MathUtils.PI * (radius * radius * radius * radius)) / 6;
-        return (radius - dst) * (radius - dst) / volumeTmp;
+        float radiusSquared = radius * radius;
+        float radiusForth = radiusSquared * radiusSquared;
+        volumeConstant = (MathUtils.PI * radiusForth) / 6;
+        scaleConstant = 12 / (MathUtils.PI * radiusForth);
+    }
+
+    private float SmoothingKernel(float dst, float radius) {
+        if (dst >= radius) return 0;
+        return (radius - dst) * (radius - dst) / volumeConstant;
     }
 
     private float SmoothingKernelDerivative(float dst, float radius) {
         if (dst >= radius) return 0;
-        // Could be (float) Math.pow(radius, 4) instead of radius * radius * radius * radius,
-        // but thanks to that we don't type cast shit
-        scaleTmp = 12 / (MathUtils.PI * (radius * radius * radius * radius));
-        return (dst - radius) * scaleTmp;
+        return (dst - radius) * scaleConstant;
     }
 
     private float calculateDensity(Vector2 samplePoint) {
-        densityTmp = 0;
+        float density = 0;
 
         neighborsTmp = getNeighbors(samplePoint);
         for (int i = neighborsTmp.size-1; i >= 0; i--) {
-            indexTmp = neighborsTmp.get(i);
-            influenceTmp = SmoothingKernel(predictedPositions[indexTmp].dst(samplePoint), smoothingRadius);
-            densityTmp += mass * influenceTmp;
+            int index = neighborsTmp.get(i);
+            float influence = SmoothingKernel(predictedPositions[index].dst(samplePoint), smoothingRadius);
+            density += mass * influence;
         }
 
-        return densityTmp;
+        return density;
     }
 
     // Calculate Property Gradient
@@ -205,18 +183,27 @@ public class FluidSystem extends EntitySystem {
 
         neighborsTmp = getNeighbors(predictedPositions[particleIndex]);
         for (int i = neighborsTmp.size-1; i >= 0; i--) {
-            indexTmp = neighborsTmp.get(i);
+            int index = neighborsTmp.get(i);
 
-            if (particleIndex == indexTmp) continue;
+            if (particleIndex == index) continue;
 
-            dstTmp = predictedPositions[indexTmp].dst(predictedPositions[particleIndex]);
+            float dst = predictedPositions[index].dst(predictedPositions[particleIndex]);
+            float dirX;
+            float dirY;
 
-            if (dstTmp == 0) dirTmp = getRandomDir();
-            else dirTmp.set((predictedPositions[indexTmp].x-predictedPositions[particleIndex].x)/dstTmp, (predictedPositions[indexTmp].y - predictedPositions[particleIndex].y)/dstTmp);
+            if (dst == 0) {
+                dirX = MathUtils.random(-1, 1);
+                dirY = MathUtils.random(-1, 1);
+            }
+            else {
+                dirX = (predictedPositions[index].x-predictedPositions[particleIndex].x)/dst;
+                dirY = (predictedPositions[index].y - predictedPositions[particleIndex].y)/dst;
+            }
 
-            slopeTmp = SmoothingKernelDerivative(dstTmp, smoothingRadius);
-            sharedPressureTmp = calculateSharedPressure(densities[indexTmp], densities[particleIndex]);
-            pressureForceTmp.add(sharedPressureTmp * dirTmp.x * slopeTmp * mass / densities[indexTmp], sharedPressureTmp * dirTmp.y * slopeTmp * mass / densities[indexTmp]);
+            float slope = SmoothingKernelDerivative(dst, smoothingRadius);
+            float sharedPressure = ((densities[index] - targetDensity) * pressureMultiplier + (densities[particleIndex] - targetDensity) * pressureMultiplier) / 2;
+            // float densityInv = 1f / densities[indexTmp];
+            pressureForceTmp.add(sharedPressure * dirX * slope * mass / densities[index], sharedPressure * dirY * slope * mass / densities[index]);
         }
 
         return pressureForceTmp;
@@ -229,23 +216,23 @@ public class FluidSystem extends EntitySystem {
     }
 
     private void resolveCollisions(int particleIndex) {
-        boundsRXTmp = bounds.x - particleSize*scale;
-        boundsTYTmp = bounds.y - particleSize*scale;
-        boundsLXTmp = 0+particleSize*scale;
-        boundsBYTmp = 0+particleSize*scale;
+        float boundsRX = bounds.x - particleSize*scale;
+        float boundsTY = bounds.y - particleSize*scale;
+        float boundsLX = 0+particleSize*scale;
+        float boundsBY = 0+particleSize*scale;
 
-        if (positions[particleIndex].x > boundsRXTmp) {
-            positions[particleIndex].x = boundsRXTmp;
+        if (positions[particleIndex].x > boundsRX) {
+            positions[particleIndex].x = boundsRX;
             velocities[particleIndex].x *= -collisionDamping;
-        } else if (positions[particleIndex].x < boundsLXTmp) {
-            positions[particleIndex].x = boundsLXTmp;
+        } else if (positions[particleIndex].x < boundsLX) {
+            positions[particleIndex].x = boundsLX;
             velocities[particleIndex].x *= -collisionDamping;
         }
-        if (positions[particleIndex].y > boundsTYTmp) {
-            positions[particleIndex].y = boundsTYTmp;
+        if (positions[particleIndex].y > boundsTY) {
+            positions[particleIndex].y = boundsTY;
             velocities[particleIndex].y *= -collisionDamping;
-        } else if (positions[particleIndex].y < boundsBYTmp) {
-            positions[particleIndex].y = boundsBYTmp;
+        } else if (positions[particleIndex].y < boundsBY) {
+            positions[particleIndex].y = boundsBY;
             velocities[particleIndex].y *= -collisionDamping;
         }
     }
@@ -260,19 +247,6 @@ public class FluidSystem extends EntitySystem {
         System.out.println(pressureMultiplier);
     }
 
-    private float calculateSharedPressure(float densityA, float densityB) {
-        return (convertDensityToPressure(densityA) + convertDensityToPressure(densityB)) /2;
-    }
-
-    private Vector2 getRandomDir() {
-        randomDirTmp.set(MathUtils.random(-1, 1), MathUtils.random(-1, 1));
-        return randomDirTmp;
-    }
-
-    private float convertDensityToPressure(float density) {
-        return (density - targetDensity) * pressureMultiplier;
-    }
-
     private void createParticlesSquare(int x, int y) {
         int amount = (int) Math.sqrt(numOfParticles);
         int index = 0;
@@ -283,8 +257,6 @@ public class FluidSystem extends EntitySystem {
             for (int j = 0; j<amount; j++) {
                 spawnX = i*(particleSize*scale+particleSpacing)+x;
                 spawnY = j*(particleSize*scale+particleSpacing)+y;
-                Entity entTmp = Director.instance.createFluidParticle(new Vector2(spawnX, spawnY));
-                particles[index] = entTmp;
                 positions[index] = new Vector2(new Vector2(spawnX, spawnY));
                 predictedPositions[index] = new Vector2();
                 velocities[index] = new Vector2();
@@ -306,8 +278,6 @@ public class FluidSystem extends EntitySystem {
             for (int j = 0; j<amountY; j++) {
                 spawnX = i*(particleSize*scale+particleSpacing)+x;
                 spawnY = j*(particleSize*scale+particleSpacing)+y;
-                Entity entTmp = Director.instance.createFluidParticle(new Vector2(spawnX, spawnY));
-                particles[index] = entTmp;
                 positions[index] = new Vector2(spawnX, spawnY);
                 predictedPositions[index] = new Vector2();
                 velocities[index] = new Vector2();
@@ -316,38 +286,33 @@ public class FluidSystem extends EntitySystem {
         }
     }
 
-    private void syncForDrawing(int i) {
-        transformTmp = Mappers.transformMapper.get(particles[i]);
-        transformTmp.pos.set(positions[i].x*(1/scale), positions[i].y*(1/scale));
-    }
-
     public void updateSpatialGrid() {
-        for(int x=0; x<gridWidth; x++)
-            for(int y=0; y<gridHeight; y++)
+        for(int x = 0; x < gridWidth; x++)
+            for(int y = 0; y < gridHeight; y++)
                 grid[x][y].clear();
 
-        for (int i = numOfParticles-1; i >=0; i--) {
-            gridXTmp = (int) Math.floor(predictedPositions[i].x / cellSize); // this should use predicted positions
-            gridYTmp = (int) Math.floor(predictedPositions[i].y / cellSize);
-            grid[gridXTmp][gridYTmp].add(i);
+        for (int i = numOfParticles-1; i >= 0; i--) {
+            int gridX = (int) Math.floor(predictedPositions[i].x / cellSize);
+            int gridY = (int) Math.floor(predictedPositions[i].y / cellSize);
+            grid[gridX][gridY].add(i);
         }
     }
 
     public IntArray getNeighbors(Vector2 samplePoint) {
         neighborsTmp.clear();
 
-        centerXTmp = (int) Math.floor(samplePoint.x / cellSize);
-        centerYTmp = (int) Math.floor(samplePoint.y / cellSize);
+        int centerX = (int) Math.floor(samplePoint.x / cellSize);
+        int centerY = (int) Math.floor(samplePoint.y / cellSize);
 
         // Check 3×3 neighborhood
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
-                gridXTmp = centerXTmp + dx;
-                gridYTmp = centerYTmp + dy;
+                int gridX = centerX + dx;
+                int gridY = centerY + dy;
 
-                if (gridXTmp >= 0 && gridXTmp < gridWidth && gridYTmp >= 0 && gridYTmp < gridHeight) {
-                    for (int i = grid[gridXTmp][gridYTmp].size-1; i >= 0; i--)
-                        neighborsTmp.add(grid[gridXTmp][gridYTmp].get(i));
+                if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight) {
+                    for (int i = grid[gridX][gridY].size-1; i >= 0; i--)
+                        neighborsTmp.add(grid[gridX][gridY].get(i));
                 }
             }
         }
@@ -356,15 +321,15 @@ public class FluidSystem extends EntitySystem {
 
     private Vector2 interactionForce(Vector2 inputPos, float radius, float strength, int particleIndex) {
         interactionForceTmp.setZero();
-        offsetXTmp = inputPos.x - positions[particleIndex].x;
-        offsetYTmp = inputPos.y - positions[particleIndex].y;
-        sqrDstTmp = Vector2.dot(offsetXTmp, offsetYTmp, offsetXTmp, offsetYTmp);
+        float offsetX = inputPos.x - positions[particleIndex].x;
+        float offsetY = inputPos.y - positions[particleIndex].y;
+        float sqrDst = Vector2.dot(offsetX, offsetY, offsetX, offsetY);
 
-        if (sqrDstTmp < radius * radius) {
-            inputPointDstTmp = (float) Math.sqrt(sqrDstTmp);
-            dirToInputPointTmp = inputPointDstTmp <= 0.001f ? Vector2.Zero : new Vector2(offsetXTmp/inputPointDstTmp, offsetYTmp/inputPointDstTmp);
-            centreTTmp = 1 - inputPointDstTmp / radius;
-            interactionForceTmp.add((dirToInputPointTmp.x * strength - velocities[particleIndex].x) * centreTTmp, (dirToInputPointTmp.y * strength - velocities[particleIndex].y) * centreTTmp);
+        if (sqrDst < radius*radius) {
+            float inputPointDst = (float) Math.sqrt(sqrDst);
+            dirToInputPointTmp = inputPointDst <= 0.001f ? Vector2.Zero : new Vector2(offsetX/inputPointDst, offsetY/inputPointDst);
+            float centreT = 1 - inputPointDst / radius;
+            interactionForceTmp.add((dirToInputPointTmp.x * strength - velocities[particleIndex].x) * centreT, (dirToInputPointTmp.y * strength - velocities[particleIndex].y) * centreT);
         }
 
         return interactionForceTmp;
@@ -404,24 +369,4 @@ public class FluidSystem extends EntitySystem {
         fluidFbo.dispose();
         fluidBatch.dispose();
     }
-
-    // TODO:
-    // Well storing 1000x texture regions is not really effective, so I would rather just use instancing (for now not)
-    // remove all these variable creations
-
-    // NI-- what?
-
-    // Alternative smoothing functions
-    //    private float SmoothingKernel(float dst, float radius) {
-//        float volume = MathUtils.PI * (float) Math.pow(radius, 8)/4;
-//        float value = Math.max(0, radius*radius - dst*dst);
-//        return value * value * value / volume;
-//    }
-//
-//    private float SmoothingKernelDerivative(float dst, float radius) {
-//        if (dst >= radius) return 0;
-//        float f = radius * radius - dst * dst;
-//        float scale = -24 / (MathUtils.PI * (float) Math.pow(radius, 8));
-//        return scale * dst * f * f;
-//    }
 }

@@ -256,17 +256,4 @@ public class Director {
                 .addElement(Color.rgba8888(Color.BROWN), ElementType.WOOD, MatterType.SOLID, 0, 0, 0)
                 .endEntity();
     }
-
-    public Entity createFluidParticle(Vector2 pos) {
-        return factory.createEntity()
-            .addTransform(pos)
-                /*.addRenderable()
-                .setRender(true)
-                .setPriority(5)
-                .setCenter(true)
-                .setColor(Color.rgba8888(Color.SKY))
-                .endComponent()
-            .addTextureRegion("fl")*/
-            .endEntity();
-    }
 }
