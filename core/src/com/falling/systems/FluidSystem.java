@@ -10,13 +10,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.Sort;
 import com.falling.assets.Assets;
 import com.falling.components.TextureRegionComp;
 import com.falling.factories.Director;
 
-import java.util.Arrays;
 import java.util.Comparator;
 
 import static com.badlogic.gdx.Gdx.gl;
@@ -41,8 +39,6 @@ public class FluidSystem extends EntitySystem {
     private float gravity = 0; // 0.5f is quite optimal, wouldn't go beyond 1
     private final float collisionDamping = 0.9f;
     private final Vector2 bounds = new Vector2(worldWidth*scale, worldHeight*scale);
-    private final int gridWidth = (int) bounds.x;
-    private final int gridHeight = (int) bounds.y;
 
     private final Vector2[] positions;
     private final Vector2[] predictedPositions;
@@ -186,11 +182,9 @@ public class FluidSystem extends EntitySystem {
     private float calculateDensity(Vector2 samplePoint) {
         float density = 0;
 
-
         int[] center = posToCellCords(samplePoint, smoothingRadius);
         float sqrRadius = smoothingRadius * smoothingRadius;
 
-        // System.out.println("\nCalculating neighbors of: " + samplePoint);
         for (int offIndex = 0; offIndex < cellOffsets.length; offIndex++) {
             int key = getKeyFromHash(hashCell(center[0]+cellOffsets[offIndex][0], center[1]+cellOffsets[offIndex][1]));
             int cellStartIndex = startIndices[key];
@@ -199,11 +193,13 @@ public class FluidSystem extends EntitySystem {
                 if (spatialLookup[i][1] != key) break;
 
                 int particleIndex = spatialLookup[i][0];
-                float sqrDst = (predictedPositions[particleIndex].x - samplePoint.x) * (predictedPositions[particleIndex].x - samplePoint.x) + (predictedPositions[particleIndex].y - samplePoint.y) * (predictedPositions[particleIndex].y - samplePoint.y);
+                float dx = predictedPositions[particleIndex].x - samplePoint.x;
+                float dy = predictedPositions[particleIndex].y - samplePoint.y;
+                float sqrDst = dx * dx + dy * dy;
 
                 if (sqrDst <= sqrRadius) {
-                    // System.out.println(particleIndex);
-                    float influence = SmoothingKernel(predictedPositions[particleIndex].dst(samplePoint), smoothingRadius);
+                    float dst = (float) Math.sqrt(sqrDst);
+                    float influence = SmoothingKernel(dst, smoothingRadius);
                     density += mass * influence;
                 }
             }
@@ -227,12 +223,14 @@ public class FluidSystem extends EntitySystem {
                 if (spatialLookup[i][1] != key) break;
 
                 int index = spatialLookup[i][0];
-                float sqrDst = (predictedPositions[index].x - predictedPositions[particleIndex].x) * (predictedPositions[index].x - predictedPositions[particleIndex].x) + (predictedPositions[index].y - predictedPositions[particleIndex].y) * (predictedPositions[index].y - predictedPositions[particleIndex].y);
+                float dx = predictedPositions[index].x - predictedPositions[particleIndex].x;
+                float dy = predictedPositions[index].y - predictedPositions[particleIndex].y;
+                float sqrDst = dx * dx + dy * dy;
 
                 if (sqrDst <= sqrRadius) {
                     if (particleIndex == index) continue;
 
-                    float dst = predictedPositions[index].dst(predictedPositions[particleIndex]);
+                    float dst = (float) Math.sqrt(sqrDst);
                     float dirX;
                     float dirY;
 
@@ -240,8 +238,8 @@ public class FluidSystem extends EntitySystem {
                         dirX = MathUtils.random(-1, 1);
                         dirY = MathUtils.random(-1, 1);
                     } else {
-                        dirX = (predictedPositions[index].x - predictedPositions[particleIndex].x) / dst;
-                        dirY = (predictedPositions[index].y - predictedPositions[particleIndex].y) / dst;
+                        dirX = dx / dst;
+                        dirY = dy / dst;
                     }
 
                     float slope = SmoothingKernelDerivative(dst, smoothingRadius);
