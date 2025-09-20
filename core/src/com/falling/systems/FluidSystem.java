@@ -11,9 +11,13 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.Sort;
 import com.falling.assets.Assets;
 import com.falling.components.TextureRegionComp;
 import com.falling.factories.Director;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 import static com.badlogic.gdx.Gdx.gl;
 import static com.falling.Core.*;
@@ -47,8 +51,15 @@ public class FluidSystem extends EntitySystem {
 
     private final float smoothingRadius = 1f;
 
-    private final float cellSize = smoothingRadius;
-    private final IntArray[][] grid; // Stores indexes of particles from all the positions, velocities etc. lists
+    // Potentially change to long[][], and if you need to have variable num of particles that changes dynamically
+    // use some different object like IntArray from libgdx
+    /** Stores pairs: particle index and cell key (a 2D coordinate of grid cell which
+     * the particle sits in (not the particle coordinate) compressed into a valid index)
+     * Gets sorted by key */
+    private final int[][] spatialLookup;
+    /** each index is cell key which's value corresponds to index in spatial lookup which is
+     *  the beginning of all particles starting from given cell key */
+    private final int[] startIndices;
 
     // For rendering
     private final FrameBuffer fluidFbo;
@@ -58,14 +69,19 @@ public class FluidSystem extends EntitySystem {
     private final Color fluidColor = Color.SKY;
 
     // temp variables for better mem management
-    private IntArray neighborsTmp = new IntArray(128);
     private final Vector2 pressureForceTmp = new Vector2();
     private final Vector2 interactionForceTmp = new Vector2();
     private Vector2 dirToInputPointTmp;
+    private final int[] posTmp = new int[2];
 
     // Compute helpers:
     private float scaleConstant;
     private float volumeConstant;
+    private int[][] cellOffsets = {
+            {-1,  1}, {0,  1}, {1,  1},
+            {-1,  0}, {0,  0}, {1,  0},
+            {-1, -1}, {0, -1}, {1, -1}
+    };
 
     public FluidSystem(int priority, Assets assets) {
         super(priority);
@@ -94,10 +110,8 @@ public class FluidSystem extends EntitySystem {
         velocities = new Vector2[numOfParticles];
         densities = new float[numOfParticles];
 
-        grid = new IntArray[gridWidth][gridHeight];
-        for(int x=0;x<gridWidth;x++)
-            for(int y=0;y<gridHeight;y++)
-                grid[x][y] = new IntArray(32); // 16 should be optimal
+        spatialLookup = new int[numOfParticles][2];
+        startIndices = new int[numOfParticles];
 
         createParticlesRect(1, 1);
     }
@@ -114,10 +128,12 @@ public class FluidSystem extends EntitySystem {
             scaledMousePos.set(mousePos.x * scale, mousePos.y * scale);
         }
 
+        // Can be run on a different thread (altough this does not cost much performance)
         for (int i = numOfParticles-1; i >=0; i--) {
             // Maybe this one should be below mouse presses
             velocities[i].y -= gravity * deltaTime;
 
+            // This probably can't be run on a different thread
             if (leftMousePressed)
                 velocities[i].add(interactionForce(scaledMousePos, 5f, 1f, i));
             else if (rightMousePressed)
@@ -127,15 +143,18 @@ public class FluidSystem extends EntitySystem {
             predictedPositions[i].y = positions[i].y + velocities[i].y * deltaTime;
         }
 
-        updateSpatialGrid();
+        updateSpatialLookup();
 
+        // Can be run on a different thread
         updateDensities();
 
+        // Can be run on a different thread
         for (int i = numOfParticles-1; i >=0; i--) {
             pressureForceTmp.set(calculatePressureForce(i));
             velocities[i].add(pressureForceTmp.x * deltaTime / densities[i], pressureForceTmp.y * deltaTime / densities[i]);
         }
 
+        // Can be run on a different thread
         for (int i = numOfParticles-1; i >=0; i--) {
             positions[i].x += velocities[i].x * deltaTime;
             positions[i].y += velocities[i].y * deltaTime;
@@ -167,20 +186,25 @@ public class FluidSystem extends EntitySystem {
     private float calculateDensity(Vector2 samplePoint) {
         float density = 0;
 
-        int centerX = (int) Math.floor(samplePoint.x / cellSize);
-        int centerY = (int) Math.floor(samplePoint.y / cellSize);
 
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                int gridX = centerX + dx;
-                int gridY = centerY + dy;
+        int[] center = posToCellCords(samplePoint, smoothingRadius);
+        float sqrRadius = smoothingRadius * smoothingRadius;
 
-                if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight) {
-                    for (int i = grid[gridX][gridY].size-1; i >= 0; i--) {
-                        int index = grid[gridX][gridY].get(i);
-                        float influence = SmoothingKernel(predictedPositions[index].dst(samplePoint), smoothingRadius);
-                        density += mass * influence;
-                    }
+        // System.out.println("\nCalculating neighbors of: " + samplePoint);
+        for (int offIndex = 0; offIndex < cellOffsets.length; offIndex++) {
+            int key = getKeyFromHash(hashCell(center[0]+cellOffsets[offIndex][0], center[1]+cellOffsets[offIndex][1]));
+            int cellStartIndex = startIndices[key];
+
+            for (int i = cellStartIndex; i < numOfParticles; i++) {
+                if (spatialLookup[i][1] != key) break;
+
+                int particleIndex = spatialLookup[i][0];
+                float sqrDst = (predictedPositions[particleIndex].x - samplePoint.x) * (predictedPositions[particleIndex].x - samplePoint.x) + (predictedPositions[particleIndex].y - samplePoint.y) * (predictedPositions[particleIndex].y - samplePoint.y);
+
+                if (sqrDst <= sqrRadius) {
+                    // System.out.println(particleIndex);
+                    float influence = SmoothingKernel(predictedPositions[particleIndex].dst(samplePoint), smoothingRadius);
+                    density += mass * influence;
                 }
             }
         }
@@ -192,37 +216,38 @@ public class FluidSystem extends EntitySystem {
     private Vector2 calculatePressureForce(int particleIndex) { // Causes most of CPU usage
         pressureForceTmp.set(0, 0);
 
-        int centerX = (int) Math.floor(predictedPositions[particleIndex].x / cellSize);
-        int centerY = (int) Math.floor(predictedPositions[particleIndex].y / cellSize);
+        int[] center = posToCellCords(predictedPositions[particleIndex], smoothingRadius);
+        float sqrRadius = smoothingRadius * smoothingRadius;
 
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                int gridX = centerX + dx;
-                int gridY = centerY + dy;
+        for (int offIndex = 0; offIndex < cellOffsets.length; offIndex++) {
+            int key = getKeyFromHash(hashCell(center[0]+cellOffsets[offIndex][0], center[1]+cellOffsets[offIndex][1]));
+            int cellStartIndex = startIndices[key];
 
-                if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight) {
-                    for (int i = grid[gridX][gridY].size-1; i >= 0; i--) {
-                        int index = grid[gridX][gridY].get(i);
+            for (int i = cellStartIndex; i < numOfParticles; i++) {
+                if (spatialLookup[i][1] != key) break;
 
-                        if (particleIndex == index) continue;
+                int index = spatialLookup[i][0];
+                float sqrDst = (predictedPositions[index].x - predictedPositions[particleIndex].x) * (predictedPositions[index].x - predictedPositions[particleIndex].x) + (predictedPositions[index].y - predictedPositions[particleIndex].y) * (predictedPositions[index].y - predictedPositions[particleIndex].y);
 
-                        float dst = predictedPositions[index].dst(predictedPositions[particleIndex]);
-                        float dirX;
-                        float dirY;
+                if (sqrDst <= sqrRadius) {
+                    if (particleIndex == index) continue;
 
-                        if (dst == 0) {
-                            dirX = MathUtils.random(-1, 1);
-                            dirY = MathUtils.random(-1, 1);
-                        } else {
-                            dirX = (predictedPositions[index].x - predictedPositions[particleIndex].x) / dst;
-                            dirY = (predictedPositions[index].y - predictedPositions[particleIndex].y) / dst;
-                        }
+                    float dst = predictedPositions[index].dst(predictedPositions[particleIndex]);
+                    float dirX;
+                    float dirY;
 
-                        float slope = SmoothingKernelDerivative(dst, smoothingRadius);
-                        float sharedPressure = ((densities[index] - targetDensity) * pressureMultiplier + (densities[particleIndex] - targetDensity) * pressureMultiplier) / 2;
-                        // float densityInv = 1f / densities[index];
-                        pressureForceTmp.add(sharedPressure * dirX * slope * mass / densities[index], sharedPressure * dirY * slope * mass / densities[index]);
+                    if (dst == 0) {
+                        dirX = MathUtils.random(-1, 1);
+                        dirY = MathUtils.random(-1, 1);
+                    } else {
+                        dirX = (predictedPositions[index].x - predictedPositions[particleIndex].x) / dst;
+                        dirY = (predictedPositions[index].y - predictedPositions[particleIndex].y) / dst;
                     }
+
+                    float slope = SmoothingKernelDerivative(dst, smoothingRadius);
+                    float sharedPressure = ((densities[index] - targetDensity) * pressureMultiplier + (densities[particleIndex] - targetDensity) * pressureMultiplier) / 2;
+                    // float densityInv = 1f / densities[index];
+                    pressureForceTmp.add(sharedPressure * dirX * slope * mass / densities[index], sharedPressure * dirY * slope * mass / densities[index]);
                 }
             }
         }
@@ -307,39 +332,6 @@ public class FluidSystem extends EntitySystem {
         }
     }
 
-    public void updateSpatialGrid() {
-        for(int x = 0; x < gridWidth; x++)
-            for(int y = 0; y < gridHeight; y++)
-                grid[x][y].clear();
-
-        for (int i = numOfParticles-1; i >= 0; i--) {
-            int gridX = (int) Math.floor(predictedPositions[i].x / cellSize);
-            int gridY = (int) Math.floor(predictedPositions[i].y / cellSize);
-            grid[gridX][gridY].add(i);
-        }
-    }
-
-    public IntArray getNeighbors(Vector2 samplePoint) { // Temporarily disabled because it's faster to just call it straight over there
-        neighborsTmp.clear();
-
-        int centerX = (int) Math.floor(samplePoint.x / cellSize);
-        int centerY = (int) Math.floor(samplePoint.y / cellSize);
-
-        // Check 3×3 neighborhood
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                int gridX = centerX + dx;
-                int gridY = centerY + dy;
-
-                if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight) {
-                    for (int i = grid[gridX][gridY].size-1; i >= 0; i--)
-                        neighborsTmp.add(grid[gridX][gridY].get(i));
-                }
-            }
-        }
-        return neighborsTmp;
-    }
-
     private Vector2 interactionForce(Vector2 inputPos, float radius, float strength, int particleIndex) {
         interactionForceTmp.setZero();
         float offsetX = inputPos.x - positions[particleIndex].x;
@@ -361,11 +353,77 @@ public class FluidSystem extends EntitySystem {
         else gravity = 0;
     }
 
+    private static final Comparator<int[]> comp = Comparator.comparingInt(a -> a[1]);
+
+    private void updateSpatialLookup() {
+        // Can be run on a different thread
+        for (int i = 0; i < numOfParticles; i++) {
+            int cellKey = getKeyFromHash(hashCell(posToCellCords(predictedPositions[i], smoothingRadius)));
+            spatialLookup[i][0] = i;
+            spatialLookup[i][1] = cellKey;
+            startIndices[i] = Integer.MAX_VALUE;
+        }
+
+        Sort.instance().sort(spatialLookup, comp);
+
+        // Can be run on a different thread
+        for (int i = 0; i < numOfParticles; i++) {
+            int key = spatialLookup[i][1];
+            int previousKey;
+
+            if (i == 0) previousKey = Integer.MAX_VALUE;
+            else previousKey = spatialLookup[i - 1][1];
+
+            if (key != previousKey)
+                startIndices[key] = i;
+        }
+    }
+
+    public void getNeighbors(Vector2 point) {
+        int[] center = posToCellCords(point, smoothingRadius);
+        float sqrRadius = smoothingRadius * smoothingRadius;
+
+        for (int offIndex = 0; offIndex < cellOffsets.length; offIndex++) {
+            int key = getKeyFromHash(hashCell(center[0]+cellOffsets[offIndex][0], center[1]+cellOffsets[offIndex][1]));
+            int cellStartIndex = startIndices[key];
+
+            for (int i = cellStartIndex; i < numOfParticles; i++) {
+                if (spatialLookup[i][1] != key) break;
+
+                int particleIndex = spatialLookup[i][0];
+                float sqrDst = (positions[particleIndex].x - point.x) * (positions[particleIndex].x - point.x) + (positions[particleIndex].y - point.y) * (positions[particleIndex].y - point.y);
+
+                if (sqrDst <= sqrRadius) {
+                    // Do something
+                }
+            }
+        }
+    }
+
+    private int[] posToCellCords(Vector2 point, float radius) {
+        posTmp[0] = (int) (point.x / radius);
+        posTmp[1] = (int) (point.y / radius);
+        return posTmp;
+    }
+
+    // some time soon change to long if too many particles
+    private int hashCell(int cellX, int cellY) {
+        return (cellX * 15823) + (cellY * 9737333);
+    }
+
+    private int hashCell(int[] cellPos) {
+        return cellPos[0] * 15823 + cellPos[1] * 9737333;
+    }
+
+    private int getKeyFromHash(int hash) {
+        return Math.floorMod(hash, numOfParticles);
+    }
+
     public void resize() {
         // TBD
     }
 
-    public void updateFbo() {
+    private void updateFbo() {
         fluidBatch.setProjectionMatrix(cameraMatrixTemp);
         fluidFbo.begin();
         fluidBatch.begin();
