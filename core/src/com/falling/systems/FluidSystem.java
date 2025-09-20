@@ -167,11 +167,22 @@ public class FluidSystem extends EntitySystem {
     private float calculateDensity(Vector2 samplePoint) {
         float density = 0;
 
-        neighborsTmp = getNeighbors(samplePoint);
-        for (int i = neighborsTmp.size-1; i >= 0; i--) {
-            int index = neighborsTmp.get(i);
-            float influence = SmoothingKernel(predictedPositions[index].dst(samplePoint), smoothingRadius);
-            density += mass * influence;
+        int centerX = (int) Math.floor(samplePoint.x / cellSize);
+        int centerY = (int) Math.floor(samplePoint.y / cellSize);
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                int gridX = centerX + dx;
+                int gridY = centerY + dy;
+
+                if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight) {
+                    for (int i = grid[gridX][gridY].size-1; i >= 0; i--) {
+                        int index = grid[gridX][gridY].get(i);
+                        float influence = SmoothingKernel(predictedPositions[index].dst(samplePoint), smoothingRadius);
+                        density += mass * influence;
+                    }
+                }
+            }
         }
 
         return density;
@@ -181,29 +192,39 @@ public class FluidSystem extends EntitySystem {
     private Vector2 calculatePressureForce(int particleIndex) { // Causes most of CPU usage
         pressureForceTmp.set(0, 0);
 
-        neighborsTmp = getNeighbors(predictedPositions[particleIndex]);
-        for (int i = neighborsTmp.size-1; i >= 0; i--) {
-            int index = neighborsTmp.get(i);
+        int centerX = (int) Math.floor(predictedPositions[particleIndex].x / cellSize);
+        int centerY = (int) Math.floor(predictedPositions[particleIndex].y / cellSize);
 
-            if (particleIndex == index) continue;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                int gridX = centerX + dx;
+                int gridY = centerY + dy;
 
-            float dst = predictedPositions[index].dst(predictedPositions[particleIndex]);
-            float dirX;
-            float dirY;
+                if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight) {
+                    for (int i = grid[gridX][gridY].size-1; i >= 0; i--) {
+                        int index = grid[gridX][gridY].get(i);
 
-            if (dst == 0) {
-                dirX = MathUtils.random(-1, 1);
-                dirY = MathUtils.random(-1, 1);
+                        if (particleIndex == index) continue;
+
+                        float dst = predictedPositions[index].dst(predictedPositions[particleIndex]);
+                        float dirX;
+                        float dirY;
+
+                        if (dst == 0) {
+                            dirX = MathUtils.random(-1, 1);
+                            dirY = MathUtils.random(-1, 1);
+                        } else {
+                            dirX = (predictedPositions[index].x - predictedPositions[particleIndex].x) / dst;
+                            dirY = (predictedPositions[index].y - predictedPositions[particleIndex].y) / dst;
+                        }
+
+                        float slope = SmoothingKernelDerivative(dst, smoothingRadius);
+                        float sharedPressure = ((densities[index] - targetDensity) * pressureMultiplier + (densities[particleIndex] - targetDensity) * pressureMultiplier) / 2;
+                        // float densityInv = 1f / densities[index];
+                        pressureForceTmp.add(sharedPressure * dirX * slope * mass / densities[index], sharedPressure * dirY * slope * mass / densities[index]);
+                    }
+                }
             }
-            else {
-                dirX = (predictedPositions[index].x-predictedPositions[particleIndex].x)/dst;
-                dirY = (predictedPositions[index].y - predictedPositions[particleIndex].y)/dst;
-            }
-
-            float slope = SmoothingKernelDerivative(dst, smoothingRadius);
-            float sharedPressure = ((densities[index] - targetDensity) * pressureMultiplier + (densities[particleIndex] - targetDensity) * pressureMultiplier) / 2;
-            // float densityInv = 1f / densities[indexTmp];
-            pressureForceTmp.add(sharedPressure * dirX * slope * mass / densities[index], sharedPressure * dirY * slope * mass / densities[index]);
         }
 
         return pressureForceTmp;
@@ -298,7 +319,7 @@ public class FluidSystem extends EntitySystem {
         }
     }
 
-    public IntArray getNeighbors(Vector2 samplePoint) {
+    public IntArray getNeighbors(Vector2 samplePoint) { // Temporarily disabled because it's faster to just call it straight over there
         neighborsTmp.clear();
 
         int centerX = (int) Math.floor(samplePoint.x / cellSize);
