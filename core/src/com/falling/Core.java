@@ -28,6 +28,7 @@ public class Core {
     /** makes screen look more like pixel art */
     public static boolean pixelate = false;
     public static int fps = 60;
+    public static float blurResFactor = 0.5f; // default 0.5f for best performance to quality ratio
 
     public static final float[] sandColor = { -33, 0.285f, 0.965f };
 }

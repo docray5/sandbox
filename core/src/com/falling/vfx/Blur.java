@@ -37,8 +37,8 @@ public class Blur {
         blurShader.setUniformf("radius", radius);
         blurShader.setUniformf("dir", 0f, 0f);
 
-        fbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
-        fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
+        fbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) (worldWidth* blurResFactor), (int) (worldHeight * blurResFactor), false);
+        fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) (worldWidth * blurResFactor), (int) (worldHeight * blurResFactor), false);
         fbo1Texture = fbo1.getColorBufferTexture();
         fbo2Texture = fbo2.getColorBufferTexture();
 
@@ -51,7 +51,7 @@ public class Blur {
         batch.draw(textureToBlur, 0, 0, blurComp.fboWidth, blurComp.fboHeight);
         batch.end();
         blurComp.fbo2.end();
-    
+
         // TODO make it so all the blurring is happening with one shader pass instead of n shader passes
         batch.setShader(blurShader);
 
@@ -98,7 +98,7 @@ public class Blur {
             blurShader.setUniformf("dir", 1f, 0f);
             blurShader.setUniformf("radius", radius);
             blurShader.setUniformf("resolution", worldWidth);
-            batch.draw(i==0 ? fboTexture : fbo2Texture, cameraPos.x - worldWidth/2f, cameraPos.y - worldHeight/2f, worldWidth, worldHeight, 0, 0, 1, 1);
+            batch.draw(i==0 ? fboTexture : fbo2Texture, cameraPos.x - worldWidth * blurResFactor, cameraPos.y - worldHeight * blurResFactor, worldWidth, worldHeight, 0, 0, 1, 1);
             batch.end();
             fbo1.end();
 
@@ -106,7 +106,7 @@ public class Blur {
             batch.begin();
             blurShader.setUniformf("dir", 0f, 1f);
             blurShader.setUniformf("resolution", worldHeight);
-            batch.draw(fbo1Texture, cameraPos.x - worldWidth/2f, cameraPos.y - worldHeight/2f, worldWidth, worldHeight, 0, 0, 1, 1);
+            batch.draw(fbo1Texture, cameraPos.x - worldWidth * blurResFactor, cameraPos.y - worldHeight * blurResFactor, worldWidth, worldHeight, 0, 0, 1, 1);
             batch.end();
             fbo2.end();
         }
@@ -171,8 +171,8 @@ public class Blur {
         fbo1 = null;
         fbo2 = null;
 
-        fbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
-        fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
+        fbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) (worldWidth * blurResFactor), (int) (worldHeight * blurResFactor), false);
+        fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) (worldWidth * blurResFactor), (int) (worldHeight * blurResFactor), false);
 
         fbo1Texture = fbo1.getColorBufferTexture();
         fbo2Texture = fbo2.getColorBufferTexture();

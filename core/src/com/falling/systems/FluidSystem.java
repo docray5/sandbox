@@ -34,9 +34,11 @@ public class FluidSystem extends EntitySystem {
 
     private final int numOfParticles = 1682; // 1568
     private final float mass = 1f;
-    private float targetDensity = 3;
+    private float targetDensity = 3f;
     private float pressureMultiplier = 40; // Stiffness constant works best at 20-50
-    private float gravity = 0; // 0.5f is quite optimal, wouldn't go beyond 1
+    private float nearPressureMultiplier = 1.5f; // set to 0 to disable near pressure accuracy
+    private float gravity = 0; // 0.5f to 0.7f is quite optimal, wouldn't go beyond 1
+    private float viscocityStrength = 0.5f; // set to 0 to disable viscosity
     private final float collisionDamping = 0.9f;
     private final Vector2 bounds = new Vector2(worldWidth*scale, worldHeight*scale);
 
@@ -44,6 +46,7 @@ public class FluidSystem extends EntitySystem {
     private final Vector2[] predictedPositions;
     private final Vector2[] velocities;
     private final float[] densities;
+    private final float[] nearDensities;
 
     private final float smoothingRadius = 1f;
 
@@ -67,12 +70,19 @@ public class FluidSystem extends EntitySystem {
     // temp variables for better mem management
     private final Vector2 pressureForceTmp = new Vector2();
     private final Vector2 interactionForceTmp = new Vector2();
-    private Vector2 dirToInputPointTmp;
+    private final Vector2 viscosityForceTmp = new Vector2();
+    private final Vector2 positionVecTmp = new Vector2();
+    private final Vector2 dirToInputPointTmp = new Vector2();
     private final int[] posTmp = new int[2];
+    private final Vector2 samplePointTmp = new Vector2();
+    private final Vector2 offsetTmp = new Vector2();
 
     // Compute helpers:
     private float scaleConstant;
     private float volumeConstant;
+    private float viscosityConstant;
+    private float nearDensityConstant;
+    private float nearDensityDerivativeConstant;
     private int[][] cellOffsets = {
             {-1,  1}, {0,  1}, {1,  1},
             {-1,  0}, {0,  0}, {1,  0},
@@ -105,6 +115,7 @@ public class FluidSystem extends EntitySystem {
         predictedPositions = new Vector2[numOfParticles];
         velocities = new Vector2[numOfParticles];
         densities = new float[numOfParticles];
+        nearDensities = new float[numOfParticles];
 
         spatialLookup = new int[numOfParticles][2];
         startIndices = new int[numOfParticles];
@@ -124,16 +135,10 @@ public class FluidSystem extends EntitySystem {
             scaledMousePos.set(mousePos.x * scale, mousePos.y * scale);
         }
 
-        // Can be run on a different thread (altough this does not cost much performance)
+        // Can be run on a different thread (although this does not cost much performance)
         for (int i = numOfParticles-1; i >=0; i--) {
             // Maybe this one should be below mouse presses
             velocities[i].y -= gravity * deltaTime;
-
-            // This probably can't be run on a different thread
-            if (leftMousePressed)
-                velocities[i].add(interactionForce(scaledMousePos, 5f, 1f, i));
-            else if (rightMousePressed)
-                velocities[i].add(interactionForce(scaledMousePos, 0.5f, -0.3f, i));
 
             predictedPositions[i].x = positions[i].x + velocities[i].x * deltaTime;
             predictedPositions[i].y = positions[i].y + velocities[i].y * deltaTime;
@@ -142,12 +147,30 @@ public class FluidSystem extends EntitySystem {
         updateSpatialLookup();
 
         // Can be run on a different thread
-        updateDensities();
+        calculateDensities();
 
         // Can be run on a different thread
         for (int i = numOfParticles-1; i >=0; i--) {
             pressureForceTmp.set(calculatePressureForce(i));
             velocities[i].add(pressureForceTmp.x * deltaTime / densities[i], pressureForceTmp.y * deltaTime / densities[i]);
+        }
+
+        // --------- From this
+        // can be run on a different thread
+        for (int i = numOfParticles-1; i >=0; i--) {
+            viscosityForceTmp.set(calculateViscosityForce(i));
+            velocities[i].add(viscosityForceTmp.x * deltaTime, viscosityForceTmp.y * deltaTime);
+        }
+        // --------- To this, can be commented for better performance but less accurate simulation
+
+        if (leftMousePressed || rightMousePressed) {
+            for (int i = numOfParticles-1; i >=0; i--) {
+                // This probably can't be run on a different thread
+                if (leftMousePressed)
+                    velocities[i].add(interactionForce(scaledMousePos, 7f, 4f, i));
+                else if (rightMousePressed)
+                    velocities[i].add(interactionForce(scaledMousePos, 0.5f, -0.3f, i));
+            }
         }
 
         // Can be run on a different thread
@@ -165,47 +188,72 @@ public class FluidSystem extends EntitySystem {
         // but thanks to that we don't type cast shit
         float radiusSquared = radius * radius;
         float radiusForth = radiusSquared * radiusSquared;
+        float radiusFifth = radiusForth*smoothingRadius;
         volumeConstant = (MathUtils.PI * radiusForth) / 6;
         scaleConstant = 12 / (MathUtils.PI * radiusForth);
+        viscosityConstant = 4 / (MathUtils.PI * radiusForth * radiusForth);
+        nearDensityConstant = 10 / (MathUtils.PI * radiusFifth);
+        nearDensityDerivativeConstant = 30 / (MathUtils.PI * radiusFifth);
     }
 
-    private float SmoothingKernel(float dst, float radius) {
+    private float densitySmoothingKernel(float dst, float radius) {
         if (dst >= radius) return 0;
         return (radius - dst) * (radius - dst) / volumeConstant;
     }
 
-    private float SmoothingKernelDerivative(float dst, float radius) {
+    private float densitySmoothingKernelDerivative(float dst, float radius) {
         if (dst >= radius) return 0;
         return (dst - radius) * scaleConstant;
     }
 
-    private float calculateDensity(Vector2 samplePoint) {
-        float density = 0;
+    private float nearDensityKernel(float dst, float radius) {
+        if (dst >= radius) return 0;
+        float v = radius - dst;
+        return v * v * v * nearDensityConstant;
+    }
 
-        int[] center = posToCellCords(samplePoint, smoothingRadius);
-        float sqrRadius = smoothingRadius * smoothingRadius;
+    private float nearDensityKernelDerivative(float dst, float radius) {
+        if (dst > radius) return 0;
+        float v = radius - dst;
+        return -v * v * nearDensityDerivativeConstant;
+    }
 
-        for (int offIndex = 0; offIndex < cellOffsets.length; offIndex++) {
-            int key = getKeyFromHash(hashCell(center[0]+cellOffsets[offIndex][0], center[1]+cellOffsets[offIndex][1]));
-            int cellStartIndex = startIndices[key];
+    private void calculateDensities() {
+        for (int i = numOfParticles-1; i >= 0; i--) {
+            float density = 0;
+            float nearDensity = 0;
 
-            for (int i = cellStartIndex; i < numOfParticles; i++) {
-                if (spatialLookup[i][1] != key) break;
+            samplePointTmp.set(predictedPositions[i]);
 
-                int particleIndex = spatialLookup[i][0];
-                float dx = predictedPositions[particleIndex].x - samplePoint.x;
-                float dy = predictedPositions[particleIndex].y - samplePoint.y;
-                float sqrDst = dx * dx + dy * dy;
+            int[] center = posToCellCords(samplePointTmp, smoothingRadius);
+            float sqrRadius = smoothingRadius * smoothingRadius;
 
-                if (sqrDst <= sqrRadius) {
-                    float dst = (float) Math.sqrt(sqrDst);
-                    float influence = SmoothingKernel(dst, smoothingRadius);
-                    density += mass * influence;
+            for (int offIndex = 0; offIndex < cellOffsets.length; offIndex++) {
+                int key = getKeyFromHash(hashCell(center[0] + cellOffsets[offIndex][0], center[1] + cellOffsets[offIndex][1]));
+                int cellStartIndex = startIndices[key];
+
+                for (int j = cellStartIndex; j < numOfParticles; j++) {
+                    if (spatialLookup[j][1] != key) break;
+
+                    int particleIndex = spatialLookup[j][0];
+                    float dx = predictedPositions[particleIndex].x - samplePointTmp.x;
+                    float dy = predictedPositions[particleIndex].y - samplePointTmp.y;
+                    float sqrDst = dx * dx + dy * dy;
+
+                    if (sqrDst <= sqrRadius) {
+                        float dst = (float) Math.sqrt(sqrDst);
+                        float influence = densitySmoothingKernel(dst, smoothingRadius);
+                        density += mass * influence;
+
+                        float nearInfluence = nearDensityKernel(dst, smoothingRadius);
+                        nearDensity += mass * nearInfluence;
+                    }
                 }
             }
-        }
 
-        return density;
+            densities[i] = density;
+            nearDensities[i] = nearDensity;
+        }
     }
 
     // Calculate Property Gradient
@@ -242,10 +290,15 @@ public class FluidSystem extends EntitySystem {
                         dirY = dy / dst;
                     }
 
-                    float slope = SmoothingKernelDerivative(dst, smoothingRadius);
+                    float slope = densitySmoothingKernelDerivative(dst, smoothingRadius);
+                    float nearSlope = nearDensityKernelDerivative(dst, smoothingRadius);
                     float sharedPressure = ((densities[index] - targetDensity) * pressureMultiplier + (densities[particleIndex] - targetDensity) * pressureMultiplier) / 2;
+                    float sharedNearPressure = (nearDensities[index] * nearPressureMultiplier + nearDensities[particleIndex] * nearPressureMultiplier) / 2;
                     // float densityInv = 1f / densities[index];
-                    pressureForceTmp.add(sharedPressure * dirX * slope * mass / densities[index], sharedPressure * dirY * slope * mass / densities[index]);
+                    pressureForceTmp.add(sharedPressure * dirX * slope * mass / densities[index],
+                            sharedPressure * dirY * slope * mass / densities[index]);
+                    pressureForceTmp.add(sharedNearPressure * dirX * nearSlope * mass / nearDensities[index],
+                            sharedNearPressure * dirY * nearSlope * mass / nearDensities[index]);
                 }
             }
         }
@@ -253,10 +306,41 @@ public class FluidSystem extends EntitySystem {
         return pressureForceTmp;
     }
 
-    private void updateDensities() {
-        // Could be run in a different thread.
-        for (int i = numOfParticles-1; i >= 0; i--)
-            densities[i] = calculateDensity(predictedPositions[i]);
+    private Vector2 calculateViscosityForce(int index) {
+        viscosityForceTmp.set(0, 0);
+        positionVecTmp.set(positions[index]);
+
+        // Neighbor search
+        int[] center = posToCellCords(positionVecTmp, smoothingRadius);
+        float sqrRadius = smoothingRadius * smoothingRadius;
+
+        for (int offIndex = 0; offIndex < cellOffsets.length; offIndex++) {
+            int key = getKeyFromHash(hashCell(center[0]+cellOffsets[offIndex][0], center[1]+cellOffsets[offIndex][1]));
+            int cellStartIndex = startIndices[key];
+
+            for (int i = cellStartIndex; i < numOfParticles; i++) {
+                if (spatialLookup[i][1] != key) break;
+
+                int particleIndex = spatialLookup[i][0];
+                float sqrDst = (positions[particleIndex].x - positionVecTmp.x) * (positions[particleIndex].x - positionVecTmp.x) + (positions[particleIndex].y - positionVecTmp.y) * (positions[particleIndex].y - positionVecTmp.y);
+
+                if (sqrDst <= sqrRadius) {
+                    // Actual viscosity code
+                    float dst = (float) Math.sqrt(sqrDst);
+                    float influence = viscositySmoothingKernel(dst, smoothingRadius);
+                    viscosityForceTmp.x = (velocities[particleIndex].x - velocities[index].x) * influence * mass / densities[particleIndex];
+                    viscosityForceTmp.y = (velocities[particleIndex].y - velocities[index].y) * influence * mass / densities[particleIndex];
+                }
+            }
+        }
+
+        return viscosityForceTmp.scl(viscocityStrength);
+    }
+
+    private float viscositySmoothingKernel(float dst, float radius) {
+        if (dst >= radius) return 0;
+        float v = radius * radius - dst * dst;
+        return v * v * v * viscosityConstant;
     }
 
     private void resolveCollisions(int particleIndex) {
@@ -332,22 +416,21 @@ public class FluidSystem extends EntitySystem {
 
     private Vector2 interactionForce(Vector2 inputPos, float radius, float strength, int particleIndex) {
         interactionForceTmp.setZero();
-        float offsetX = inputPos.x - positions[particleIndex].x;
-        float offsetY = inputPos.y - positions[particleIndex].y;
-        float sqrDst = Vector2.dot(offsetX, offsetY, offsetX, offsetY);
+        offsetTmp.set(inputPos).sub(predictedPositions[particleIndex]);
+        float sqrDst = offsetTmp.len2();
 
-        if (sqrDst < radius*radius) {
+        if (sqrDst < radius*radius && sqrDst > 10f) {
             float inputPointDst = (float) Math.sqrt(sqrDst);
-            dirToInputPointTmp = inputPointDst <= 0.001f ? Vector2.Zero : new Vector2(offsetX/inputPointDst, offsetY/inputPointDst);
+            dirToInputPointTmp.set(offsetTmp.x/inputPointDst, offsetTmp.y/inputPointDst);
             float centreT = 1 - inputPointDst / radius;
-            interactionForceTmp.add((dirToInputPointTmp.x * strength - velocities[particleIndex].x) * centreT, (dirToInputPointTmp.y * strength - velocities[particleIndex].y) * centreT);
+            interactionForceTmp.add((dirToInputPointTmp.x * strength - velocities[particleIndex].x) * centreT * 0.1f, (dirToInputPointTmp.y * strength - velocities[particleIndex].y) * centreT *0.1f);
         }
 
         return interactionForceTmp;
     }
 
     public void gravity() {
-        if (gravity == 0) gravity = 0.5f;
+        if (gravity == 0) gravity = 0.6f;
         else gravity = 0;
     }
 
