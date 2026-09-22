@@ -47,6 +47,9 @@ public class Assets {
             for (String asset : arr) {
                 if (asset.split("\\.")[1].equals("txt")) continue;
                 if (descriptor.folder.equals(asset.split("/")[0])) {
+                    if (descriptor.assetType == BitmapFont.class && asset.endsWith(".png"))
+                        continue;
+
                     if (descriptor.assetType == TextureRegion[].class) {
                         String[] param = Gdx.files.internal(asset.split("\\.")[0] + ".txt").readString().split(",");
 
