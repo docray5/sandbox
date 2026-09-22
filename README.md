@@ -1,5 +1,7 @@
 Sand simulation and separate SPH based Fluid Simulation built in Java and LibGdx.
 
+Started in March 2024, mostly abandoned since then.
+
 This project got split into two branches: (this is where the code is)
 - Blur behind UI elements like buttons and updated sand sim: https://github.com/docray5/sandbox/tree/bluries
 - Real time SPH based fluid sim (inspired by Sebastian Lague): https://github.com/docray5/sandbox/tree/fluid
