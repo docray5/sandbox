@@ -35,7 +35,13 @@ public class Director {
     }
 
     public void createMainScene() {
-
+        createSpawnArea();
+        createStartText();
+        createBlurBtn();
+        createNinePatch();
+        createTestBtn();
+        createNinePatchWithBlur();
+        createTempBg();
     }
 
     // ================================ Main Menu ================================
@@ -52,6 +58,34 @@ public class Director {
                 .addSceneComponent(LOADING, new AnimToCmd(factory.getEntity(), POS, 0, -15, true),
                 new AnimToCmd(factory.getEntity(), POS, 0, -30, true))
                 .endEntity();
+    }
+
+    public void createTempBg() {
+        factory.createEntity()
+                .addTransform(worldWidth/2f, worldHeight/2f)
+                .addRenderable()
+                    .setPriority(0)
+                    .setCenter(true)
+                .endComponent()
+                .addTextureRegion("bg")
+                .endEntity();
+    }
+
+    public void createNinePatchWithBlur() {
+        factory.createEntity()
+            .addTransform(44+4, 100)
+            .addResize(STICK_TYPE.LEFT_TOP)
+            .addRenderable()
+                .setPriority(10)
+                .setCenter(true)
+            .setColor(new Color(1, 1, 1, 0.1f))
+            .endComponent()
+            .addNinePatch("np", 14, 14, 14, 14, 40, 40)
+            .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut), factory.createAnimator(SIZE, 0.25f, null, Interpolation.swingOut))
+            .addClickableAuto(null, new AnimToCmd(factory.getEntity(), SIZE, 40-10, 40-10, false), new AnimToCmd(factory.getEntity(), SIZE, 40, 40, false), new AnimToCmd(factory.getEntity(), SIZE, 44, 44, false), new AnimToCmd(factory.getEntity(), SIZE, 40, 40, false), 0, 10)
+            .addBlurComp(true, 46, 46)
+            .addAutoMaskComp()
+            .endEntity();
     }
     
     public void createNinePatch() {
@@ -79,6 +113,23 @@ public class Director {
                 .endEntity();
     }
 
+    public void createUIButtonWithBlurBckg(float x, float y, float width, float height, String fn, STICK_TYPE stick, Command commandOnClick, Color color) {
+        factory.createEntity()
+            .addTransform(x, y)
+            .addResize(stick)
+            .addRenderable()
+                .setPriority(10)
+                .setCenter(true)
+            .setColor(color)
+            .endComponent()
+            .addTextureRegion(fn)
+            .addAnimation(factory.createAnimator(POS, 1, null, Interpolation.swingOut), factory.createAnimator(SCALE, 0.25f, null, Interpolation.swingOut))
+            .addClickableAuto(commandOnClick, new AnimToCmd(factory.getEntity(), SCALE, 0.7f, 0.7f, false), new AnimToCmd(factory.getEntity(), SCALE, 1f, 1f, false), new AnimToCmd(factory.getEntity(), SCALE, 1.1f, 1.1f, false), new AnimToCmd(factory.getEntity(), SCALE, 1f, 1f, false), 0, 10)
+            .addBlurComp(true, MathUtils.floor(width*1.2f), MathUtils.floor(height*1.2f))
+            .addMaskComp("mask")
+            .endEntity();
+    }
+
     public void createUIButton(float x, float y, float width, float height, String fn, STICK_TYPE stick, Command commandOnClick) {
         factory.createEntity()
             .addTransform(x-width/2, y-height/2)
@@ -95,6 +146,11 @@ public class Director {
 
     public void createBlurBtn() {
         createUIButton(worldWidth-4, worldHeight-4, 27, 33, "btn", STICK_TYPE.RIGHT_TOP, Commands.instance.shiftBlur);
+    }
+
+    public void createTestBtn() {
+        createUIButtonWithBlurBckg(32, 32, 32, 32, "test", STICK_TYPE.LEFT_BOTTOM, null, Color.WHITE);
+        createUIButtonWithBlurBckg(worldWidth-32, 32, 32, 32, "mask", STICK_TYPE.RIGHT_BOTTOM, null, Color.CLEAR);
     }
 
     public void createPauseBtn() {

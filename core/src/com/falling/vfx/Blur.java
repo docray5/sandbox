@@ -3,9 +3,11 @@ package com.falling.vfx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.falling.assets.Assets;
+import com.falling.components.BlurComp;
 
 import static com.falling.Core.*;
 
@@ -20,6 +22,7 @@ public class Blur {
     private boolean active;
     private Texture fbo1Texture;
     private Texture fbo2Texture;
+    private boolean resizeNext = false;
 
     public Blur(Assets assets) {
         accel = 4f;
@@ -38,11 +41,53 @@ public class Blur {
         fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, (int) worldWidth/2, (int) worldHeight/2, false);
         fbo1Texture = fbo1.getColorBufferTexture();
         fbo2Texture = fbo2.getColorBufferTexture();
+
+        updateBlur = true;
+    }
+
+    public void miniBlur(SpriteBatch batch, TextureRegion textureToBlur, BlurComp blurComp) {
+        blurComp.fbo2.begin();
+        batch.begin();
+        batch.draw(textureToBlur, 0, 0, blurComp.fboWidth, blurComp.fboHeight);
+        batch.end();
+        blurComp.fbo2.end();
+    
+        // TODO make it so all the blurring is happening with one shader pass instead of n shader passes
+        batch.setShader(blurShader);
+
+        for (int i = 0; i < iterations; i++) {
+            blurComp.fbo1.begin();
+            batch.begin();
+            blurShader.setUniformf("dir", 1f, 0f);
+            blurShader.setUniformf("radius", 1f);
+            blurShader.setUniformf("resolution", blurComp.fboWidth);
+
+            batch.draw(blurComp.fboTexture2, 0, 0, blurComp.fboWidth, blurComp.fboHeight, 0, 0, 1, 1);
+
+            batch.end();
+            blurComp.fbo1.end();
+
+            blurComp.fbo2.begin();
+            batch.begin();
+            blurShader.setUniformf("dir", 0f, 1f);
+            blurShader.setUniformf("radius", 1);
+            blurShader.setUniformf("resolution", blurComp.fboHeight);
+            batch.draw(blurComp.fboTexture1, 0, 0, blurComp.fboWidth, blurComp.fboHeight, 0, 0, 1, 1);
+            batch.end();
+            blurComp.fbo2.end();
+        }
+
+        batch.setShader(null);
     }
 
     public void blur(SpriteBatch batch, Texture fboTexture, float deltaTime) {
         if (!updateBlur) return;
         updateBlur = false;
+
+        if (resizeNext) {
+            resizeNext = false;
+            resize();
+        }
 
         animation(deltaTime);
 
@@ -110,9 +155,11 @@ public class Blur {
         return active;
     }
 
-    public void resize() {
-        updateBlur = true;
+    public void resizeNext() {
+        resizeNext = true;
+    }
 
+    private void resize() {
         fbo1Texture.dispose();
         fbo1Texture = null;
 
@@ -129,5 +176,29 @@ public class Blur {
 
         fbo1Texture = fbo1.getColorBufferTexture();
         fbo2Texture = fbo2.getColorBufferTexture();
+    }
+
+    public void resizeMiniBlur(BlurComp blurComponent, int newWidth, int newHeight) {
+        blurComponent.fboWidth = newWidth;
+        blurComponent.fboHeight = newHeight;
+
+        blurComponent.fboTexture1.dispose();
+        blurComponent.fboTexture1 = null;
+
+        blurComponent.fboTexture2.dispose();
+        blurComponent.fboTexture2 = null;
+
+        blurComponent.fbo1.dispose();
+        blurComponent.fbo2.dispose();
+        blurComponent.fbo1 = null;
+        blurComponent.fbo2 = null;
+
+        blurComponent.fbo1 = new FrameBuffer(Pixmap.Format.RGBA8888, blurComponent.fboWidth, blurComponent.fboHeight, false);
+        blurComponent.fbo2 = new FrameBuffer(Pixmap.Format.RGBA8888, blurComponent.fboWidth, blurComponent.fboHeight, false);
+
+        blurComponent.fboTexture1 = blurComponent.fbo1.getColorBufferTexture();
+        blurComponent.fboTexture2 = blurComponent.fbo2.getColorBufferTexture();
+
+        blurComponent.textureRegion.setRegion(blurComponent.fboTexture2);
     }
 }
